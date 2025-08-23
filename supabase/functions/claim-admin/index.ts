@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
     
     if (!token) {
       return new Response(
-        JSON.stringify({ error: 'Token is required' }),
+        JSON.stringify({ code: 'MISSING_TOKEN', error: 'Token is required' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     const adminClaimToken = Deno.env.get('ADMIN_CLAIM_TOKEN');
     if (!adminClaimToken || token !== adminClaimToken) {
       return new Response(
-        JSON.stringify({ error: 'Invalid token' }),
+        JSON.stringify({ code: 'INVALID_TOKEN', message: 'Token invalide.' }),
         { 
           status: 401, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
     // If another admin exists, reject
     if (existingAdmin && existingAdmin.length > 0) {
       return new Response(
-        JSON.stringify({ error: 'Admin already exists' }),
+        JSON.stringify({ code: 'ADMIN_ALREADY_EXISTS', message: 'Un administrateur existe déjà.' }),
         { 
           status: 409, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
       // If constraint violation, user is already an admin
       if (insertError.code === '23505') {
         return new Response(
-          JSON.stringify({ success: true, message: 'Admin role already assigned' }),
+          JSON.stringify({ ok: true, message: 'Admin role already assigned' }),
           { 
             status: 200, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -156,7 +156,7 @@ Deno.serve(async (req) => {
     console.log(`Admin created for user: ${user.email} (${user.id})`);
 
     return new Response(
-      JSON.stringify({ success: true, admin: adminData }),
+      JSON.stringify({ ok: true, admin: adminData }),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

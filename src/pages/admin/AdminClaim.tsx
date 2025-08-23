@@ -47,10 +47,10 @@ export default function AdminClaim() {
       if (error) {
         console.error('Error claiming admin:', error);
         
-        // Handle specific error codes
-        if (error.message.includes('Invalid token') || error.message.includes('401')) {
+        // Handle specific error codes from the function response
+        if (error.message.includes('INVALID_TOKEN') || error.message.includes('Token invalide')) {
           setError('Token invalide.');
-        } else if (error.message.includes('Admin already exists') || error.message.includes('409')) {
+        } else if (error.message.includes('ADMIN_ALREADY_EXISTS') || error.message.includes('Un administrateur existe déjà')) {
           setError('Un administrateur existe déjà.');
         } else {
           setError('Erreur lors de la création du compte administrateur. Réessayez.');
@@ -58,7 +58,7 @@ export default function AdminClaim() {
         return;
       }
 
-      if (data?.success) {
+      if (data?.ok) {
         toast.success('Droits administrateur accordés avec succès !');
         
         // Force a refresh to reload auth context and roles
