@@ -451,6 +451,7 @@ export type Database = {
           github_profile: string | null
           id: string
           phone: string | null
+          primary_class_id: number | null
           telegram: string | null
           user_id: string
           whatsapp: string | null
@@ -462,6 +463,7 @@ export type Database = {
           github_profile?: string | null
           id?: string
           phone?: string | null
+          primary_class_id?: number | null
           telegram?: string | null
           user_id: string
           whatsapp?: string | null
@@ -473,11 +475,20 @@ export type Database = {
           github_profile?: string | null
           id?: string
           phone?: string | null
+          primary_class_id?: number | null
           telegram?: string | null
           user_id?: string
           whatsapp?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "students_primary_class_id_fkey"
+            columns: ["primary_class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       submissions: {
         Row: {
