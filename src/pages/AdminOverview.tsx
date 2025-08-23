@@ -49,21 +49,23 @@ export default function AdminOverview() {
       
       if (error) {
         console.error('Error checking admin state:', error);
-        setHasAdmin(true); // Assume admin exists to avoid setup loop on error
+        // On error, assume no admin exists to allow setup
+        setHasAdmin(false);
       } else {
         setHasAdmin(data.hasAdmin);
       }
     } catch (error) {
       console.error('Error checking admin state:', error);
-      setHasAdmin(true); // Assume admin exists to avoid setup loop on error
+      // On error, assume no admin exists to allow setup
+      setHasAdmin(false);
     } finally {
       setCheckingAdminState(false);
     }
   };
 
-  const handleAdminSetupSuccess = () => {
+  const handleAdminSetupSuccess = async () => {
     setHasAdmin(true);
-    // Trigger auth refresh to update isAdmin state
+    // Force a refresh of the entire page to reload auth context
     window.location.reload();
   };
 
@@ -118,6 +120,7 @@ export default function AdminOverview() {
     }
   };
 
+  // Wait for both auth and admin state to load before deciding what to render
   if (loading || checkingAdminState) {
     return <div className="flex items-center justify-center h-64">Chargement...</div>;
   }
@@ -130,17 +133,19 @@ export default function AdminOverview() {
     return <AdminSetupWizard onSuccess={handleAdminSetupSuccess} />;
   }
 
-  // Admin exists but user is not admin
-  if (hasAdmin === true && !isAdmin) {
+  // Admin exists - check user permissions
+  if (hasAdmin === true) {
     if (!user) {
       return <Navigate to="/auth?next=/admin" replace />;
     }
-    return <Forbidden />;
+    if (!isAdmin) {
+      return <Forbidden />;
+    }
   }
 
-  // User is admin - show dashboard
-  if (!isAdmin) {
-    return <div className="flex items-center justify-center h-64">Chargement des permissions...</div>;
+  // hasAdmin is null (still loading) - show loading
+  if (hasAdmin === null) {
+    return <div className="flex items-center justify-center h-64">Vérification des permissions...</div>;
   }
 
   return (

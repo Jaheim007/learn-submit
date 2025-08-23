@@ -16,14 +16,17 @@ export default function AdminSetupWizard({ onSuccess }: AdminSetupWizardProps) {
   const { user } = useAuth();
   const [token, setToken] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleClaimAdmin = async () => {
     if (!token.trim()) {
-      toast.error('Veuillez saisir le token d\'administration');
+      setError('Veuillez saisir le token d\'administration');
       return;
     }
 
     setIsLoading(true);
+    setError('');
+    
     try {
       const { data, error } = await supabase.functions.invoke('claim-admin', {
         body: { token: token.trim() }
@@ -31,12 +34,14 @@ export default function AdminSetupWizard({ onSuccess }: AdminSetupWizardProps) {
 
       if (error) {
         console.error('Error claiming admin:', error);
-        if (error.message.includes('Invalid token')) {
-          toast.error('Token d\'administration invalide');
-        } else if (error.message.includes('Admin already exists')) {
-          toast.error('Un administrateur existe déjà');
+        
+        // Handle specific error codes
+        if (error.message.includes('Invalid token') || error.message.includes('401')) {
+          setError('Token d\'administration invalide. Vérifiez le token et réessayez.');
+        } else if (error.message.includes('Admin already exists') || error.message.includes('409')) {
+          setError('Un administrateur existe déjà dans le système.');
         } else {
-          toast.error('Erreur lors de la création du compte administrateur');
+          setError('Erreur lors de la création du compte administrateur. Réessayez.');
         }
         return;
       }
@@ -45,7 +50,7 @@ export default function AdminSetupWizard({ onSuccess }: AdminSetupWizardProps) {
       onSuccess();
     } catch (error: any) {
       console.error('Unexpected error:', error);
-      toast.error('Erreur inattendue lors de la création du compte administrateur');
+      setError('Erreur inattendue. Vérifiez votre connexion et réessayez.');
     } finally {
       setIsLoading(false);
     }
@@ -82,13 +87,21 @@ export default function AdminSetupWizard({ onSuccess }: AdminSetupWizardProps) {
                 id="token"
                 type="password"
                 value={token}
-                onChange={(e) => setToken(e.target.value)}
+                onChange={(e) => {
+                  setToken(e.target.value);
+                  if (error) setError(''); // Clear error when typing
+                }}
                 placeholder="Saisissez le token d'administration"
                 disabled={isLoading}
               />
               <p className="text-xs text-muted-foreground">
                 Ce token vous a été fourni pour sécuriser la création du premier administrateur
               </p>
+              {error && (
+                <p className="text-xs text-destructive mt-2">
+                  {error}
+                </p>
+              )}
             </div>
 
             <Button 
