@@ -2,41 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* NYS Submissions Portal - Design System 
+Professional educational platform with modern aesthetics */
 
 @layer base {
   :root {
+    /* Educational Primary Colors - Deep academic blue */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 215 20% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 215 20% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 215 20% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Academic Blue Theme */
+    --primary: 215 85% 55%;
+    --primary-foreground: 0 0% 98%;
+    --primary-hover: 215 85% 45%;
+    --primary-light: 215 85% 95%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Educational Purple Accents */
+    --secondary: 260 60% 65%;
+    --secondary-foreground: 0 0% 98%;
+    --secondary-hover: 260 60% 55%;
+    --secondary-light: 260 60% 95%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Neutral System */
+    --muted: 215 15% 96%;
+    --muted-foreground: 215 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 215 85% 95%;
+    --accent-foreground: 215 85% 25%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Status Colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+    --success-light: 142 76% 95%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 98%;
+    --warning-light: 38 92% 95%;
 
-    --radius: 0.5rem;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --destructive-light: 0 84% 95%;
+
+    /* Interface Elements */
+    --border: 215 15% 88%;
+    --input: 215 15% 96%;
+    --ring: 215 85% 55%;
+
+    /* Layout & Spacing */
+    --radius: 0.75rem;
+    --content-max-width: 1200px;
+
+    /* Gradients for visual appeal */
+    --gradient-primary: linear-gradient(135deg, hsl(215 85% 55%), hsl(260 60% 65%));
+    --gradient-hero: linear-gradient(135deg, hsl(215 85% 55%) 0%, hsl(260 60% 65%) 50%, hsl(215 85% 45%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(215 15% 98%) 100%);
+
+    /* Shadows for depth */
+    --shadow-sm: 0 1px 2px 0 hsl(215 15% 15% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(215 15% 15% / 0.1), 0 2px 4px -1px hsl(215 15% 15% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(215 15% 15% / 0.1), 0 4px 6px -2px hsl(215 15% 15% / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(215 15% 15% / 0.1), 0 10px 10px -5px hsl(215 15% 15% / 0.04);
+
+    /* Animation easing */
+    --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --sidebar-background: 0 0% 98%;
 
@@ -101,5 +136,98 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    @apply font-sans antialiased;
+  }
+
+  /* Educational components */
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+
+  .shadow-custom {
+    box-shadow: var(--shadow-md);
+  }
+
+  .shadow-custom-lg {
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Smooth transitions for professional feel */
+  .transition-smooth {
+    transition: all 0.3s var(--ease-smooth);
+  }
+
+  .transition-bounce {
+    transition: all 0.4s var(--ease-bounce);
+  }
+}
+
+@layer components {
+  /* Educational card component */
+  .card-educational {
+    @apply bg-card border border-border rounded-lg shadow-custom transition-smooth;
+    @apply hover:shadow-custom-lg hover:border-primary/20;
+  }
+
+  /* Status badges */
+  .badge-status {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+  }
+
+  .badge-received {
+    @apply bg-accent text-accent-foreground;
+  }
+
+  .badge-reviewing {
+    @apply bg-warning/10 text-warning border border-warning/20;
+  }
+
+  .badge-validated {
+    @apply bg-success/10 text-success border border-success/20;
+  }
+
+  .badge-rejected {
+    @apply bg-destructive/10 text-destructive border border-destructive/20;
+  }
+
+  /* Educational form inputs */
+  .input-educational {
+    @apply border border-input bg-background px-3 py-2 text-sm;
+    @apply ring-offset-background placeholder:text-muted-foreground;
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+    @apply rounded-md transition-smooth;
+  }
+
+  /* Educational buttons */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground;
+    @apply hover:bg-primary-hover focus:ring-primary;
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium;
+    @apply rounded-md ring-offset-background transition-smooth;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground;
+    @apply hover:bg-secondary-hover focus:ring-secondary;
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium;
+    @apply rounded-md ring-offset-background transition-smooth;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-outline {
+    @apply border border-primary text-primary bg-background;
+    @apply hover:bg-primary hover:text-primary-foreground;
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium;
+    @apply rounded-md ring-offset-background transition-smooth;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+    @apply disabled:pointer-events-none disabled:opacity-50;
   }
 }
