@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 interface AdminGuardProps {
   children: React.ReactNode;
 }
 
 export function AdminGuard({ children }: AdminGuardProps) {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, authLoading, isAdmin } = useAuth();
   const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
   const [checkingAdminState, setCheckingAdminState] = useState(true);
   const [promoting, setPromoting] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     checkAdminState();
@@ -71,8 +72,8 @@ export function AdminGuard({ children }: AdminGuardProps) {
     }
   };
 
-  // Wait for both auth and admin state to load
-  if (loading || checkingAdminState || promoting) {
+  // Show loading while auth or admin state is loading
+  if (authLoading || checkingAdminState || promoting) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -85,8 +86,13 @@ export function AdminGuard({ children }: AdminGuardProps) {
     );
   }
 
+  // Allow admin registration page when no admin exists
+  if (hasAdmin === false && location.pathname === '/admin/register') {
+    return <>{children}</>;
+  }
+
   // No admin exists and user is authenticated - show loading while auto-promotion happens
-  if (hasAdmin === false && user && !isAdmin) {
+  if (hasAdmin === false && user && !isAdmin && location.pathname !== '/admin/register') {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -108,7 +114,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
       return <Navigate to="/admin/login" replace />;
     }
     if (!isAdmin) {
-      return <Navigate to="/admin/login" replace />;
+      return <Navigate to="/forbidden" replace />;
     }
     // User is admin - allow access
     return <>{children}</>;

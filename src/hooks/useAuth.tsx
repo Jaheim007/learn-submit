@@ -6,12 +6,14 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  authLoading: boolean;
   isAdmin: boolean;
   isSupervisor: boolean;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
   signUpWithClass: (email: string, password: string, classId: number) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
+  refetchRoles: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSupervisor, setIsSupervisor] = useState(false);
 
@@ -40,6 +43,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Error checking user role:', error);
       setIsAdmin(false);
       setIsSupervisor(false);
+    }
+  };
+
+  const refetchRoles = async () => {
+    if (user) {
+      await checkUserRole(user.id);
     }
   };
 
@@ -84,6 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         
         setLoading(false);
+        setAuthLoading(false);
       }
     );
 
@@ -99,6 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       setLoading(false);
+      setAuthLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -206,12 +217,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     session,
     loading,
+    authLoading,
     isAdmin,
     isSupervisor,
     signUp,
     signUpWithClass,
     signIn,
-    signOut
+    signOut,
+    refetchRoles
   };
 
   return (

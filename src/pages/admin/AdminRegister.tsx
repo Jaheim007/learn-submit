@@ -76,7 +76,22 @@ export default function AdminRegister() {
         return;
       }
 
-      // 2. Promote to admin using edge function
+      // 2. If no session (email confirmation enabled), sign in immediately
+      if (!data.session) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password
+        });
+        
+        if (signInError) {
+          console.error('Auto sign-in error:', signInError);
+          toast.error('Compte créé mais erreur de connexion automatique. Veuillez vous connecter manuellement.');
+          navigate('/admin/login');
+          return;
+        }
+      }
+
+      // 3. Promote to admin using edge function
       const { error: promoteError } = await supabase.functions.invoke('promote-self-to-admin');
 
       if (promoteError) {
@@ -85,10 +100,16 @@ export default function AdminRegister() {
         return;
       }
 
-      toast.success('Compte administrateur créé avec succès !');
+      // 4. Force refresh session and roles
+      await supabase.auth.refreshSession();
       
-      // 3. Redirect to admin dashboard
-      navigate('/admin');
+      // Give a small delay to ensure role propagation
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      toast.success('Compte administrateur créé. Redirection vers le tableau de bord…');
+      
+      // 5. Force navigation to admin dashboard
+      window.location.replace('/admin');
 
     } catch (error) {
       console.error('Unexpected error:', error);
