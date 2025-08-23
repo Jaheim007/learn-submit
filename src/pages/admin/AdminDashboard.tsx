@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
-import { AdminGuard } from '@/components/AdminGuard';
+import AdminGuard from '@/components/admin/AdminGuard';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, FileText, Clock, AlertTriangle } from 'lucide-react';

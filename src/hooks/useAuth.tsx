@@ -13,7 +13,6 @@ interface AuthContextType {
   signUpWithClass: (email: string, password: string, classId: number) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
-  refetchRoles: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -46,11 +45,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const refetchRoles = async () => {
-    if (user) {
-      await checkUserRole(user.id);
-    }
-  };
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -83,7 +77,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // 1. Not admin or supervisor
             // 2. On a student route or homepage
             // 3. Just signed in (to avoid repeated profile creation)
-            if (!hasAdminRole && !hasSupervisorRole && isStudentRoute && event === 'SIGNED_IN') {
+            // 4. Not currently on admin routes
+            const isAdminRoute = currentPath.startsWith('/admin');
+            if (!hasAdminRole && !hasSupervisorRole && isStudentRoute && !isAdminRoute && event === 'SIGNED_IN') {
               await createStudentProfileIfNeeded(session.user);
             }
           }, 0);
@@ -223,8 +219,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp,
     signUpWithClass,
     signIn,
-    signOut,
-    refetchRoles
+    signOut
   };
 
   return (

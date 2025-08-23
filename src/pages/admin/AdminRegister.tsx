@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
+import { useRoles } from '@/hooks/useRoles';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -16,7 +17,8 @@ export default function AdminRegister() {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
+  const { isAdmin, refetch: refetchRoles } = useRoles();
   const navigate = useNavigate();
 
   // Redirect if already logged in as admin
@@ -102,14 +104,12 @@ export default function AdminRegister() {
 
       // 4. Force refresh session and roles
       await supabase.auth.refreshSession();
-      
-      // Give a small delay to ensure role propagation
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await refetchRoles();
 
       toast.success('Compte administrateur créé. Redirection vers le tableau de bord…');
       
-      // 5. Force navigation to admin dashboard
-      window.location.replace('/admin');
+      // 5. Navigate to admin dashboard
+      navigate('/admin', { replace: true });
 
     } catch (error) {
       console.error('Unexpected error:', error);

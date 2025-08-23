@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
+import { useRoles } from '@/hooks/useRoles';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Shield } from 'lucide-react';
 
@@ -13,20 +15,16 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn, user, isAdmin, loading: authLoading } = useAuth();
+  const { signIn, user, authLoading } = useAuth();
+  const { isAdmin, isLoading: rolesLoading, refetch: refetchRoles } = useRoles();
   const navigate = useNavigate();
 
   // Redirect logic
   useEffect(() => {
-    if (!authLoading && user) {
-      if (isAdmin) {
-        navigate('/admin');
-      } else {
-        // User is authenticated but not admin - show error
-        toast.error('Accès non autorisé. Seuls les administrateurs peuvent accéder à cette zone.');
-      }
+    if (!authLoading && !rolesLoading && user && isAdmin) {
+      navigate('/admin', { replace: true });
     }
-  }, [user, isAdmin, authLoading, navigate]);
+  }, [user, isAdmin, authLoading, rolesLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +46,9 @@ export default function AdminLogin() {
         return;
       }
 
-      // Success will be handled by useEffect
+      // Refresh session and roles after successful login
+      await supabase.auth.refreshSession();
+      await refetchRoles();
       
     } catch (error) {
       console.error('Unexpected login error:', error);
@@ -59,7 +59,7 @@ export default function AdminLogin() {
   };
 
   // Show loading while checking auth state
-  if (authLoading) {
+  if (authLoading || rolesLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
