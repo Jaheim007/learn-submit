@@ -17,6 +17,13 @@ export function AdminGuard({ children }: AdminGuardProps) {
     checkAdminState();
   }, []);
 
+  useEffect(() => {
+    // Auto-promotion logic - only run when conditions change
+    if (hasAdmin === false && user && !isAdmin && !promoting) {
+      attemptSelfPromotion();
+    }
+  }, [hasAdmin, user, isAdmin, promoting]);
+
   const checkAdminState = async () => {
     try {
       const { data, error } = await supabase.functions.invoke('get-admin-state');
@@ -78,9 +85,8 @@ export function AdminGuard({ children }: AdminGuardProps) {
     );
   }
 
-  // No admin exists and user is authenticated - try auto-promotion
+  // No admin exists and user is authenticated - show loading while auto-promotion happens
   if (hasAdmin === false && user && !isAdmin) {
-    attemptSelfPromotion();
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
