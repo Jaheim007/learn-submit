@@ -18,13 +18,17 @@ import {
   Loader2,
   RefreshCw,
   AlertTriangle,
-  BookOpen
+  BookOpen,
+  Star,
+  MessageSquare
 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface Submission {
   id: number;
   status: 'Reçu' | 'En révision' | 'Validé' | 'Refusé';
+  grade: number | null;
+  feedback: string | null;
   submitted_at: string;
   updated_at: string;
   description: string | null;
@@ -115,6 +119,8 @@ export default function StudentSubmissions() {
         .select(`
           id,
           status,
+          grade,
+          feedback,
           submitted_at,
           updated_at,
           description,
@@ -430,6 +436,31 @@ export default function StudentSubmissions() {
                               </div>
                             ))}
                           </div>
+                        </div>
+                      )}
+
+                      {/* Grade and Feedback */}
+                      {(submission.grade !== null || submission.feedback) && (
+                        <div className="border-t border-border pt-4">
+                          {submission.grade !== null && (
+                            <div className="flex items-center gap-2 mb-2">
+                              <Star className="w-4 h-4 text-yellow-500" />
+                              <span className="font-medium text-sm">
+                                Note: {submission.grade}/20
+                              </span>
+                            </div>
+                          )}
+                          {submission.feedback && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <MessageSquare className="w-4 h-4 text-primary" />
+                                <span className="font-medium text-sm">Commentaires du formateur</span>
+                              </div>
+                              <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                                {submission.feedback}
+                              </p>
+                            </div>
+                          )}
                         </div>
                       )}
 

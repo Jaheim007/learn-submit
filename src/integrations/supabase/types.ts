@@ -494,9 +494,11 @@ export type Database = {
         Row: {
           class_id: number
           description: string | null
+          feedback: string | null
           file1_url: string | null
           file2_url: string | null
           file3_url: string | null
+          grade: number | null
           id: number
           link1: string | null
           link2: string | null
@@ -510,9 +512,11 @@ export type Database = {
         Insert: {
           class_id: number
           description?: string | null
+          feedback?: string | null
           file1_url?: string | null
           file2_url?: string | null
           file3_url?: string | null
+          grade?: number | null
           id?: number
           link1?: string | null
           link2?: string | null
@@ -526,9 +530,11 @@ export type Database = {
         Update: {
           class_id?: number
           description?: string | null
+          feedback?: string | null
           file1_url?: string | null
           file2_url?: string | null
           file3_url?: string | null
+          grade?: number | null
           id?: number
           link1?: string | null
           link2?: string | null

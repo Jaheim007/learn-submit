@@ -11,8 +11,11 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { StatusBadge } from '@/components/StatusBadge';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Eye, FileText, ExternalLink } from 'lucide-react';
+import { Download, Eye, FileText, ExternalLink, Edit, Star } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Navigate } from 'react-router-dom';
+import { SubmissionReviewModal } from '@/components/SubmissionReviewModal';
 
 interface Submission {
   id: number;
@@ -20,6 +23,8 @@ interface Submission {
   updated_at: string;
   description: string | null;
   status: 'Reçu' | 'En révision' | 'Validé' | 'Refusé';
+  grade: number | null;
+  feedback: string | null;
   link1: string | null;
   link2: string | null;
   link3: string | null;
@@ -75,6 +80,9 @@ export default function AdminDashboard() {
   const [selectedProject, setSelectedProject] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [studentSearch, setStudentSearch] = useState('');
+  
+  // Review modal
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
 
   // Vérification admin
   const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
@@ -134,28 +142,32 @@ export default function AdminDashboard() {
     }
   };
 
-  const updateStatus = async (submissionId: number, newStatus: 'Reçu' | 'En révision' | 'Validé' | 'Refusé') => {
+  const updateSubmission = async (
+    submissionId: number, 
+    updates: { status?: string; grade?: number | null; feedback?: string }
+  ) => {
     try {
-      const { error } = await supabase
-        .from('submissions')
-        .update({ status: newStatus })
-        .eq('id', submissionId);
+      const response = await supabase.functions.invoke('update-submission', {
+        body: { submissionId, ...updates },
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
 
-      if (error) throw error;
+      if (response.error) throw response.error;
 
-      setSubmissions(prev => 
-        prev.map(s => s.id === submissionId ? { ...s, status: newStatus } : s)
-      );
+      // Refresh submissions after update
+      await loadData();
 
       toast({
-        title: "Statut mis à jour",
-        description: `Statut changé en "${newStatus}"`
+        title: "Soumission mise à jour",
+        description: "Les modifications ont été enregistrées avec succès"
       });
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de mettre à jour le statut",
+        description: "Impossible de mettre à jour la soumission",
         variant: "destructive"
       });
     }
@@ -412,7 +424,8 @@ export default function AdminDashboard() {
                     <TableHead>Fichiers</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead>Statut</TableHead>
-                    <TableHead>Mis à jour</TableHead>
+                    <TableHead>Note</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -518,25 +531,28 @@ export default function AdminDashboard() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Select 
-                          value={submission.status} 
-                          onValueChange={(value) => updateStatus(submission.id, value as any)}
-                        >
-                          <SelectTrigger className="w-auto">
-                            <SelectValue>
-                              <StatusBadge status={submission.status} />
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Reçu">Reçu</SelectItem>
-                            <SelectItem value="En révision">En révision</SelectItem>
-                            <SelectItem value="Validé">Validé</SelectItem>
-                            <SelectItem value="Refusé">Refusé</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <StatusBadge status={submission.status} />
                       </TableCell>
-                      <TableCell className="text-sm">
-                        {new Date(submission.updated_at).toLocaleDateString('fr-FR')}
+                      <TableCell className="text-center">
+                        {submission.grade !== null ? (
+                          <div className="flex items-center justify-center gap-1">
+                            <Star className="w-4 h-4 text-yellow-500" />
+                            <span className="font-medium">{submission.grade}/20</span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedSubmission(submission)}
+                          className="flex items-center gap-2"
+                        >
+                          <Edit className="w-4 h-4" />
+                          Réviser
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -545,6 +561,15 @@ export default function AdminDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Review Modal */}
+        <SubmissionReviewModal
+          submission={selectedSubmission}
+          isOpen={selectedSubmission !== null}
+          onClose={() => setSelectedSubmission(null)}
+          onUpdate={updateSubmission}
+          onDownloadFile={downloadFile}
+        />
       </div>
     </Layout>
   );
