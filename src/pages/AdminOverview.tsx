@@ -4,6 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, FileText, Clock, AlertTriangle } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
+import AdminSetupWizard from '@/components/AdminSetupWizard';
+import Auth from '@/pages/Auth';
+import Forbidden from '@/pages/Forbidden';
 
 interface Stats {
   totalSubmissions: number;
@@ -15,7 +18,7 @@ interface Stats {
 }
 
 export default function AdminOverview() {
-  const { isAdmin, loading } = useAuth();
+  const { isAdmin, loading, user } = useAuth();
   const [stats, setStats] = useState<Stats>({
     totalSubmissions: 0,
     submissionsToday: 0,
@@ -25,12 +28,44 @@ export default function AdminOverview() {
     totalSupervisors: 0
   });
   const [loadingStats, setLoadingStats] = useState(true);
+  const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
+  const [checkingAdminState, setCheckingAdminState] = useState(true);
 
+  // Check admin state on mount
   useEffect(() => {
-    if (!loading && isAdmin) {
+    checkAdminState();
+  }, []);
+
+  // Load stats when user is admin
+  useEffect(() => {
+    if (!loading && isAdmin && hasAdmin) {
       loadStats();
     }
-  }, [loading, isAdmin]);
+  }, [loading, isAdmin, hasAdmin]);
+
+  const checkAdminState = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('get-admin-state');
+      
+      if (error) {
+        console.error('Error checking admin state:', error);
+        setHasAdmin(true); // Assume admin exists to avoid setup loop on error
+      } else {
+        setHasAdmin(data.hasAdmin);
+      }
+    } catch (error) {
+      console.error('Error checking admin state:', error);
+      setHasAdmin(true); // Assume admin exists to avoid setup loop on error
+    } finally {
+      setCheckingAdminState(false);
+    }
+  };
+
+  const handleAdminSetupSuccess = () => {
+    setHasAdmin(true);
+    // Trigger auth refresh to update isAdmin state
+    window.location.reload();
+  };
 
   const loadStats = async () => {
     try {
@@ -83,12 +118,29 @@ export default function AdminOverview() {
     }
   };
 
-  if (loading) {
+  if (loading || checkingAdminState) {
     return <div className="flex items-center justify-center h-64">Chargement...</div>;
   }
 
+  // No admin exists - show setup flow
+  if (hasAdmin === false) {
+    if (!user) {
+      return <Auth />;
+    }
+    return <AdminSetupWizard onSuccess={handleAdminSetupSuccess} />;
+  }
+
+  // Admin exists but user is not admin
+  if (hasAdmin === true && !isAdmin) {
+    if (!user) {
+      return <Navigate to="/auth?next=/admin" replace />;
+    }
+    return <Forbidden />;
+  }
+
+  // User is admin - show dashboard
   if (!isAdmin) {
-    return <Navigate to="/auth" replace />;
+    return <div className="flex items-center justify-center h-64">Chargement des permissions...</div>;
   }
 
   return (

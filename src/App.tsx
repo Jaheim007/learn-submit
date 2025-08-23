@@ -19,6 +19,7 @@ import SupervisorSubmissions from "./pages/SupervisorSubmissions";
 import TestDashboard from "./pages/TestDashboard";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
+import Forbidden from "./pages/Forbidden";
 
 const queryClient = new QueryClient();
 
@@ -37,11 +38,13 @@ const App = () => (
               <Route path="/etudiant/mes-projets" element={<StudentProjects />} />
               <Route path="/etudiant/soumettre" element={<SubmitProject />} />
               <Route path="/etudiant/mes-soumissions" element={<StudentSubmissions />} />
+        {/* Admin routes - no guards here, handled in component */}
         <Route path="/admin" element={<AdminOverview />} />
         <Route path="/admin/soumissions" element={<AdminDashboard />} />
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/superviseur" element={<SupervisorDashboard />} />
         <Route path="/superviseur/soumissions" element={<SupervisorSubmissions />} />
+        <Route path="/forbidden" element={<Forbidden />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/test" element={<TestDashboard />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

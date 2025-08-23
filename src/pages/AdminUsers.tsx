@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import Forbidden from '@/pages/Forbidden';
 
 interface Supervisor {
   user_id: string;
@@ -178,7 +179,7 @@ export default function AdminUsers() {
   }
 
   if (!isAdmin) {
-    return <Navigate to="/auth" replace />;
+    return <Forbidden />;
   }
 
   return (
