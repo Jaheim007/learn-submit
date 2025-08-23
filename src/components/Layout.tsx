@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, BookOpen, Upload } from 'lucide-react';
+import { LogOut, User, BookOpen, Upload, FileText } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface LayoutProps {
@@ -24,6 +24,11 @@ export function Layout({ children, showNavigation = true }: LayoutProps) {
       label: 'Mes Projets', 
       path: '/etudiant/mes-projets', 
       icon: BookOpen 
+    },
+    { 
+      label: 'Mes Soumissions', 
+      path: '/etudiant/mes-soumissions', 
+      icon: FileText 
     },
     { 
       label: 'Mon Profil', 

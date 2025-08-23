@@ -162,13 +162,13 @@ export default function SubmitProject() {
 
   const handleFileSelect = async (index: number, file: File) => {
     // Validate file
-    const maxSize = 20 * 1024 * 1024; // 20MB
-    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'application/zip'];
+    const maxSize = 25 * 1024 * 1024; // 25MB
+    const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip', 'application/x-zip-compressed'];
     
     if (file.size > maxSize) {
       toast({
         title: "Fichier trop volumineux",
-        description: "La taille maximale autorisée est de 20 MB",
+        description: "La taille maximale autorisée est de 25 MB",
         variant: "destructive"
       });
       return;
@@ -177,7 +177,7 @@ export default function SubmitProject() {
     if (!allowedTypes.includes(file.type)) {
       toast({
         title: "Type de fichier non autorisé",
-        description: "Formats acceptés : PDF, PNG, JPG, ZIP",
+        description: "Formats acceptés : PDF, DOCX, ZIP",
         variant: "destructive"
       });
       return;
@@ -249,6 +249,19 @@ export default function SubmitProject() {
     e.preventDefault();
     
     if (!project || !classInfo || !studentId) return;
+
+    // Validate at least one submission item
+    const hasFiles = files.some(f => f.uploaded && f.url);
+    const hasLinks = links.some(link => link.trim());
+    
+    if (!hasFiles && !hasLinks) {
+      toast({
+        title: "Soumission requise",
+        description: "Veuillez ajouter au moins un fichier ou un lien avant de soumettre",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setSubmitting(true);
 
@@ -399,7 +412,7 @@ export default function SubmitProject() {
                       Fichiers du projet
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Formats acceptés : PDF, PNG, JPG, ZIP • Taille max : 20 MB
+                      Formats acceptés : PDF, DOCX, ZIP • Taille max : 25 MB
                     </p>
                     
                     {files.map((fileUpload, index) => (
@@ -410,7 +423,7 @@ export default function SubmitProject() {
                           <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
                             <input
                               type="file"
-                              accept=".pdf,.png,.jpg,.jpeg,.zip"
+                              accept=".pdf,.docx,.zip"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {

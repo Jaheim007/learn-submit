@@ -56,9 +56,10 @@ export async function createTestSubmissions(studentId: string, projectIds: numbe
     project_id: projectId,
     class_id: classId,
     status: ['Reçu', 'En révision', 'Validé', 'Refusé'][index % 4] as any,
-    description: `Test submission for project ${projectId}`,
+    description: `Test submission for project ${projectId} - comprehensive testing description with details about the implementation`,
     link1: `https://github.com/test/project-${projectId}`,
-    link2: `https://test-app-${projectId}.netlify.app`
+    link2: `https://test-app-${projectId}.netlify.app`,
+    link3: index > 0 ? `https://docs-project-${projectId}.com` : null
   }));
 
   const { data, error } = await supabase

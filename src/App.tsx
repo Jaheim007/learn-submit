@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import StudentProjects from "./pages/StudentProjects";
 import SubmitProject from "./pages/SubmitProject";
+import StudentSubmissions from "./pages/StudentSubmissions";
 import AdminDashboard from "./pages/AdminDashboard";
 import TestDashboard from "./pages/TestDashboard";
 import NotFound from "./pages/NotFound";
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/profil" element={<Profile />} />
             <Route path="/etudiant/mes-projets" element={<StudentProjects />} />
             <Route path="/etudiant/soumettre" element={<SubmitProject />} />
+            <Route path="/etudiant/mes-soumissions" element={<StudentSubmissions />} />
             <Route path="/admin/soumissions" element={<AdminDashboard />} />
             <Route path="/test" element={<TestDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
