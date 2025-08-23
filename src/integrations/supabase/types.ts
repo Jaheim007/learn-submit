@@ -14,6 +14,141 @@ export type Database = {
   }
   public: {
     Tables: {
+      class_instructors: {
+        Row: {
+          class_id: number
+          created_at: string
+          id: number
+          instructor_id: string
+        }
+        Insert: {
+          class_id: number
+          created_at?: string
+          id?: number
+          instructor_id: string
+        }
+        Update: {
+          class_id?: number
+          created_at?: string
+          id?: number
+          instructor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_instructors_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_instructors_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "instructors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_projects: {
+        Row: {
+          class_id: number
+          created_at: string
+          id: number
+          project_id: number
+        }
+        Insert: {
+          class_id: number
+          created_at?: string
+          id?: number
+          project_id: number
+        }
+        Update: {
+          class_id?: number
+          created_at?: string
+          id?: number
+          project_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_projects_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_projects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classes: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: number
+          is_active: boolean
+          title: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean
+          title: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean
+          title?: string
+        }
+        Relationships: []
+      }
+      enrollments: {
+        Row: {
+          class_id: number
+          created_at: string
+          id: number
+          student_id: string
+        }
+        Insert: {
+          class_id: number
+          created_at?: string
+          id?: number
+          student_id: string
+        }
+        Update: {
+          class_id?: number
+          created_at?: string
+          id?: number
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrollments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrollments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       formation_inscriptions: {
         Row: {
           age: string | null
@@ -137,6 +272,27 @@ export type Database = {
         }
         Relationships: []
       }
+      instructors: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
       program_registrations_vac25: {
         Row: {
           accept_terms: boolean
@@ -188,6 +344,36 @@ export type Database = {
           payment_method?: string | null
           status?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          due_at: string | null
+          id: number
+          is_active: boolean
+          title: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          id?: number
+          is_active?: boolean
+          title: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          id?: number
+          is_active?: boolean
+          title?: string
         }
         Relationships: []
       }
@@ -256,6 +442,115 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      students: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          github_profile: string | null
+          id: string
+          phone: string | null
+          telegram: string | null
+          user_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          github_profile?: string | null
+          id?: string
+          phone?: string | null
+          telegram?: string | null
+          user_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          github_profile?: string | null
+          id?: string
+          phone?: string | null
+          telegram?: string | null
+          user_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      submissions: {
+        Row: {
+          class_id: number
+          description: string | null
+          file1_url: string | null
+          file2_url: string | null
+          file3_url: string | null
+          id: number
+          link1: string | null
+          link2: string | null
+          link3: string | null
+          project_id: number
+          status: Database["public"]["Enums"]["submission_status"]
+          student_id: string
+          submitted_at: string
+          updated_at: string
+        }
+        Insert: {
+          class_id: number
+          description?: string | null
+          file1_url?: string | null
+          file2_url?: string | null
+          file3_url?: string | null
+          id?: number
+          link1?: string | null
+          link2?: string | null
+          link3?: string | null
+          project_id: number
+          status?: Database["public"]["Enums"]["submission_status"]
+          student_id: string
+          submitted_at?: string
+          updated_at?: string
+        }
+        Update: {
+          class_id?: number
+          description?: string | null
+          file1_url?: string | null
+          file2_url?: string | null
+          file3_url?: string | null
+          id?: number
+          link1?: string | null
+          link2?: string | null
+          link3?: string | null
+          project_id?: number
+          status?: Database["public"]["Enums"]["submission_status"]
+          student_id?: string
+          submitted_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subsidy_applications: {
         Row: {
@@ -349,6 +644,7 @@ export type Database = {
       }
     }
     Enums: {
+      submission_status: "Reçu" | "En révision" | "Validé" | "Refusé"
       user_role: "admin" | "user"
     }
     CompositeTypes: {
@@ -477,6 +773,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      submission_status: ["Reçu", "En révision", "Validé", "Refusé"],
       user_role: ["admin", "user"],
     },
   },
