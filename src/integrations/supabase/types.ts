@@ -519,6 +519,7 @@ export type Database = {
           full_name: string | null
           github_profile: string | null
           id: string
+          is_active: boolean
           phone: string | null
           primary_class_id: number | null
           telegram: string | null
@@ -531,6 +532,7 @@ export type Database = {
           full_name?: string | null
           github_profile?: string | null
           id?: string
+          is_active?: boolean
           phone?: string | null
           primary_class_id?: number | null
           telegram?: string | null
@@ -543,6 +545,7 @@ export type Database = {
           full_name?: string | null
           github_profile?: string | null
           id?: string
+          is_active?: boolean
           phone?: string | null
           primary_class_id?: number | null
           telegram?: string | null
