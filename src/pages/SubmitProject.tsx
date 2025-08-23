@@ -84,15 +84,26 @@ export default function SubmitProject() {
     try {
       setLoading(true);
 
-      // Get student ID
+      // Get student ID and check if class is selected
       const { data: studentData, error: studentError } = await supabase
         .from('students')
-        .select('id')
+        .select('id, primary_class_id')
         .eq('user_id', user?.id)
         .single();
 
       if (studentError || !studentData) {
         throw new Error('Student profile not found');
+      }
+
+      // Check if student has selected a class
+      if (!studentData.primary_class_id) {
+        toast({
+          title: "Sélection de classe requise",
+          description: "Vous devez d'abord sélectionner votre groupe de classe depuis votre profil.",
+          variant: "destructive"
+        });
+        navigate('/profil');
+        return;
       }
 
       setStudentId(studentData.id);

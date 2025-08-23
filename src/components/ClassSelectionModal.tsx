@@ -59,35 +59,36 @@ export function ClassSelectionModal({ isOpen, onClassSelected }: ClassSelectionM
     setError('');
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Utilisateur non connecté');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Utilisateur non connecté');
 
-      // Get student ID
-      const { data: student, error: studentError } = await supabase
-        .from('students')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (studentError) throw studentError;
-
-      // Update student with primary_class_id
-      const { error: updateError } = await supabase
-        .from('students')
-        .update({ primary_class_id: parseInt(selectedClassId) })
-        .eq('user_id', user.id);
-
-      if (updateError) throw updateError;
-
-      // Create enrollment
-      const { error: enrollmentError } = await supabase
-        .from('enrollments')
-        .insert({
-          student_id: student.id,
+      const response = await fetch(`https://ucgaxcnfvrbhsxxcwceo.supabase.co/functions/v1/choose-class`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjZ2F4Y25mdnJiaHN4eGN3Y2VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDc1OTMsImV4cCI6MjA2NzAyMzU5M30.qPKuBuirq3kJI36BhoA_6IO_usl6iGt6QA2qWV_Sv4o',
+        },
+        body: JSON.stringify({
           class_id: parseInt(selectedClassId)
-        });
+        }),
+      });
 
-      if (enrollmentError) throw enrollmentError;
+      const result = await response.json();
+
+      if (!response.ok) {
+        let errorMessage = 'Erreur lors de la sélection du groupe';
+        
+        if (response.status === 400) {
+          errorMessage = 'Sélection invalide.';
+        } else if (response.status === 403) {
+          errorMessage = 'Votre groupe est définitif et ne peut pas être modifié.';
+        } else if (response.status === 409 || response.status === 500) {
+          errorMessage = 'Impossible d\'enregistrer votre groupe, veuillez réessayer.';
+        }
+        
+        throw new Error(errorMessage);
+      }
 
       toast({
         title: "Groupe sélectionné",
@@ -97,7 +98,7 @@ export function ClassSelectionModal({ isOpen, onClassSelected }: ClassSelectionM
       onClassSelected();
     } catch (error) {
       console.error('Error selecting class:', error);
-      setError('Erreur lors de la sélection du groupe');
+      setError(error instanceof Error ? error.message : 'Erreur lors de la sélection du groupe');
     } finally {
       setLoading(false);
     }
