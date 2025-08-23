@@ -6,6 +6,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isAdmin: boolean;
+  isSupervisor: boolean;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
   signUpWithClass: (email: string, password: string, classId: number) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
@@ -18,6 +20,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isSupervisor, setIsSupervisor] = useState(false);
+
+  const checkUserRole = async (userId: string) => {
+    try {
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+
+      if (roles) {
+        const hasAdmin = roles.some(r => r.role === 'admin');
+        const hasSupervisor = roles.some(r => r.role === 'supervisor');
+        setIsAdmin(hasAdmin);
+        setIsSupervisor(hasSupervisor);
+      }
+    } catch (error) {
+      console.error('Error checking user role:', error);
+      setIsAdmin(false);
+      setIsSupervisor(false);
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -25,14 +49,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        setLoading(false);
         
-        // Auto-create student profile if needed
-        if (session?.user && event === 'SIGNED_IN') {
+        if (session?.user) {
           setTimeout(() => {
-            createStudentProfileIfNeeded(session.user);
+            checkUserRole(session.user.id);
+            // Auto-create student profile if needed
+            if (event === 'SIGNED_IN') {
+              createStudentProfileIfNeeded(session.user);
+            }
           }, 0);
+        } else {
+          setIsAdmin(false);
+          setIsSupervisor(false);
         }
+        
+        setLoading(false);
       }
     );
 
@@ -40,6 +71,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        setTimeout(() => {
+          checkUserRole(session.user.id);
+        }, 0);
+      }
+      
       setLoading(false);
     });
 
@@ -148,6 +186,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     session,
     loading,
+    isAdmin,
+    isSupervisor,
     signUp,
     signUpWithClass,
     signIn,

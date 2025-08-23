@@ -12,6 +12,10 @@ import StudentProjects from "./pages/StudentProjects";
 import SubmitProject from "./pages/SubmitProject";
 import StudentSubmissions from "./pages/StudentSubmissions";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminOverview from "./pages/AdminOverview";
+import AdminUsers from "./pages/AdminUsers";
+import SupervisorDashboard from "./pages/SupervisorDashboard";
+import SupervisorSubmissions from "./pages/SupervisorSubmissions";
 import TestDashboard from "./pages/TestDashboard";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
@@ -33,7 +37,11 @@ const App = () => (
               <Route path="/etudiant/mes-projets" element={<StudentProjects />} />
               <Route path="/etudiant/soumettre" element={<SubmitProject />} />
               <Route path="/etudiant/mes-soumissions" element={<StudentSubmissions />} />
-              <Route path="/admin/soumissions" element={<AdminDashboard />} />
+        <Route path="/admin" element={<AdminOverview />} />
+        <Route path="/admin/soumissions" element={<AdminDashboard />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/superviseur" element={<SupervisorDashboard />} />
+        <Route path="/superviseur/soumissions" element={<SupervisorSubmissions />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/test" element={<TestDashboard />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -11,7 +11,7 @@ interface LayoutProps {
 }
 
 export function Layout({ children, showNavigation = true }: LayoutProps) {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin, isSupervisor } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -20,23 +20,30 @@ export function Layout({ children, showNavigation = true }: LayoutProps) {
     navigate('/');
   };
 
-  const navigationItems = [
-    { 
-      label: 'Mes Projets', 
-      path: '/etudiant/mes-projets', 
-      icon: BookOpen 
-    },
-    { 
-      label: 'Mes Soumissions', 
-      path: '/etudiant/mes-soumissions', 
-      icon: FileText 
-    },
-    { 
-      label: 'Mon Profil', 
-      path: '/profil', 
-      icon: User 
+  const getNavigationItems = () => {
+    if (isAdmin) {
+      return [
+        { label: 'Dashboard', path: '/admin', icon: BookOpen },
+        { label: 'Soumissions', path: '/admin/soumissions', icon: FileText },
+        { label: 'Utilisateurs', path: '/admin/users', icon: User },
+        { label: 'Profil', path: '/profil', icon: User }
+      ];
     }
-  ];
+    if (isSupervisor) {
+      return [
+        { label: 'Dashboard', path: '/superviseur', icon: BookOpen },
+        { label: 'Soumissions', path: '/superviseur/soumissions', icon: FileText },
+        { label: 'Profil', path: '/profil', icon: User }
+      ];
+    }
+    return [
+      { label: 'Mes Projets', path: '/etudiant/mes-projets', icon: BookOpen },
+      { label: 'Mes Soumissions', path: '/etudiant/mes-soumissions', icon: FileText },
+      { label: 'Mon Profil', path: '/profil', icon: User }
+    ];
+  };
+
+  const navigationItems = getNavigationItems();
 
   return (
     <div className="min-h-screen bg-background">

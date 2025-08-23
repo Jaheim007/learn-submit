@@ -677,6 +677,32 @@ export type Database = {
         }
         Relationships: []
       }
+      supervisor_class_assignments: {
+        Row: {
+          class_id: number
+          id: number
+          supervisor_user_id: string
+        }
+        Insert: {
+          class_id: number
+          id?: number
+          supervisor_user_id: string
+        }
+        Update: {
+          class_id?: number
+          id?: number
+          supervisor_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supervisor_class_assignments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -710,10 +736,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_supervisor: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       submission_status: "Reçu" | "En révision" | "Validé" | "Refusé"
-      user_role: "admin" | "user"
+      user_role: "admin" | "user" | "supervisor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -842,7 +872,7 @@ export const Constants = {
   public: {
     Enums: {
       submission_status: ["Reçu", "En révision", "Validé", "Refusé"],
-      user_role: ["admin", "user"],
+      user_role: ["admin", "user", "supervisor"],
     },
   },
 } as const
