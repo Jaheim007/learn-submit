@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
-import { ClassSelectionProvider } from "@/components/ClassSelectionProvider";
+import { ConditionalClassSelectionProvider } from "@/components/ConditionalClassSelectionProvider";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
@@ -14,6 +14,10 @@ import StudentSubmissions from "./pages/StudentSubmissions";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminOverview from "./pages/AdminOverview";
 import AdminUsers from "./pages/AdminUsers";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminRegister from "./pages/admin/AdminRegister";
+import AdminClaim from "./pages/admin/AdminClaim";
+import AdminDashboardNew from "./pages/admin/AdminDashboard";
 import SupervisorDashboard from "./pages/SupervisorDashboard";
 import SupervisorSubmissions from "./pages/SupervisorSubmissions";
 import TestDashboard from "./pages/TestDashboard";
@@ -27,7 +31,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <ClassSelectionProvider>
+        <ConditionalClassSelectionProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -38,10 +42,14 @@ const App = () => (
               <Route path="/etudiant/mes-projets" element={<StudentProjects />} />
               <Route path="/etudiant/soumettre" element={<SubmitProject />} />
               <Route path="/etudiant/mes-soumissions" element={<StudentSubmissions />} />
-        {/* Admin routes - no guards here, handled in component */}
-        <Route path="/admin" element={<AdminOverview />} />
-        <Route path="/admin/soumissions" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<AdminUsers />} />
+         {/* Admin auth routes */}
+         <Route path="/admin/login" element={<AdminLogin />} />
+         <Route path="/admin/register" element={<AdminRegister />} />
+         <Route path="/admin/claim" element={<AdminClaim />} />
+         {/* Admin dashboard routes */}
+         <Route path="/admin" element={<AdminDashboardNew />} />
+         <Route path="/admin/soumissions" element={<AdminDashboard />} />
+         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/superviseur" element={<SupervisorDashboard />} />
         <Route path="/superviseur/soumissions" element={<SupervisorSubmissions />} />
         <Route path="/forbidden" element={<Forbidden />} />
@@ -51,7 +59,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </ClassSelectionProvider>
+        </ConditionalClassSelectionProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

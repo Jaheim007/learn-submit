@@ -12,11 +12,16 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Create Supabase client
+    // Create Supabase client with service role to bypass RLS
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
 
     // Check if any admin exists
     const { data: adminCheck, error } = await supabase

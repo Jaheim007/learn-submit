@@ -14,6 +14,12 @@ export function Layout({ children, showNavigation = true }: LayoutProps) {
   const { user, signOut, isAdmin, isSupervisor } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Don't show student navigation on admin routes
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  if (isAdminRoute) {
+    return <>{children}</>;
+  }
 
   const handleSignOut = async () => {
     await signOut();

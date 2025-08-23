@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { AdminLayout } from '@/components/AdminLayout';
+import { AdminGuard } from '@/components/AdminGuard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -174,16 +176,12 @@ export default function AdminUsers() {
     }
   };
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-64">Chargement...</div>;
-  }
-
-  if (!isAdmin) {
-    return <Forbidden />;
-  }
+  // AdminGuard will handle all auth checks, so we can remove these
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <AdminGuard>
+      <AdminLayout>
+        <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Gestion des Utilisateurs</h1>
@@ -347,6 +345,8 @@ export default function AdminUsers() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+        </div>
+      </AdminLayout>
+    </AdminGuard>
   );
 }

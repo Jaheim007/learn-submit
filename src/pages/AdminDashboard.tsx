@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Layout } from '@/components/Layout';
+import { AdminLayout } from '@/components/AdminLayout';
+import { AdminGuard } from '@/components/AdminGuard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -264,16 +265,19 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="container mx-auto py-8">
-          <div className="text-center">Chargement...</div>
-        </div>
-      </Layout>
+      <AdminGuard>
+        <AdminLayout>
+          <div className="container mx-auto py-8">
+            <div className="text-center">Chargement...</div>
+          </div>
+        </AdminLayout>
+      </AdminGuard>
     );
   }
 
   return (
-    <Layout>
+    <AdminGuard>
+      <AdminLayout>
       <div className="container mx-auto py-8 space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -571,6 +575,7 @@ export default function AdminDashboard() {
           onDownloadFile={downloadFile}
         />
       </div>
-    </Layout>
+      </AdminLayout>
+    </AdminGuard>
   );
 }
