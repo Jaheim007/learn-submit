@@ -18,6 +18,11 @@ interface StudentProfile {
   whatsapp: string;
   telegram: string;
   github_profile: string;
+  primary_class_id?: number;
+  primary_class?: {
+    code: string;
+    title: string;
+  };
 }
 
 export default function Profile() {
@@ -50,7 +55,13 @@ export default function Profile() {
     try {
       const { data, error } = await supabase
         .from('students')
-        .select('*')
+        .select(`
+          *,
+          primary_class:classes!primary_class_id (
+            code,
+            title
+          )
+        `)
         .eq('user_id', user?.id)
         .single();
 
@@ -64,7 +75,9 @@ export default function Profile() {
           phone: data.phone || '',
           whatsapp: data.whatsapp || '',
           telegram: data.telegram || '',
-          github_profile: data.github_profile || ''
+          github_profile: data.github_profile || '',
+          primary_class_id: data.primary_class_id,
+          primary_class: data.primary_class
         });
       }
     } catch (error) {
@@ -237,6 +250,26 @@ export default function Profile() {
                       />
                     </div>
                   </div>
+
+                  {/* Class Info */}
+                  {profile.primary_class && (
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium text-foreground flex items-center gap-2">
+                        <User className="w-5 h-5" />
+                        Groupe de classe
+                      </h3>
+                      
+                      <div className="space-y-2">
+                        <Label>Votre groupe (lecture seule)</Label>
+                        <div className="px-3 py-2 bg-muted rounded-md border">
+                          <span className="font-medium">{profile.primary_class.title}</span>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Votre groupe est défini par l'administration. Contactez un admin en cas d'erreur.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Professional Info */}
                   <div className="space-y-4">

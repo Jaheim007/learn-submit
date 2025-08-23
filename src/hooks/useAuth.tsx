@@ -7,6 +7,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
+  signUpWithClass: (email: string, password: string, classId: number) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
 }
@@ -82,6 +83,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
+  const signUpWithClass = async (email: string, password: string, classId: number) => {
+    const redirectUrl = `${window.location.origin}/`;
+    
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl
+      }
+    });
+
+    if (error) return { error };
+    
+    // If user was created successfully, create student profile with class
+    if (data.user) {
+      try {
+        // Create student profile with primary_class_id
+        const { data: studentData, error: studentError } = await supabase
+          .from('students')
+          .insert({
+            user_id: data.user.id,
+            email: data.user.email,
+            full_name: data.user.user_metadata?.full_name || '',
+            primary_class_id: classId
+          })
+          .select('id')
+          .single();
+
+        if (studentError) throw studentError;
+
+        // Create enrollment
+        const { error: enrollmentError } = await supabase
+          .from('enrollments')
+          .insert({
+            student_id: studentData.id,
+            class_id: classId
+          });
+
+        if (enrollmentError) throw enrollmentError;
+      } catch (profileError) {
+        console.error('Error creating student profile:', profileError);
+        return { error: profileError };
+      }
+    }
+
+    return { error: null };
+  };
+
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -100,6 +149,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session,
     loading,
     signUp,
+    signUpWithClass,
     signIn,
     signOut
   };

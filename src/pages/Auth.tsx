@@ -1,24 +1,57 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Layout } from '@/components/Layout';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, BookOpen, Users, Upload } from 'lucide-react';
+import { Loader2, BookOpen, Users, Upload, AlertCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Class {
+  id: number;
+  code: string;
+  title: string;
+}
 
 export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [selectedClassId, setSelectedClassId] = useState<string>('');
+  const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(false);
   
-  const { signUp, signIn, user } = useAuth();
+  const { signUp, signUpWithClass, signIn, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isSignUp) {
+      fetchClasses();
+    }
+  }, [isSignUp]);
+
+  const fetchClasses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('classes')
+        .select('id, code, title')
+        .in('code', ['G1', 'G2', 'G3', 'G4', 'G5'])
+        .eq('is_active', true)
+        .order('code');
+
+      if (error) throw error;
+      setClasses(data || []);
+    } catch (error) {
+      console.error('Error fetching classes:', error);
+    }
+  };
 
   // Redirect if already authenticated
   if (user) {
@@ -38,11 +71,20 @@ export default function Auth() {
       return;
     }
 
+    if (isSignUp && !selectedClassId) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner votre groupe de classe",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
       const { error } = isSignUp 
-        ? await signUp(email, password)
+        ? await signUpWithClass(email, password, parseInt(selectedClassId))
         : await signIn(email, password);
 
       if (error) {
@@ -179,8 +221,32 @@ export default function Auth() {
                     />
                   </div>
                 )}
+
+                {isSignUp && (
+                  <div className="space-y-2">
+                    <Label htmlFor="class-select">Choisissez votre groupe de classe</Label>
+                    <Select value={selectedClassId} onValueChange={setSelectedClassId}>
+                      <SelectTrigger className="input-educational">
+                        <SelectValue placeholder="Sélectionnez votre groupe..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {classes.map((cls) => (
+                          <SelectItem key={cls.id} value={cls.id.toString()}>
+                            {cls.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Alert>
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        Sélectionnez votre groupe. Ce choix est définitif.
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
                 
-                <Button 
+                <Button
                   type="submit" 
                   className="w-full btn-primary"
                   disabled={loading}
