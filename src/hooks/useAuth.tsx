@@ -51,11 +51,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          setTimeout(() => {
-            checkUserRole(session.user.id);
-            // Auto-create student profile if needed
-            if (event === 'SIGNED_IN') {
-              createStudentProfileIfNeeded(session.user);
+          setTimeout(async () => {
+            await checkUserRole(session.user.id);
+            
+            // Only create student profile for non-admin/supervisor users
+            // AND only when they're actually accessing student features
+            const currentPath = window.location.pathname;
+            const isStudentRoute = currentPath.startsWith('/etudiant') || 
+                                 currentPath.startsWith('/student') ||
+                                 currentPath === '/';
+            
+            // Check if user is admin or supervisor before creating student profile
+            const { data: userRoles } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', session.user.id);
+            
+            const hasAdminRole = userRoles?.some(r => r.role === 'admin');
+            const hasSupervisorRole = userRoles?.some(r => r.role === 'supervisor');
+            
+            // Only create student profile if:
+            // 1. Not admin or supervisor
+            // 2. On a student route or homepage
+            // 3. Just signed in (to avoid repeated profile creation)
+            if (!hasAdminRole && !hasSupervisorRole && isStudentRoute && event === 'SIGNED_IN') {
+              await createStudentProfileIfNeeded(session.user);
             }
           }, 0);
         } else {

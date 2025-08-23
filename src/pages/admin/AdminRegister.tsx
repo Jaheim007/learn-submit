@@ -1,187 +1,200 @@
-import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useNavigate, Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Shield, AlertCircle } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function AdminRegister() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  
-  const { signUp, user, isAdmin } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already authenticated and admin
-  if (user && isAdmin) {
-    navigate('/admin');
-    return null;
-  }
+  // Redirect if already logged in as admin
+  useEffect(() => {
+    if (user && isAdmin) {
+      navigate('/admin');
+    }
+  }, [user, isAdmin, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+      toast.error('Les mots de passe ne correspondent pas');
       return;
     }
 
     if (password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères');
+      toast.error('Le mot de passe doit contenir au moins 6 caractères');
+      return;
+    }
+
+    if (!fullName.trim()) {
+      toast.error('Le nom complet est requis');
       return;
     }
 
     setLoading(true);
-    setError('');
 
     try {
-      const { error } = await signUp(email, password);
-
-      if (error) {
-        if (error.message.includes('Email already registered') || error.message.includes('already_registered')) {
-          setError('Cette adresse email est déjà utilisée');
-        } else if (error.message.includes('Password should be at least')) {
-          setError('Le mot de passe doit contenir au moins 6 caractères');
-        } else if (error.message.includes('Invalid email')) {
-          setError('Adresse email invalide');
-        } else {
-          setError('Erreur lors de la création du compte. Réessayez.');
+      // 1. Sign up the user
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/admin`,
+          data: {
+            full_name: fullName.trim()
+          }
         }
+      });
+
+      if (signUpError) {
+        console.error('Signup error:', signUpError);
+        
+        if (signUpError.message.includes('already registered')) {
+          toast.error('Cet email est déjà enregistré. Utilisez la page de connexion.');
+          return;
+        }
+        
+        toast.error(signUpError.message || 'Erreur lors de l\'inscription');
         return;
       }
 
-      // After successful signup, try to promote to admin
-      const { data, error: promoteError } = await supabase.functions.invoke('promote-self-to-admin');
+      if (!data.user) {
+        toast.error('Erreur lors de la création du compte');
+        return;
+      }
+
+      // 2. Promote to admin using edge function
+      const { error: promoteError } = await supabase.functions.invoke('promote-self-to-admin');
 
       if (promoteError) {
-        console.error('Error promoting to admin:', promoteError);
-        if (promoteError.message.includes('409')) {
-          setError('Un administrateur existe déjà. Veuillez vous connecter.');
-          setTimeout(() => navigate('/admin/login'), 2000);
-        } else {
-          setError('Erreur lors de la promotion administrateur. Réessayez.');
-        }
-        return;
-      }
-
-      if (data?.code === 'ADMIN_EXISTS') {
-        setError('Un administrateur existe déjà. Veuillez vous connecter.');
-        setTimeout(() => navigate('/admin/login'), 2000);
+        console.error('Promotion error:', promoteError);
+        toast.error('Compte créé mais erreur lors de l\'attribution du rôle admin. Contactez le support.');
         return;
       }
 
       toast.success('Compte administrateur créé avec succès !');
-      // Force refresh user roles in auth context
-      window.location.href = '/admin';
       
-    } catch (error: any) {
-      console.error('Registration error:', error);
-      setError('Erreur inattendue. Vérifiez votre connexion et réessayez.');
+      // 3. Redirect to admin dashboard
+      navigate('/admin');
+
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast.error('Erreur inattendue lors de la création du compte');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Card className="shadow-custom-xl border-0 bg-white/95 backdrop-blur-sm">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <Shield className="h-6 w-6 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">Créer un compte administrateur</CardTitle>
+          <CardDescription>
+            Enregistrez-vous en tant qu'administrateur de la plateforme NYS
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="fullName">Nom complet</Label>
+              <Input
+                id="fullName"
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Votre nom complet"
+                required
+              />
             </div>
-            <CardTitle className="text-2xl">Créer un compte administrateur</CardTitle>
-            <CardDescription>
-              Créez votre compte pour accéder au système d'administration
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Adresse email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@nys-africa.com"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (error) setError('');
-                  }}
-                  required
-                  disabled={loading}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password">Mot de passe</Label>
+
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@nys-africa.com"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="password">Mot de passe</Label>
+              <div className="relative">
                 <Input
                   id="password"
-                  type="password"
-                  placeholder="••••••••"
+                  type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (error) setError('');
-                  }}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Mot de passe (min. 6 caractères)"
                   required
-                  disabled={loading}
                 />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    if (error) setError('');
-                  }}
-                  required
-                  disabled={loading}
-                />
-              </div>
-
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              
-              <Button
-                type="submit" 
-                className="w-full"
-                disabled={loading}
-              >
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Créer mon compte
-              </Button>
-            </form>
-            
-            <div className="mt-6 text-center">
-              <Link 
-                to="/admin/login"
-                className="text-sm text-primary hover:text-primary-hover transition-smooth"
-              >
-                Déjà un compte ? Se connecter
-              </Link>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+
+            <div>
+              <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirmez votre mot de passe"
+                required
+              />
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loading}
+            >
+              {loading ? 'Création du compte...' : 'Créer le compte administrateur'}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              Vous avez déjà un compte administrateur ?{' '}
+              <Button
+                variant="link"
+                className="p-0 h-auto text-primary"
+                onClick={() => navigate('/admin/login')}
+              >
+                Connectez-vous
+              </Button>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

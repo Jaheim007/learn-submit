@@ -11,44 +11,12 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      { 
-        status: 405, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    );
-  }
-
   try {
-    // Get the authorization header
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Authorization header required' }),
-        { 
-          status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
     // Create Supabase client with service role to bypass RLS
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
-    // Create client for authentication
-    const supabaseAuth = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
-      auth: { 
-        autoRefreshToken: false, 
-        persistSession: false 
-      }
-    });
-
-    // Create client with service role for admin operations
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false
@@ -56,71 +24,42 @@ Deno.serve(async (req) => {
     });
 
     // Get the authenticated user
-    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(authHeader.replace('Bearer ', ''));
+    const authHeader = req.headers.get('Authorization')!;
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
     if (authError || !user) {
-      console.error('Authentication error:', authError);
+      console.error('Auth error:', authError);
       return new Response(
-        JSON.stringify({ error: 'Invalid authentication' }),
-        { 
-          status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Check if any admin already exists
-    const { data: existingAdmins, error: adminCheckError } = await supabaseAdmin
-      .from('user_roles')
-      .select('id')
-      .eq('role', 'admin')
-      .limit(1);
+    console.log('Promoting user to admin:', user.email);
 
-    if (adminCheckError) {
-      console.error('Error checking existing admins:', adminCheckError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to check admin state' }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    // If admins already exist, deny the request
-    if (existingAdmins && existingAdmins.length > 0) {
-      return new Response(
-        JSON.stringify({ 
-          code: 'ADMIN_EXISTS', 
-          message: 'Un administrateur existe déjà.' 
-        }),
-        { 
-          status: 409, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    // Create admin record (this will trigger the role creation via trigger)
-    const { error: insertError } = await supabaseAdmin
+    // Insert into admins table (will trigger role assignment via trigger)
+    const { error: adminError } = await supabase
       .from('admins')
-      .insert([{ user_id: user.id }])
+      .insert({ 
+        user_id: user.id,
+        full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Admin'
+      })
       .select()
       .single();
 
-    if (insertError && !insertError.message.includes('duplicate key')) {
-      console.error('Error creating admin:', insertError);
+    if (adminError && adminError.code !== '23505') { // Ignore duplicate key error
+      console.error('Error inserting admin:', adminError);
       return new Response(
-        JSON.stringify({ error: 'Failed to create admin' }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        JSON.stringify({ error: 'Failed to create admin record' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    console.log('Admin promotion successful for:', user.email);
+
     return new Response(
-      JSON.stringify({ ok: true }),
+      JSON.stringify({ success: true, message: 'Admin role granted successfully' }),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
