@@ -16,7 +16,7 @@ import AdminOverview from "./pages/AdminOverview";
 import AdminUsers from "./pages/AdminUsers";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminRegister from "./pages/admin/AdminRegister";
-import AdminClaim from "./pages/admin/AdminClaim";
+
 import AdminDashboardNew from "./pages/admin/AdminDashboard";
 import SupervisorDashboard from "./pages/SupervisorDashboard";
 import SupervisorSubmissions from "./pages/SupervisorSubmissions";
@@ -45,7 +45,7 @@ const App = () => (
          {/* Admin auth routes */}
          <Route path="/admin/login" element={<AdminLogin />} />
          <Route path="/admin/register" element={<AdminRegister />} />
-         <Route path="/admin/claim" element={<AdminClaim />} />
+         
          {/* Admin dashboard routes */}
          <Route path="/admin" element={<AdminDashboardNew />} />
          <Route path="/admin/soumissions" element={<AdminDashboard />} />

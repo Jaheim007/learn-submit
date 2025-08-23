@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, FileText, Clock, AlertTriangle } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
-import AdminSetupWizard from '@/components/AdminSetupWizard';
+
 import Auth from '@/pages/Auth';
 import Forbidden from '@/pages/Forbidden';
 
@@ -63,11 +63,6 @@ export default function AdminOverview() {
     }
   };
 
-  const handleAdminSetupSuccess = async () => {
-    setHasAdmin(true);
-    // Force a refresh of the entire page to reload auth context
-    window.location.reload();
-  };
 
   const loadStats = async () => {
     try {
@@ -125,12 +120,12 @@ export default function AdminOverview() {
     return <div className="flex items-center justify-center h-64">Chargement...</div>;
   }
 
-  // No admin exists - show setup flow
+  // No admin exists - redirect to admin register
   if (hasAdmin === false) {
     if (!user) {
-      return <Auth />;
+      return <Navigate to="/admin/register" replace />;
     }
-    return <AdminSetupWizard onSuccess={handleAdminSetupSuccess} />;
+    return <Navigate to="/admin/register" replace />;
   }
 
   // Admin exists - check user permissions

@@ -11,6 +11,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
   const { user, loading, isAdmin } = useAuth();
   const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
   const [checkingAdminState, setCheckingAdminState] = useState(true);
+  const [promoting, setPromoting] = useState(false);
 
   useEffect(() => {
     checkAdminState();
@@ -36,25 +37,63 @@ export function AdminGuard({ children }: AdminGuardProps) {
     }
   };
 
+  const attemptSelfPromotion = async () => {
+    if (!user || promoting) return;
+    
+    setPromoting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('promote-self-to-admin');
+      
+      if (error) {
+        console.error('Error promoting to admin:', error);
+        return false;
+      }
+
+      if (data?.code === 'ADMIN_EXISTS') {
+        return false;
+      }
+
+      // Success - force page reload to refresh auth context
+      window.location.reload();
+      return true;
+    } catch (error) {
+      console.error('Error promoting to admin:', error);
+      return false;
+    } finally {
+      setPromoting(false);
+    }
+  };
+
   // Wait for both auth and admin state to load
-  if (loading || checkingAdminState) {
+  if (loading || checkingAdminState || promoting) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-sm text-muted-foreground">Chargement...</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {promoting ? 'Configuration du compte administrateur...' : 'Chargement...'}
+          </p>
         </div>
       </div>
     );
   }
 
-  // No admin exists - allow access to setup flow
-  if (hasAdmin === false) {
-    if (!user) {
-      return <Navigate to="/admin/login" replace />;
-    }
-    // User exists but no admin in system - allow access to claim
-    return <>{children}</>;
+  // No admin exists and user is authenticated - try auto-promotion
+  if (hasAdmin === false && user && !isAdmin) {
+    attemptSelfPromotion();
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-sm text-muted-foreground">Configuration du compte administrateur...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // No admin exists but no user - redirect to register
+  if (hasAdmin === false && !user) {
+    return <Navigate to="/admin/register" replace />;
   }
 
   // Admin exists - check user permissions
@@ -63,7 +102,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
       return <Navigate to="/admin/login" replace />;
     }
     if (!isAdmin) {
-      return <Navigate to="/admin/claim" replace />;
+      return <Navigate to="/admin/login" replace />;
     }
     // User is admin - allow access
     return <>{children}</>;

@@ -24,10 +24,9 @@ export default function AdminLogin() {
     return null;
   }
 
-  // If authenticated but not admin, redirect to claim
+  // If authenticated but not admin, redirect to login (no auto-promotion here)
   if (user && !isAdmin) {
-    navigate('/admin/claim');
-    return null;
+    setError('Accès non autorisé. Seuls les administrateurs peuvent se connecter.');
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

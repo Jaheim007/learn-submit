@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,12 +23,6 @@ export default function AdminRegister() {
   // Redirect if already authenticated and admin
   if (user && isAdmin) {
     navigate('/admin');
-    return null;
-  }
-
-  // If authenticated but not admin, redirect to claim
-  if (user && !isAdmin) {
-    navigate('/admin/claim');
     return null;
   }
 
@@ -63,8 +58,29 @@ export default function AdminRegister() {
         return;
       }
 
-      toast.success('Compte créé avec succès !');
-      navigate('/admin/claim');
+      // After successful signup, try to promote to admin
+      const { data, error: promoteError } = await supabase.functions.invoke('promote-self-to-admin');
+
+      if (promoteError) {
+        console.error('Error promoting to admin:', promoteError);
+        if (promoteError.message.includes('409')) {
+          setError('Un administrateur existe déjà. Veuillez vous connecter.');
+          setTimeout(() => navigate('/admin/login'), 2000);
+        } else {
+          setError('Erreur lors de la promotion administrateur. Réessayez.');
+        }
+        return;
+      }
+
+      if (data?.code === 'ADMIN_EXISTS') {
+        setError('Un administrateur existe déjà. Veuillez vous connecter.');
+        setTimeout(() => navigate('/admin/login'), 2000);
+        return;
+      }
+
+      toast.success('Compte administrateur créé avec succès !');
+      // Force refresh user roles in auth context
+      window.location.href = '/admin';
       
     } catch (error: any) {
       console.error('Registration error:', error);
