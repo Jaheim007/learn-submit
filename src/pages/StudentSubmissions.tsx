@@ -38,6 +38,7 @@ interface Submission {
   file1_url: string | null;
   file2_url: string | null;
   file3_url: string | null;
+  version: number;
   project: {
     id: number;
     code: string;
@@ -130,6 +131,7 @@ export default function StudentSubmissions() {
           file1_url,
           file2_url,
           file3_url,
+          version,
           project_id,
           class_id,
           projects!inner (
@@ -369,8 +371,9 @@ export default function StudentSubmissions() {
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="space-y-1">
-                          <CardTitle className="text-lg">
+                          <CardTitle className="text-lg flex items-center gap-2">
                             {submission.project.code} - {submission.project.title}
+                            <Badge variant="outline">v{submission.version}</Badge>
                           </CardTitle>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <BookOpen className="w-4 h-4" />

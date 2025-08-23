@@ -160,6 +160,54 @@ serve(async (req) => {
 
     console.log('Submission updated successfully:', updatedSubmission.id)
 
+    // Create notification for student about status/grade/feedback change
+    if (status || grade !== undefined || feedback) {
+      try {
+        // Get student user_id
+        const { data: submissionData } = await supabaseClient
+          .from('submissions')
+          .select('student:students(user_id, full_name)')
+          .eq('id', Number(submissionId))
+          .single()
+
+        if (submissionData?.student) {
+          let notificationType = 'status_changed'
+          let notificationTitle = 'Mise à jour de votre soumission'
+          let notificationBody = ''
+
+          if (status) {
+            notificationTitle = 'Changement de statut'
+            notificationBody = `Le statut de votre soumission a été mis à jour: ${status}`
+          } else if (grade !== undefined) {
+            notificationType = 'grade_assigned'
+            notificationTitle = 'Note attribuée'
+            notificationBody = `Votre soumission a reçu la note: ${grade}/20`
+          } else if (feedback) {
+            notificationType = 'feedback_added'
+            notificationTitle = 'Nouveau commentaire'
+            notificationBody = 'Un commentaire a été ajouté à votre soumission'
+          }
+
+          await supabaseClient.functions.invoke('create-notification', {
+            body: {
+              user_id: submissionData.student.user_id,
+              type: notificationType,
+              title: notificationTitle,
+              body: notificationBody,
+              metadata: {
+                submission_id: Number(submissionId),
+                status,
+                grade,
+                has_feedback: !!feedback
+              }
+            }
+          })
+        }
+      } catch (notifError) {
+        console.warn('Failed to create notification:', notifError)
+      }
+    }
+
     return new Response(
       JSON.stringify({ 
         message: 'Submission updated successfully',

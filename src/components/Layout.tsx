@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { NotificationBell } from '@/components/NotificationBell';
 import { LogOut, User, BookOpen, Upload, FileText } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -77,6 +78,8 @@ export function Layout({ children, showNavigation = true }: LayoutProps) {
                   );
                 })}
                 
+                <NotificationBell />
+                
                 <Button
                   variant="ghost"
                   size="sm"
@@ -89,7 +92,8 @@ export function Layout({ children, showNavigation = true }: LayoutProps) {
               </nav>
 
               {/* Mobile menu - simplified for now */}
-              <div className="md:hidden">
+              <div className="md:hidden flex items-center gap-2">
+                <NotificationBell />
                 <Button
                   variant="ghost"
                   size="sm"

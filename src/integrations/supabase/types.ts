@@ -293,6 +293,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          read_at: string | null
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          read_at?: string | null
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       program_registrations_vac25: {
         Row: {
           accept_terms: boolean
@@ -349,30 +385,39 @@ export type Database = {
       }
       projects: {
         Row: {
+          allow_resubmit: boolean | null
           code: string
           created_at: string
+          deadline_at: string | null
           description: string | null
           due_at: string | null
           id: number
           is_active: boolean
+          max_resubmits: number | null
           title: string
         }
         Insert: {
+          allow_resubmit?: boolean | null
           code: string
           created_at?: string
+          deadline_at?: string | null
           description?: string | null
           due_at?: string | null
           id?: number
           is_active?: boolean
+          max_resubmits?: number | null
           title: string
         }
         Update: {
+          allow_resubmit?: boolean | null
           code?: string
           created_at?: string
+          deadline_at?: string | null
           description?: string | null
           due_at?: string | null
           id?: number
           is_active?: boolean
+          max_resubmits?: number | null
           title?: string
         }
         Relationships: []
@@ -500,6 +545,7 @@ export type Database = {
           file3_url: string | null
           grade: number | null
           id: number
+          is_latest: boolean | null
           link1: string | null
           link2: string | null
           link3: string | null
@@ -508,6 +554,7 @@ export type Database = {
           student_id: string
           submitted_at: string
           updated_at: string
+          version: number | null
         }
         Insert: {
           class_id: number
@@ -518,6 +565,7 @@ export type Database = {
           file3_url?: string | null
           grade?: number | null
           id?: number
+          is_latest?: boolean | null
           link1?: string | null
           link2?: string | null
           link3?: string | null
@@ -526,6 +574,7 @@ export type Database = {
           student_id: string
           submitted_at?: string
           updated_at?: string
+          version?: number | null
         }
         Update: {
           class_id?: number
@@ -536,6 +585,7 @@ export type Database = {
           file3_url?: string | null
           grade?: number | null
           id?: number
+          is_latest?: boolean | null
           link1?: string | null
           link2?: string | null
           link3?: string | null
@@ -544,6 +594,7 @@ export type Database = {
           student_id?: string
           submitted_at?: string
           updated_at?: string
+          version?: number | null
         }
         Relationships: [
           {
