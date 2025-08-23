@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import StudentProjects from "./pages/StudentProjects";
 import SubmitProject from "./pages/SubmitProject";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,8 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/profil" element={<Profile />} />
             <Route path="/etudiant/mes-projets" element={<StudentProjects />} />
+            <Route path="/etudiant/soumettre" element={<SubmitProject />} />
+            <Route path="/admin/soumissions" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

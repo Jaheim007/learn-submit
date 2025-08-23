@@ -3,7 +3,7 @@ import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, User, Upload, ArrowRight, GraduationCap, Target, Users } from 'lucide-react';
+import { BookOpen, User, Upload, ArrowRight, GraduationCap, Target, Users, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -235,6 +235,37 @@ export default function Home() {
               </CardHeader>
             </Card>
           </div>
+
+          {/* Admin Access */}
+          {user?.email && ['admin@nys-africa.com', 'formation@nys-africa.com', 'contact@nys-africa.com'].includes(user.email) && (
+            <Card className="card-educational mb-8">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-destructive/10 rounded-lg flex items-center justify-center">
+                      <Settings className="w-5 h-5 text-destructive" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-destructive">
+                        Accès Administrateur
+                      </CardTitle>
+                      <CardDescription>
+                        Gérer les soumissions et étudiants
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => navigate('/admin/soumissions')}
+                    variant="outline"
+                    className="border-destructive text-destructive hover:bg-destructive hover:text-white"
+                  >
+                    Dashboard Admin
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+            </Card>
+          )}
 
           {/* Student Classes */}
           <div className="space-y-6">
