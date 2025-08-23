@@ -58,10 +58,14 @@ export default function AdminClaim() {
         return;
       }
 
-      toast.success('Droits administrateur accordés avec succès !');
-      
-      // Force a refresh to reload auth context and roles
-      window.location.href = '/admin';
+      if (data?.success) {
+        toast.success('Droits administrateur accordés avec succès !');
+        
+        // Force a refresh to reload auth context and roles
+        window.location.href = '/admin';
+      } else {
+        setError('Erreur lors de la création du compte administrateur. Réessayez.');
+      }
       
     } catch (error: any) {
       console.error('Unexpected error:', error);

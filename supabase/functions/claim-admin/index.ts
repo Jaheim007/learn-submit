@@ -91,15 +91,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check if any admin already exists
-    const { data: existingAdmins, error: checkError } = await supabaseClient
-      .from('user_roles')
-      .select('id')
-      .eq('role', 'admin')
+    // Check if an admin already exists (but allow this user if they're already an admin)
+    const { data: existingAdmin, error: adminCheckError } = await supabaseClient
+      .from('admins')
+      .select('user_id')
+      .neq('user_id', user.id)
       .limit(1);
 
-    if (checkError) {
-      console.error('Error checking existing admins:', checkError);
+    if (adminCheckError) {
+      console.error('Error checking existing admins:', adminCheckError);
       return new Response(
         JSON.stringify({ error: 'Failed to check admin state' }),
         { 
@@ -109,7 +109,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (existingAdmins && existingAdmins.length > 0) {
+    // If another admin exists, reject
+    if (existingAdmin && existingAdmin.length > 0) {
       return new Response(
         JSON.stringify({ error: 'Admin already exists' }),
         { 
@@ -119,18 +120,32 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create admin role for the user
-    const { error: insertError } = await supabaseClient
-      .from('user_roles')
+    // Create admin record (this will trigger the role creation via trigger)
+    const { data: adminData, error: insertError } = await supabaseClient
+      .from('admins')
       .insert({
         user_id: user.id,
-        role: 'admin'
-      });
+        full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+        phone: user.user_metadata?.phone || null
+      })
+      .select()
+      .single();
 
     if (insertError) {
-      console.error('Error creating admin role:', insertError);
+      // If constraint violation, user is already an admin
+      if (insertError.code === '23505') {
+        return new Response(
+          JSON.stringify({ success: true, message: 'Admin role already assigned' }),
+          { 
+            status: 200, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+      
+      console.error('Error creating admin:', insertError);
       return new Response(
-        JSON.stringify({ error: 'Failed to create admin role' }),
+        JSON.stringify({ error: 'Failed to create admin' }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -138,10 +153,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Admin role created for user: ${user.email} (${user.id})`);
+    console.log(`Admin created for user: ${user.email} (${user.id})`);
 
     return new Response(
-      JSON.stringify({ ok: true }),
+      JSON.stringify({ success: true, admin: adminData }),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
