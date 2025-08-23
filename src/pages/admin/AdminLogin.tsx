@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -24,10 +24,12 @@ export default function AdminLogin() {
     return null;
   }
 
-  // If authenticated but not admin, redirect to login (no auto-promotion here)
-  if (user && !isAdmin) {
-    setError('Accès non autorisé. Seuls les administrateurs peuvent se connecter.');
-  }
+  // Handle redirects and error states in useEffect to prevent infinite re-renders
+  useEffect(() => {
+    if (user && !isAdmin) {
+      setError('Accès non autorisé. Seuls les administrateurs peuvent se connecter.');
+    }
+  }, [user, isAdmin]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
