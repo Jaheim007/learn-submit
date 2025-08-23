@@ -64,9 +64,34 @@ export default function StudentProjects() {
 
   const fetchStudentClasses = async () => {
     try {
-      const { data, error } = await supabase
+      if (!user?.id) {
+        throw new Error('Utilisateur non connecté');
+      }
+
+      // First get the student record
+      const { data: studentData, error: studentError } = await supabase
+        .from('students')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (studentError) {
+        console.error('Error fetching student:', studentError);
+        throw new Error('Profil étudiant non trouvé');
+      }
+
+      if (!studentData) {
+        console.log('No student profile found, showing empty state');
+        setStudentClasses([]);
+        setLoading(false);
+        return;
+      }
+
+      // Then get enrollments with class information
+      const { data: enrollmentsData, error: enrollmentsError } = await supabase
         .from('enrollments')
         .select(`
+          id,
           class_id,
           classes!inner (
             id,
@@ -74,19 +99,37 @@ export default function StudentProjects() {
             title
           )
         `)
-        .eq('students.user_id', user?.id);
+        .eq('student_id', studentData.id);
 
-      if (error) throw error;
+      if (enrollmentsError) {
+        console.error('Error fetching enrollments:', enrollmentsError);
+        throw new Error('Impossible de récupérer vos inscriptions');
+      }
 
-      const classes = data?.map(enrollment => enrollment.classes).filter(Boolean) || [];
-      setStudentClasses(classes as StudentClass[]);
+      console.log('Enrollments data:', enrollmentsData);
+
+      const classesData = enrollmentsData?.map(enrollment => enrollment.classes).filter(Boolean) || [];
+
+      console.log('Student classes:', classesData);
+      setStudentClasses(classesData as StudentClass[]);
+      
+      // If there are classes, set the first one as selected by default
+      if (classesData.length > 0 && !selectedClassId) {
+        setSelectedClassId(classesData[0].id);
+      }
+      
     } catch (error) {
       console.error('Error fetching student classes:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger vos classes",
-        variant: "destructive"
-      });
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de récupérer vos projets, veuillez réessayer plus tard';
+      
+      // Only show toast for real errors, not when user has no classes
+      if (error instanceof Error && error.message !== 'Profil étudiant non trouvé') {
+        toast({
+          title: "Erreur",
+          description: errorMessage,
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -282,7 +325,7 @@ export default function StudentProjects() {
               </div>
             )}
 
-            {projects.length === 0 ? (
+            {studentClasses.length === 0 ? (
               <Card className="card-educational">
                 <CardContent className="py-12 text-center">
                   <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -290,9 +333,21 @@ export default function StudentProjects() {
                     Aucun projet disponible
                   </h3>
                   <p className="text-muted-foreground">
+                    Vous n'avez pas encore de projets assignés.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : projects.length === 0 ? (
+              <Card className="card-educational">
+                <CardContent className="py-12 text-center">
+                  <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    Aucun projet dans cette classe
+                  </h3>
+                  <p className="text-muted-foreground">
                     {selectedClassId 
                       ? "Aucun projet n'est assigné à cette classe pour le moment."
-                      : "Vous n'avez pas encore de projets assignés."
+                      : "Aucun projet n'est encore disponible dans vos classes."
                     }
                   </p>
                 </CardContent>
