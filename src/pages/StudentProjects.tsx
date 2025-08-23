@@ -8,7 +8,7 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { BookOpen, Calendar, Send, Filter, Clock } from 'lucide-react';
+import { BookOpen, Calendar, Send, Filter, Clock, RefreshCw, AlertTriangle } from 'lucide-react';
 
 interface StudentClass {
   id: number;
@@ -29,22 +29,32 @@ interface Project {
   } | null;
 }
 
+interface ApiState {
+  data: { classes: StudentClass[]; projects: Project[] };
+  loading: boolean;
+  error: string | null;
+  retryCount: number;
+}
+
 export default function StudentProjects() {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   
-  const [studentClasses, setStudentClasses] = useState<StudentClass[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [apiState, setApiState] = useState<ApiState>({
+    data: { classes: [], projects: [] },
+    loading: true,
+    error: null,
+    retryCount: 0
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
     } else if (user) {
-      fetchStudentClasses();
+      fetchStudentData();
     }
   }, [user, authLoading, navigate]);
 
@@ -57,15 +67,21 @@ export default function StudentProjects() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (studentClasses.length > 0) {
+    if (apiState.data.classes.length > 0) {
       fetchProjects();
     }
-  }, [selectedClassId, studentClasses]);
+  }, [selectedClassId, apiState.data.classes]);
 
-  const fetchStudentClasses = async () => {
+  const fetchStudentData = async (isRetry = false) => {
     try {
+      if (!isRetry) {
+        setApiState(prev => ({ ...prev, loading: true, error: null }));
+      }
+
+      console.log('🔍 Fetching student data for user:', user?.id);
+      
       if (!user?.id) {
-        throw new Error('Utilisateur non connecté');
+        throw new Error('Session expirée, veuillez vous reconnecter');
       }
 
       // First get the student record
@@ -76,16 +92,22 @@ export default function StudentProjects() {
         .maybeSingle();
 
       if (studentError) {
-        console.error('Error fetching student:', studentError);
+        console.error('❌ Error fetching student:', studentError);
         throw new Error('Profil étudiant non trouvé');
       }
 
       if (!studentData) {
-        console.log('No student profile found, showing empty state');
-        setStudentClasses([]);
-        setLoading(false);
+        console.log('ℹ️ No student profile found');
+        setApiState(prev => ({
+          ...prev,
+          data: { classes: [], projects: [] },
+          loading: false,
+          error: null
+        }));
         return;
       }
+
+      console.log('✅ Student found:', studentData.id);
 
       // Then get enrollments with class information
       const { data: enrollmentsData, error: enrollmentsError } = await supabase
@@ -102,16 +124,23 @@ export default function StudentProjects() {
         .eq('student_id', studentData.id);
 
       if (enrollmentsError) {
-        console.error('Error fetching enrollments:', enrollmentsError);
+        console.error('❌ Error fetching enrollments:', enrollmentsError);
         throw new Error('Impossible de récupérer vos inscriptions');
       }
 
-      console.log('Enrollments data:', enrollmentsData);
+      console.log('📚 Enrollments data:', enrollmentsData);
 
       const classesData = enrollmentsData?.map(enrollment => enrollment.classes).filter(Boolean) || [];
 
-      console.log('Student classes:', classesData);
-      setStudentClasses(classesData as StudentClass[]);
+      console.log('🎓 Student classes:', classesData);
+      
+      setApiState(prev => ({
+        ...prev,
+        data: { classes: classesData as StudentClass[], projects: [] },
+        loading: false,
+        error: null,
+        retryCount: 0
+      }));
       
       // If there are classes, set the first one as selected by default
       if (classesData.length > 0 && !selectedClassId) {
@@ -119,39 +148,52 @@ export default function StudentProjects() {
       }
       
     } catch (error) {
-      console.error('Error fetching student classes:', error);
+      console.error('💥 Error fetching student data:', error);
       const errorMessage = error instanceof Error ? error.message : 'Impossible de récupérer vos projets, veuillez réessayer plus tard';
       
-      // Only show toast for real errors, not when user has no classes
-      if (error instanceof Error && error.message !== 'Profil étudiant non trouvé') {
+      setApiState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+        retryCount: prev.retryCount + 1
+      }));
+
+      // Only show toast for real server errors (not empty data cases)
+      if (error instanceof Error && !error.message.includes('non trouvé')) {
         toast({
-          title: "Erreur",
+          title: "Erreur de connexion",
           description: errorMessage,
           variant: "destructive"
         });
       }
-    } finally {
-      setLoading(false);
     }
   };
 
   const fetchProjects = async () => {
     try {
-      setLoading(true);
+      console.log('📝 Fetching projects...');
       
       // Get student ID first
       const { data: studentData } = await supabase
         .from('students')
         .select('id')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       if (!studentData) return;
 
       // Build query based on class filter
-      let classIds = studentClasses.map(c => c.id);
+      let classIds = apiState.data.classes.map(c => c.id);
       if (selectedClassId) {
         classIds = [selectedClassId];
+      }
+
+      if (classIds.length === 0) {
+        setApiState(prev => ({
+          ...prev,
+          data: { ...prev.data, projects: [] }
+        }));
+        return;
       }
 
       // Get projects for the selected classes
@@ -171,7 +213,10 @@ export default function StudentProjects() {
         .in('class_id', classIds)
         .eq('projects.is_active', true);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error fetching projects:', error);
+        throw error;
+      }
 
       // Get unique projects
       const uniqueProjects = classProjects?.reduce((acc, item) => {
@@ -194,7 +239,7 @@ export default function StudentProjects() {
             .in('class_id', classIds)
             .order('submitted_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
 
           return {
             ...project,
@@ -203,17 +248,24 @@ export default function StudentProjects() {
         })
       );
 
-      setProjects(projectsWithSubmissions);
+      console.log('📋 Projects with submissions:', projectsWithSubmissions);
+      
+      setApiState(prev => ({
+        ...prev,
+        data: { ...prev.data, projects: projectsWithSubmissions }
+      }));
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      console.error('💥 Error fetching projects:', error);
       toast({
         title: "Erreur",
         description: "Impossible de charger les projets",
         variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
+  };
+
+  const handleRetry = () => {
+    fetchStudentData(true);
   };
 
   const handleClassFilter = (classId: number | null) => {
@@ -230,8 +282,8 @@ export default function StudentProjects() {
   const handleSubmitProject = (projectId: number) => {
     if (selectedClassId) {
       navigate(`/etudiant/soumettre?project_id=${projectId}&class_id=${selectedClassId}`);
-    } else if (studentClasses.length === 1) {
-      navigate(`/etudiant/soumettre?project_id=${projectId}&class_id=${studentClasses[0].id}`);
+    } else if (apiState.data.classes.length === 1) {
+      navigate(`/etudiant/soumettre?project_id=${projectId}&class_id=${apiState.data.classes[0].id}`);
     } else {
       toast({
         title: "Sélectionnez une classe",
@@ -250,15 +302,67 @@ export default function StudentProjects() {
     });
   };
 
-  if (authLoading || loading) {
+  // Loading state
+  if (authLoading || apiState.loading) {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Chargement de vos projets...</p>
+          </div>
         </div>
       </Layout>
     );
   }
+
+  // Error state with retry option
+  if (apiState.error && apiState.data.classes.length === 0) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center max-w-md mx-auto">
+            <h1 className="text-3xl font-bold mb-4">Mes Projets</h1>
+            <p className="text-muted-foreground mb-8">Consultez et soumettez vos projets par classe</p>
+            
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-yellow-100 rounded-full">
+                <AlertTriangle className="w-6 h-6 text-yellow-600" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2 text-yellow-800">Service temporairement indisponible</h3>
+              <p className="text-yellow-700 mb-4">{apiState.error}</p>
+              <div className="space-y-2">
+                <Button 
+                  onClick={handleRetry} 
+                  disabled={apiState.loading}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                >
+                  {apiState.loading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Reconnexion...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Réessayer
+                    </>
+                  )}
+                </Button>
+                {apiState.retryCount > 2 && (
+                  <p className="text-xs text-yellow-600 mt-2">
+                    Tentative {apiState.retryCount}/3 - Contactez le support si le problème persiste
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const { classes, projects } = apiState.data;
 
   return (
     <Layout>
@@ -284,7 +388,7 @@ export default function StudentProjects() {
 
         <div className="max-w-content mx-auto p-4 md:p-6 lg:p-8">
           {/* Class Filters */}
-          {studentClasses.length > 1 && (
+          {classes.length > 1 && (
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-4">
                 <Filter className="w-5 h-5 text-muted-foreground" />
@@ -301,7 +405,7 @@ export default function StudentProjects() {
                 >
                   Toutes les classes
                 </Button>
-                {studentClasses.map((studentClass) => (
+                {classes.map((studentClass) => (
                   <Button
                     key={studentClass.id}
                     variant={selectedClassId === studentClass.id ? "default" : "outline"}
@@ -320,12 +424,13 @@ export default function StudentProjects() {
             {selectedClassId && (
               <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
                 <p className="text-sm text-primary font-medium">
-                  Projets pour : {studentClasses.find(c => c.id === selectedClassId)?.title}
+                  Projets pour : {classes.find(c => c.id === selectedClassId)?.title}
                 </p>
               </div>
             )}
 
-            {studentClasses.length === 0 ? (
+            {/* Empty States */}
+            {classes.length === 0 ? (
               <Card className="card-educational">
                 <CardContent className="py-12 text-center">
                   <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -333,7 +438,7 @@ export default function StudentProjects() {
                     Aucun projet disponible
                   </h3>
                   <p className="text-muted-foreground">
-                    Vous n'avez pas encore de projets assignés.
+                    Vous n'êtes inscrit à aucune classe pour le moment.
                   </p>
                 </CardContent>
               </Card>
