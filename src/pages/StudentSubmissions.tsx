@@ -493,50 +493,12 @@ export default function StudentSubmissions() {
                         </div>
                       )}
 
-                      {/* Actions */}
-                      {canEdit && (
-                        <div className="flex items-center gap-2 pt-4 border-t border-border">
-                          <Button
-                            onClick={() => handleEdit(submission)}
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center gap-2"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                            Modifier
-                          </Button>
-                          
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex items-center gap-2 text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                                Supprimer
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Êtes-vous sûr de vouloir supprimer cette soumission ? Cette action est irréversible.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDelete(submission.id)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                >
-                                  Supprimer
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      )}
+                      {/* Locked status badge - submissions are locked after creation */}
+                      <div className="pt-4 border-t border-border">
+                        <Badge variant="outline" className="text-xs">
+                          🔒 Verrouillé après envoi
+                        </Badge>
+                      </div>
                     </CardContent>
                   </Card>
                 );

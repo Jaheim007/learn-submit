@@ -357,11 +357,18 @@ export default function AdminSubmissions() {
 
   const updateSubmission = async (submissionId: string, updates: { status?: string; grade?: number; feedback?: string }) => {
     try {
-      const { error } = await supabase.functions.invoke('update-submission', {
+      console.log('Updating submission:', submissionId, updates);
+      
+      const { data, error } = await supabase.functions.invoke('update-submission', {
         body: { submissionId, ...updates }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Update error:', error);
+        throw new Error(error.message || 'Erreur lors de la mise à jour');
+      }
+
+      console.log('Update response:', data);
 
       setSubmissions(prev =>
         prev.map(sub =>
@@ -372,9 +379,9 @@ export default function AdminSubmissions() {
       );
 
       toast.success('Soumission mise à jour avec succès');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating submission:', error);
-      toast.error('Erreur lors de la mise à jour de la soumission');
+      toast.error(error.message || 'Erreur lors de la mise à jour de la soumission');
     }
   };
 
