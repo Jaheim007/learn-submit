@@ -201,6 +201,13 @@ export type Database = {
             foreignKeyName: "enrollments_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
+            referencedRelation: "students_v"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrollments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "v_students_admin"
             referencedColumns: ["id"]
           },
@@ -718,6 +725,13 @@ export type Database = {
             foreignKeyName: "submissions_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
+            referencedRelation: "students_v"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "v_students_admin"
             referencedColumns: ["id"]
           },
@@ -873,7 +887,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "class_enrollments_class_id_fkey"
+            foreignKeyName: "students_primary_class_id_fkey"
             columns: ["class_id"]
             isOneToOne: false
             referencedRelation: "classes"
