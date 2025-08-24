@@ -895,7 +895,6 @@ export type Database = {
           id: string | null
           is_active: boolean | null
           phone: string | null
-          submissions_count: number | null
           telegram: string | null
           user_id: string | null
           whatsapp: string | null
@@ -908,7 +907,6 @@ export type Database = {
           id?: string | null
           is_active?: boolean | null
           phone?: string | null
-          submissions_count?: never
           telegram?: string | null
           user_id?: string | null
           whatsapp?: string | null
@@ -921,7 +919,6 @@ export type Database = {
           id?: string | null
           is_active?: boolean | null
           phone?: string | null
-          submissions_count?: never
           telegram?: string | null
           user_id?: string | null
           whatsapp?: string | null
