@@ -8,6 +8,8 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ConditionalClassSelectionProvider } from "@/components/ConditionalClassSelectionProvider";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
+import StudentLogin from "./pages/StudentLogin";
+import StudentRegister from "./pages/StudentRegister";
 import Profile from "./pages/Profile";
 import StudentProjects from "./pages/StudentProjects";
 import SubmitProject from "./pages/SubmitProject";
@@ -44,6 +46,12 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
+              
+              {/* Student auth routes */}
+              <Route path="/etudiant/login" element={<StudentLogin />} />
+              <Route path="/etudiant/register" element={<StudentRegister />} />
+              
+              {/* Student protected routes */}
               <Route path="/profil" element={<StudentGuard><Profile /></StudentGuard>} />
               <Route path="/etudiant/mes-projets" element={<StudentGuard><StudentProjects /></StudentGuard>} />
               <Route path="/etudiant/soumettre" element={<StudentGuard><SubmitProject /></StudentGuard>} />

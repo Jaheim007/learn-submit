@@ -8,7 +8,6 @@ interface AuthContextType {
   loading: boolean;
   authLoading: boolean;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
-  signUpWithClass: (email: string, password: string, classId: number) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
 }
@@ -31,36 +30,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user && event === 'SIGNED_IN') {
-          // Defer student profile creation to avoid blocking login
-          setTimeout(async () => {
-            // Only create student profile for users accessing student routes
-            const currentPath = window.location.pathname;
-            const isStudentRoute = currentPath.startsWith('/etudiant') || currentPath === '/auth' || currentPath === '/';
-            const isAdminRoute = currentPath.startsWith('/admin');
-            
-            // Skip profile creation on admin routes entirely
-            if (!isAdminRoute && isStudentRoute) {
-              // Check if user has admin/supervisor roles before creating student profile
-              try {
-                const { data: userRoles } = await supabase
-                  .from('user_roles')
-                  .select('role')
-                  .eq('user_id', session.user.id);
-                
-                const hasAdminRole = userRoles?.some(r => r.role === 'admin');
-                const hasSupervisorRole = userRoles?.some(r => r.role === 'supervisor');
-                
-                // Only create student profile if not admin/supervisor
-                if (!hasAdminRole && !hasSupervisorRole) {
-                  await createStudentProfileIfNeeded(session.user);
-                }
-              } catch (error) {
-                console.error('Error checking user roles for student profile creation:', error);
-              }
-            }
-          }, 100);
-        }
+        // Remove auto-creation of student profiles
+        // Students must explicitly register through the registration flow
         
         setLoading(false);
         setAuthLoading(false);
@@ -78,29 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const createStudentProfileIfNeeded = async (user: User) => {
-    try {
-      // Check if student profile exists
-      const { data: student } = await supabase
-        .from('students')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (!student) {
-        // Create student profile
-        await supabase
-          .from('students')
-          .insert({
-            user_id: user.id,
-            email: user.email,
-            full_name: user.user_metadata?.full_name || ''
-          });
-      }
-    } catch (error) {
-      console.error('Error creating student profile:', error);
-    }
-  };
+  // Removed auto-creation logic - students must register explicitly
 
   const signUp = async (email: string, password: string) => {
     const redirectUrl = `${window.location.origin}/`;
@@ -115,53 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
-  const signUpWithClass = async (email: string, password: string, classId: number) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl
-      }
-    });
-
-    if (error) return { error };
-    
-    // If user was created successfully, create student profile with class
-    if (data.user) {
-      try {
-        // Create student profile with primary_class_id
-        const { data: studentData, error: studentError } = await supabase
-          .from('students')
-          .insert({
-            user_id: data.user.id,
-            email: data.user.email,
-            full_name: data.user.user_metadata?.full_name || '',
-            primary_class_id: classId
-          })
-          .select('id')
-          .single();
-
-        if (studentError) throw studentError;
-
-        // Create enrollment
-        const { error: enrollmentError } = await supabase
-          .from('enrollments')
-          .insert({
-            student_id: studentData.id,
-            class_id: classId
-          });
-
-        if (enrollmentError) throw enrollmentError;
-      } catch (profileError) {
-        console.error('Error creating student profile:', profileError);
-        return { error: profileError };
-      }
-    }
-
-    return { error: null };
-  };
+  // Removed signUpWithClass - now handled in StudentRegister component
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
@@ -182,7 +85,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     authLoading,
     signUp,
-    signUpWithClass,
     signIn,
     signOut
   };

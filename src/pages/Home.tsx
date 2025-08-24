@@ -45,7 +45,7 @@ export default function Home() {
         navigate('/etudiant/mes-projets');
       }
     } else {
-      navigate('/auth');
+      navigate('/etudiant/login');
     }
   };
 
@@ -129,7 +129,7 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
                   size="lg"
-                  onClick={() => navigate('/auth')}
+                  onClick={() => navigate('/etudiant/login')}
                   className="btn-primary text-lg px-8 py-3"
                 >
                   Se connecter
@@ -139,7 +139,7 @@ export default function Home() {
                 <Button 
                   size="lg"
                   variant="outline"
-                  onClick={() => navigate('/auth')}
+                  onClick={() => navigate('/etudiant/register')}
                   className="btn-outline text-lg px-8 py-3 border-white/30 text-white hover:bg-white hover:text-primary"
                 >
                   Créer un compte

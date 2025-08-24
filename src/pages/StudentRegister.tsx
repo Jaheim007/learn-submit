@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Layout } from '@/components/Layout';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, BookOpen, Users, Upload, AlertCircle } from 'lucide-react';
+import { Loader2, Upload, AlertCircle, BookOpen, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Class {
@@ -18,24 +18,22 @@ interface Class {
   title: string;
 }
 
-export default function Auth() {
-  const [isSignUp, setIsSignUp] = useState(false);
+export default function StudentRegister() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [selectedClassId, setSelectedClassId] = useState<string>('');
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(false);
   
-  const { signUp, signIn, user } = useAuth();
+  const { signUp, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isSignUp) {
-      fetchClasses();
-    }
-  }, [isSignUp]);
+    fetchClasses();
+  }, []);
 
   const fetchClasses = async () => {
     try {
@@ -55,14 +53,14 @@ export default function Auth() {
 
   // Redirect if already authenticated
   if (user) {
-    navigate('/', { replace: true });
+    navigate('/etudiant/mes-projets', { replace: true });
     return null;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isSignUp && password !== confirmPassword) {
+    if (password !== confirmPassword) {
       toast({
         title: "Erreur",
         description: "Les mots de passe ne correspondent pas",
@@ -71,7 +69,7 @@ export default function Auth() {
       return;
     }
 
-    if (isSignUp && !selectedClassId) {
+    if (!selectedClassId) {
       toast({
         title: "Erreur",
         description: "Veuillez sélectionner votre groupe de classe",
@@ -80,45 +78,105 @@ export default function Auth() {
       return;
     }
 
+    if (!fullName.trim()) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez saisir votre nom complet",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { error } = isSignUp 
-        ? await signUp(email, password)
-        : await signIn(email, password);
+      // Sign up with metadata
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/etudiant/login`,
+          data: {
+            full_name: fullName.trim()
+          }
+        }
+      });
 
       if (error) {
         let errorMessage = "Une erreur s'est produite";
         
-        if (error.message.includes('Invalid login credentials')) {
-          errorMessage = "Identifiants invalides";
-        } else if (error.message.includes('Email already registered')) {
+        if (error.message.includes('User already registered')) {
           errorMessage = "Cette adresse email est déjà utilisée";
         } else if (error.message.includes('Password should be at least')) {
           errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
+        } else if (error.message.includes('Invalid email')) {
+          errorMessage = "Adresse email invalide";
         }
 
         toast({
-          title: "Erreur de connexion",
+          title: "Erreur d'inscription",
           description: errorMessage,
           variant: "destructive"
         });
-      } else {
-        if (isSignUp) {
+        return;
+      }
+
+      // If user was created and we have a session, create the student profile
+      if (data.user && data.session) {
+        try {
+          // Create student profile
+          const { error: studentError } = await supabase
+            .from('students')
+            .insert({
+              user_id: data.user.id,
+              email: data.user.email,
+              full_name: fullName.trim(),
+              primary_class_id: parseInt(selectedClassId)
+            });
+
+          if (studentError) throw studentError;
+
+          // Create enrollment
+          const { error: enrollmentError } = await supabase
+            .from('enrollments')
+            .insert({
+              student_id: data.user.id, // Will be replaced by student.id from trigger
+              class_id: parseInt(selectedClassId)
+            });
+
+          if (enrollmentError) {
+            console.warn('Enrollment creation failed, but student profile was created:', enrollmentError);
+          }
+
           toast({
-            title: "Compte créé !",
-            description: "Vérifiez votre email pour confirmer votre compte",
+            title: "Compte créé avec succès !",
+            description: "Bienvenue ! Redirection en cours...",
           });
-        } else {
+
+          // Redirect to student dashboard
+          navigate('/etudiant/mes-projets', { replace: true });
+        } catch (profileError) {
+          console.error('Error creating student profile:', profileError);
+          
+          // Clean up auth user if profile creation fails
+          await supabase.auth.signOut();
+          
           toast({
-            title: "Connexion réussie !",
-            description: "Redirection en cours...",
+            title: "Erreur de création du profil",
+            description: "Veuillez réessayer ou contacter l'administration",
+            variant: "destructive"
           });
-          // Navigate to home
-          navigate('/', { replace: true });
         }
+      } else {
+        // Email confirmation required
+        toast({
+          title: "Inscription réussie !",
+          description: "Vérifiez votre email pour confirmer votre compte, puis connectez-vous",
+        });
+        navigate('/etudiant/login');
       }
     } catch (error) {
+      console.error('Registration error:', error);
       toast({
         title: "Erreur",
         description: "Une erreur inattendue s'est produite",
@@ -142,10 +200,10 @@ export default function Auth() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white mb-2">
-                NYS Submissions Portal
+                Inscription Étudiant
               </h1>
               <p className="text-white/80 text-lg">
-                Plateforme de soumission de projets étudiants
+                Rejoignez votre promotion NYS-Africa
               </p>
             </div>
             
@@ -166,22 +224,32 @@ export default function Auth() {
             </div>
           </div>
 
-          {/* Auth Form */}
+          {/* Registration Form */}
           <Card className="shadow-custom-xl border-0 bg-white/95 backdrop-blur-sm">
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl text-center">
-                {isSignUp ? 'Créer un compte' : 'Se connecter'}
+                Créer un compte
               </CardTitle>
               <CardDescription className="text-center">
-                {isSignUp 
-                  ? 'Rejoignez votre promotion et commencez à soumettre vos projets'
-                  : 'Accédez à vos projets et soumissions'
-                }
+                Rejoignez votre promotion et commencez à soumettre vos projets
               </CardDescription>
             </CardHeader>
             
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Nom complet</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="Votre nom complet"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                    className="input-educational"
+                  />
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="email">Adresse email</Label>
                   <Input
@@ -204,48 +272,45 @@ export default function Auth() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    minLength={6}
                     className="input-educational"
                   />
                 </div>
                 
-                {isSignUp && (
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      className="input-educational"
-                    />
-                  </div>
-                )}
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className="input-educational"
+                  />
+                </div>
 
-                {isSignUp && (
-                  <div className="space-y-2">
-                    <Label htmlFor="class-select">Choisissez votre groupe de classe</Label>
-                    <Select value={selectedClassId} onValueChange={setSelectedClassId}>
-                      <SelectTrigger className="input-educational">
-                        <SelectValue placeholder="Sélectionnez votre groupe..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {classes.map((cls) => (
-                          <SelectItem key={cls.id} value={cls.id.toString()}>
-                            {cls.title}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Alert>
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        Sélectionnez votre groupe. Ce choix est définitif.
-                      </AlertDescription>
-                    </Alert>
-                  </div>
-                )}
+                <div className="space-y-2">
+                  <Label htmlFor="class-select">Choisissez votre groupe de classe</Label>
+                  <Select value={selectedClassId} onValueChange={setSelectedClassId}>
+                    <SelectTrigger className="input-educational">
+                      <SelectValue placeholder="Sélectionnez votre groupe..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {classes.map((cls) => (
+                        <SelectItem key={cls.id} value={cls.id.toString()}>
+                          {cls.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Sélectionnez votre groupe. Ce choix est définitif après l'inscription.
+                    </AlertDescription>
+                  </Alert>
+                </div>
                 
                 <Button
                   type="submit" 
@@ -253,21 +318,17 @@ export default function Auth() {
                   disabled={loading}
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {isSignUp ? 'Créer mon compte' : 'Se connecter'}
+                  Créer mon compte
                 </Button>
               </form>
               
               <div className="mt-6 text-center">
-                <button
-                  type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
+                <Link
+                  to="/etudiant/login"
                   className="text-sm text-primary hover:text-primary-hover transition-smooth"
                 >
-                  {isSignUp 
-                    ? 'Déjà un compte ? Se connecter' 
-                    : 'Pas de compte ? S\'inscrire'
-                  }
-                </button>
+                  Déjà un compte ? Se connecter
+                </Link>
               </div>
             </CardContent>
           </Card>
