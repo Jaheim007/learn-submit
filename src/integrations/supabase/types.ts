@@ -576,6 +576,7 @@ export type Database = {
           link1: string | null
           link2: string | null
           link3: string | null
+          locked_at: string | null
           project_id: number
           status: Database["public"]["Enums"]["submission_status"]
           student_id: string
@@ -596,6 +597,7 @@ export type Database = {
           link1?: string | null
           link2?: string | null
           link3?: string | null
+          locked_at?: string | null
           project_id: number
           status?: Database["public"]["Enums"]["submission_status"]
           student_id: string
@@ -616,6 +618,7 @@ export type Database = {
           link1?: string | null
           link2?: string | null
           link3?: string | null
+          locked_at?: string | null
           project_id?: number
           status?: Database["public"]["Enums"]["submission_status"]
           student_id?: string
