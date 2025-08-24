@@ -50,24 +50,29 @@ export default function StudentLogin() {
           variant: "destructive"
         });
       } else {
-        // Check if student profile exists
-        const { data: student, error: studentError } = await supabase
-          .from('students')
-          .select('id')
-          .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
-          .single();
+        // Check if student profile exists using the new schema
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        
+        if (currentUser) {
+          const { data: roleData, error: roleError } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', currentUser.id)
+            .eq('role', 'student')
+            .single();
 
-        if (studentError || !student) {
-          // Student profile not found - sign out and show error
-          await supabase.auth.signOut();
-          setStudentNotFound(true);
-        } else {
-          // Success - redirect to dashboard
-          toast({
-            title: "Connexion réussie !",
-            description: "Redirection en cours...",
-          });
-          navigate('/etudiant/mes-projets', { replace: true });
+          if (roleError || !roleData) {
+            // Student role not found - sign out and show error
+            await supabase.auth.signOut();
+            setStudentNotFound(true);
+          } else {
+            // Success - redirect to dashboard
+            toast({
+              title: "Connexion réussie !",
+              description: "Redirection en cours...",
+            });
+            navigate('/etudiant/mes-projets', { replace: true });
+          }
         }
       }
     } catch (error) {

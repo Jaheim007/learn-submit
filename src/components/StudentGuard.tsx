@@ -17,19 +17,20 @@ export default function StudentGuard({ children }: StudentGuardProps) {
 
     const checkStudentProfile = async () => {
       try {
-        const { data: student, error } = await supabase
-          .from('students')
-          .select('id')
+        const { data: roleData, error } = await supabase
+          .from('user_roles')
+          .select('role')
           .eq('user_id', user.id)
+          .eq('role', 'student')
           .single();
 
-        if (error || !student) {
+        if (error || !roleData) {
           setStudentCheck('not_found');
         } else {
           setStudentCheck('found');
         }
       } catch (error) {
-        console.error('Error checking student profile:', error);
+        console.error('Error checking student role:', error);
         setStudentCheck('not_found');
       }
     };

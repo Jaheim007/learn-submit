@@ -38,6 +38,32 @@ export type Database = {
         }
         Relationships: []
       }
+      class_enrollments: {
+        Row: {
+          class_id: number
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          class_id: number
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          class_id?: number
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_enrollments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_instructors: {
         Row: {
           class_id: number
@@ -350,6 +376,33 @@ export type Database = {
           type?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -760,30 +813,65 @@ export type Database = {
       user_roles: {
         Row: {
           created_at: string
-          id: string
-          role: Database["public"]["Enums"]["user_role"]
-          updated_at: string
+          role: string
           user_id: string
         }
         Insert: {
           created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["user_role"]
-          updated_at?: string
+          role: string
           user_id: string
         }
         Update: {
           created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["user_role"]
-          updated_at?: string
+          role?: string
           user_id?: string
         }
         Relationships: []
       }
     }
     Views: {
-      [_ in never]: never
+      admins_v: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string | null
+          phone: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
+      students_v: {
+        Row: {
+          class_id: number | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string | null
+          phone: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_enrollments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supervisors_v: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string | null
+          phone: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       is_admin: {
