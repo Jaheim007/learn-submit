@@ -295,15 +295,22 @@ export default function AdminSubmissions() {
             grade,
             feedback,
             version,
-            links,
-            files,
+            link1,
+            link2,
+            link3,
+            file1_url,
+            file2_url,
+            file3_url,
             description,
             is_latest,
+            student_id,
+            class_id,
+            project_id,
             students!inner(id, full_name, email),
             projects!inner(id, title),
             classes!inner(id, code, title)
           `)
-          .eq('is_latest', latestOnly ? true : undefined)
+          .eq('is_latest', latestOnly)
           .order('submitted_at', { ascending: false }),
         
         supabase
@@ -330,8 +337,8 @@ export default function AdminSubmissions() {
           grade: sub.grade,
           feedback: sub.feedback,
           version: sub.version,
-          links: sub.links || [],
-          files: sub.files || [],
+          links: [sub.link1, sub.link2, sub.link3].filter(Boolean),
+          files: [sub.file1_url, sub.file2_url, sub.file3_url].filter(Boolean),
           description: sub.description,
           student: sub.students,
           project: sub.projects,
