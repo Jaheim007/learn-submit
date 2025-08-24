@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const corsHeaders = {
@@ -6,225 +5,138 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-serve(async (req) => {
+// Validation schema for the request body
+const validateUpdatePayload = (body: any) => {
+  const errors: string[] = []
+  
+  if (!body.submissionId || typeof body.submissionId !== 'string') {
+    errors.push('submissionId is required and must be a string')
+  }
+  
+  if (body.status && !['received', 'in_review', 'approved', 'rejected'].includes(body.status)) {
+    errors.push('status must be one of: received, in_review, approved, rejected')
+  }
+  
+  if (body.grade !== undefined && body.grade !== null) {
+    if (typeof body.grade !== 'number' || body.grade < 0 || body.grade > 20) {
+      errors.push('grade must be a number between 0 and 20')
+    }
+  }
+  
+  if (body.feedback && typeof body.feedback !== 'string') {
+    errors.push('feedback must be a string')
+  }
+  
+  return errors
+}
+
+Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders })
   }
-
+  
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
-    )
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!
+    const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!
+    const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 
-    // Get the authenticated user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseClient.auth.getUser()
-
-    if (userError || !user) {
-      console.error('Authentication error:', userError)
+    // 1) Caller identity (uses caller's JWT from Authorization header)
+    const anon = createClient(SUPABASE_URL, ANON_KEY, {
+      global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
+    })
+    
+    const { data: auth, error: authErr } = await anon.auth.getUser()
+    if (authErr || !auth?.user) {
+      console.error('Authentication failed:', authErr)
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
+        JSON.stringify({ error: "unauthorized" }), 
         { 
-          status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
         }
       )
     }
 
-    // Check if user is admin
-    const { data: userRole, error: roleError } = await supabaseClient
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('role', 'admin')
-      .maybeSingle()
-
-    if (roleError || !userRole) {
-      console.error('Admin check error:', roleError)
+    // 2) Admin check
+    const { data: isAdmin, error: adminErr } = await anon.rpc("is_admin")
+    if (adminErr) {
+      console.error("is_admin RPC error", adminErr)
       return new Response(
-        JSON.stringify({ error: 'Forbidden: Admin access required' }),
+        JSON.stringify({ error: "admin_check_failed" }), 
         { 
-          status: 403, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      )
+    }
+    if (!isAdmin) {
+      console.error("User is not admin:", auth.user.id)
+      return new Response(
+        JSON.stringify({ error: "forbidden" }), 
+        { 
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
         }
       )
     }
 
-    if (req.method !== 'PATCH') {
-      return new Response(
-        JSON.stringify({ error: 'Method not allowed' }),
-        { 
-          status: 405, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
-
-    // Parse request body
+    // 3) Validate body
     const body = await req.json()
-    const { submissionId, status, grade, feedback } = body
-    
-    if (!submissionId || isNaN(Number(submissionId))) {
+    const validationErrors = validateUpdatePayload(body)
+    if (validationErrors.length > 0) {
       return new Response(
-        JSON.stringify({ error: 'Invalid submission ID' }),
+        JSON.stringify({ error: "validation_failed", details: validationErrors }), 
         { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
         }
       )
     }
 
+    // Build partial update
+    const update: Record<string, unknown> = {}
+    if (typeof body.status !== "undefined") update.status = body.status
+    if (typeof body.grade !== "undefined") update.grade = body.grade  // number or null
+    if (typeof body.feedback !== "undefined") update.feedback = body.feedback
 
-    // Validate inputs
-    const validStatuses = ['Reçu', 'En révision', 'Validé', 'Refusé']
-    
-    const updateData: any = {}
-    
-    if (status !== undefined) {
-      if (!validStatuses.includes(status)) {
-        return new Response(
-          JSON.stringify({ error: 'Invalid status value' }),
-          { 
-            status: 400, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        )
-      }
-      updateData.status = status
-    }
+    console.log('Updating submission:', body.submissionId, 'with:', update)
 
-    if (grade !== undefined) {
-      if (grade !== null && (typeof grade !== 'number' || grade < 0 || grade > 20)) {
-        return new Response(
-          JSON.stringify({ error: 'Grade must be between 0 and 20' }),
-          { 
-            status: 400, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        )
-      }
-      updateData.grade = grade
-    }
+    // 4) Service-role client for the write (bypasses RLS after admin check)
+    const service = createClient(SUPABASE_URL, SERVICE_KEY)
+    const { error: updErr } = await service
+      .from("submissions")
+      .update(update)
+      .eq("id", body.submissionId)
 
-    if (feedback !== undefined) {
-      updateData.feedback = feedback
-    }
-
-    if (Object.keys(updateData).length === 0) {
+    if (updErr) {
+      console.error("update-submission DB error", updErr)
       return new Response(
-        JSON.stringify({ error: 'No valid fields to update' }),
+        JSON.stringify({ error: "db_update_failed", detail: updErr.message }), 
         { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
         }
       )
     }
 
-    // Update the submission
-    const { data: updatedSubmission, error: updateError } = await supabaseClient
-      .from('submissions')
-      .update(updateData)
-      .eq('id', Number(submissionId))
-      .select(`
-        id,
-        status,
-        grade,
-        feedback,
-        submitted_at,
-        updated_at,
-        students!inner(full_name, email),
-        classes!inner(code, title),
-        projects!inner(code, title)
-      `)
-      .single()
-
-    if (updateError) {
-      console.error('Update error:', updateError)
-      return new Response(
-        JSON.stringify({ error: 'Failed to update submission' }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
-
-    console.log('Submission updated successfully:', updatedSubmission.id)
-
-    // Create notification for student about status/grade/feedback change
-    if (status || grade !== undefined || feedback) {
-      try {
-        // Get student user_id
-        const { data: submissionData } = await supabaseClient
-          .from('submissions')
-          .select('student:students(user_id, full_name)')
-          .eq('id', Number(submissionId))
-          .single()
-
-        if (submissionData?.student) {
-          let notificationType = 'status_changed'
-          let notificationTitle = 'Mise à jour de votre soumission'
-          let notificationBody = ''
-
-          if (status) {
-            notificationTitle = 'Changement de statut'
-            notificationBody = `Le statut de votre soumission a été mis à jour: ${status}`
-          } else if (grade !== undefined) {
-            notificationType = 'grade_assigned'
-            notificationTitle = 'Note attribuée'
-            notificationBody = `Votre soumission a reçu la note: ${grade}/20`
-          } else if (feedback) {
-            notificationType = 'feedback_added'
-            notificationTitle = 'Nouveau commentaire'
-            notificationBody = 'Un commentaire a été ajouté à votre soumission'
-          }
-
-          await supabaseClient.functions.invoke('create-notification', {
-            body: {
-              user_id: submissionData.student.user_id,
-              type: notificationType,
-              title: notificationTitle,
-              body: notificationBody,
-              metadata: {
-                submission_id: Number(submissionId),
-                status,
-                grade,
-                has_feedback: !!feedback
-              }
-            }
-          })
-        }
-      } catch (notifError) {
-        console.warn('Failed to create notification:', notifError)
-      }
-    }
+    console.log('Submission updated successfully:', body.submissionId)
 
     return new Response(
-      JSON.stringify({ 
-        message: 'Submission updated successfully',
-        submission: updatedSubmission 
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      JSON.stringify({ ok: true }), 
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     )
-
-  } catch (error) {
-    console.error('Unexpected error:', error)
+  } catch (e) {
+    console.error("update-submission unhandled error", e)
+    const msg = typeof e?.message === "string" ? e.message : "server_error"
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: msg }), 
       { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
       }
     )
   }

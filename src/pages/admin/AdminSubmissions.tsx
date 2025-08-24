@@ -355,21 +355,50 @@ export default function AdminSubmissions() {
     }
   };
 
+  // Status mapping from French labels to English DB values
+  const statusMap: Record<string, "received" | "in_review" | "approved" | "rejected"> = {
+    "Reçu": "received",
+    "En révision": "in_review", 
+    "Validé": "approved",
+    "Refusé": "rejected",
+  };
+
   const updateSubmission = async (submissionId: string, updates: { status?: string; grade?: number; feedback?: string }) => {
     try {
       console.log('Updating submission:', submissionId, updates);
       
+      // Map French status to English for DB
+      const requestBody: any = { submissionId };
+      
+      if (updates.status) {
+        requestBody.status = statusMap[updates.status];
+        if (!requestBody.status) {
+          throw new Error(`Unknown status: ${updates.status}`);
+        }
+      }
+      
+      if (typeof updates.grade !== 'undefined') {
+        requestBody.grade = updates.grade;
+      }
+      
+      if (typeof updates.feedback !== 'undefined') {
+        requestBody.feedback = updates.feedback;
+      }
+      
+      console.log('Sending request body:', requestBody);
+      
       const { data, error } = await supabase.functions.invoke('update-submission', {
-        body: { submissionId, ...updates }
+        body: requestBody
       });
 
       if (error) {
-        console.error('Update error:', error);
+        console.error('Edge function error:', error);
         throw new Error(error.message || 'Erreur lors de la mise à jour');
       }
 
       console.log('Update response:', data);
 
+      // Update local state with original French labels
       setSubmissions(prev =>
         prev.map(sub =>
           sub.id === submissionId
