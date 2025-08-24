@@ -79,6 +79,32 @@ export default function StudentSubmissions() {
     }
   }, [user, authLoading, navigate]);
 
+  // Set up realtime updates for submission changes
+  useEffect(() => {
+    if (!studentId || !user) return;
+
+    const channel = supabase
+      .channel('submission-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'submissions',
+          filter: `student_id=eq.${studentId}`
+        },
+        () => {
+          // Refresh submissions when any change occurs
+          fetchSubmissions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [studentId, user]);
+
   const fetchSubmissions = async (isRetry = false) => {
     console.log('🔍 Fetching student submissions for user:', user?.id);
     

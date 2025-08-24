@@ -217,10 +217,10 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="submitted">Soumis</SelectItem>
-                    <SelectItem value="in_review">En révision</SelectItem>
-                    <SelectItem value="approved">Approuvé</SelectItem>
-                    <SelectItem value="rejected">Rejeté</SelectItem>
+                     <SelectItem value="Reçu">Reçu</SelectItem>
+                     <SelectItem value="En révision">En révision</SelectItem>
+                     <SelectItem value="Validé">Validé</SelectItem>
+                     <SelectItem value="Refusé">Refusé</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -357,8 +357,8 @@ export default function AdminSubmissions() {
 
   const updateSubmission = async (submissionId: string, updates: { status?: string; grade?: number; feedback?: string }) => {
     try {
-      const { error } = await supabase.functions.invoke('admin-update-submission', {
-        body: { submissionId, updates }
+      const { error } = await supabase.functions.invoke('update-submission', {
+        body: { submissionId, ...updates }
       });
 
       if (error) throw error;
@@ -411,10 +411,10 @@ export default function AdminSubmissions() {
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'submitted': return 'bg-blue-100 text-blue-800';
-      case 'in_review': return 'bg-yellow-100 text-yellow-800';
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
+      case 'Reçu': return 'bg-blue-100 text-blue-800';
+      case 'En révision': return 'bg-yellow-100 text-yellow-800';
+      case 'Validé': return 'bg-green-100 text-green-800';
+      case 'Refusé': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -492,10 +492,10 @@ export default function AdminSubmissions() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les statuts</SelectItem>
-                <SelectItem value="submitted">Soumis</SelectItem>
-                <SelectItem value="in_review">En révision</SelectItem>
-                <SelectItem value="approved">Approuvé</SelectItem>
-                <SelectItem value="rejected">Rejeté</SelectItem>
+                 <SelectItem value="Reçu">Reçu</SelectItem>
+                 <SelectItem value="En révision">En révision</SelectItem>
+                 <SelectItem value="Validé">Validé</SelectItem>
+                 <SelectItem value="Refusé">Refusé</SelectItem>
               </SelectContent>
             </Select>
 
@@ -534,12 +534,14 @@ export default function AdminSubmissions() {
             <TableBody>
               {filteredSubmissions.map((submission) => (
                 <TableRow key={submission.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{submission.student.full_name}</div>
-                      <div className="text-sm text-muted-foreground">{submission.student.email}</div>
-                    </div>
-                  </TableCell>
+                   <TableCell>
+                     <div>
+                       <div className="font-medium">
+                         {submission.student.full_name || submission.student.email || 'Nom non défini'}
+                       </div>
+                       <div className="text-sm text-muted-foreground">{submission.student.email}</div>
+                     </div>
+                   </TableCell>
                   <TableCell>{submission.class.code}</TableCell>
                   <TableCell>{submission.project.title}</TableCell>
                   <TableCell>#{submission.version}</TableCell>
