@@ -18,6 +18,31 @@ import { Textarea } from '@/components/ui/textarea';
 import { Navigate } from 'react-router-dom';
 import { SubmissionReviewModal } from '@/components/SubmissionReviewModal';
 
+// Component to display student count
+function StudentCount() {
+  const [studentCount, setStudentCount] = useState<number>(0);
+
+  useEffect(() => {
+    const loadStudentCount = async () => {
+      try {
+        const { count, error } = await supabase
+          .from('students')
+          .select('*', { count: 'exact', head: true });
+        
+        if (error) throw error;
+        setStudentCount(count || 0);
+      } catch (error) {
+        console.error('Error loading student count:', error);
+        setStudentCount(0);
+      }
+    };
+
+    loadStudentCount();
+  }, []);
+
+  return <div className="text-2xl font-bold text-foreground">{studentCount}</div>;
+}
+
 interface Submission {
   id: number;
   submitted_at: string;
@@ -331,11 +356,11 @@ export default function AdminDashboard() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Classes Actives
+                Étudiants Actifs
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">{classes.length}</div>
+              <StudentCount />
             </CardContent>
           </Card>
         </div>

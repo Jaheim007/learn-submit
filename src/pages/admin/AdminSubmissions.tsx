@@ -393,7 +393,9 @@ export default function AdminSubmissions() {
 
       if (error) {
         console.error('Edge function error:', error);
-        throw new Error(error.message || 'Erreur lors de la mise à jour');
+        // Check if the error has a detail field for more specific error messages
+        const errorMsg = error.message || error?.context?.error?.detail || 'Erreur lors de la mise à jour';
+        throw new Error(errorMsg);
       }
 
       console.log('Update response:', data);
@@ -410,7 +412,9 @@ export default function AdminSubmissions() {
       toast.success('Soumission mise à jour avec succès');
     } catch (error: any) {
       console.error('Error updating submission:', error);
-      toast.error(error.message || 'Erreur lors de la mise à jour de la soumission');
+      // Show more detailed error message if available
+      const errorMsg = error.message || error?.detail || 'Erreur lors de la mise à jour de la soumission';
+      toast.error(errorMsg);
     }
   };
 
