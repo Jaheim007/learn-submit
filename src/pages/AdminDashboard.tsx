@@ -43,6 +43,14 @@ function StudentCount() {
   return <div className="text-2xl font-bold text-foreground">{studentCount}</div>;
 }
 
+// Status mapping from English DB values to French labels
+const reverseStatusMap: Record<string, "Reçu" | "En révision" | "Validé" | "Refusé"> = {
+  "received": "Reçu",
+  "in_review": "En révision", 
+  "approved": "Validé",
+  "rejected": "Refusé",
+};
+
 interface Submission {
   id: number;
   submitted_at: string;
@@ -153,7 +161,12 @@ export default function AdminDashboard() {
 
       if (projectsError) throw projectsError;
 
-      setSubmissions(submissionsData || []);
+      // Convert English status to French for display
+      const formattedSubmissions = (submissionsData || []).map((sub: any) => ({
+        ...sub,
+        status: reverseStatusMap[sub.status] || sub.status
+      }));
+      setSubmissions(formattedSubmissions);
       setClasses(classesData || []);
       setProjects(projectsData || []);
     } catch (error) {

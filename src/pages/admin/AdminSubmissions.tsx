@@ -17,7 +17,7 @@ import { fr } from 'date-fns/locale';
 interface Submission {
   id: string;
   submitted_at: string;
-  status: string;
+  status: "Reçu" | "En révision" | "Validé" | "Refusé";
   grade?: number;
   feedback?: string;
   version: number;
@@ -266,6 +266,22 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
   );
 }
 
+// Status mapping from French labels to English DB values
+const statusMap: Record<string, "received" | "in_review" | "approved" | "rejected"> = {
+  "Reçu": "received",
+  "En révision": "in_review", 
+  "Validé": "approved",
+  "Refusé": "rejected",
+};
+
+// Status mapping from English DB values to French labels
+const reverseStatusMap: Record<string, "Reçu" | "En révision" | "Validé" | "Refusé"> = {
+  "received": "Reçu",
+  "in_review": "En révision", 
+  "approved": "Validé",
+  "rejected": "Refusé",
+};
+
 export default function AdminSubmissions() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
@@ -333,7 +349,7 @@ export default function AdminSubmissions() {
         const formattedSubmissions = submissionsResponse.data.map((sub: any) => ({
           id: sub.id,
           submitted_at: sub.submitted_at,
-          status: sub.status,
+          status: reverseStatusMap[sub.status] || sub.status, // Convert English to French for display
           grade: sub.grade,
           feedback: sub.feedback,
           version: sub.version,
@@ -355,13 +371,6 @@ export default function AdminSubmissions() {
     }
   };
 
-  // Status mapping from French labels to English DB values
-  const statusMap: Record<string, "received" | "in_review" | "approved" | "rejected"> = {
-    "Reçu": "received",
-    "En révision": "in_review", 
-    "Validé": "approved",
-    "Refusé": "rejected",
-  };
 
   const updateSubmission = async (submissionId: string, updates: { status?: string; grade?: number; feedback?: string }) => {
     try {
@@ -404,7 +413,12 @@ export default function AdminSubmissions() {
       setSubmissions(prev =>
         prev.map(sub =>
           sub.id === submissionId
-            ? { ...sub, ...updates }
+            ? { 
+                ...sub, 
+                status: updates.status as "Reçu" | "En révision" | "Validé" | "Refusé" || sub.status,
+                grade: updates.grade !== undefined ? updates.grade : sub.grade,
+                feedback: updates.feedback !== undefined ? updates.feedback : sub.feedback
+              }
             : sub
         )
       );

@@ -90,11 +90,15 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Build partial update
+    // Build partial update with proper field names and timestamp
     const update: Record<string, unknown> = {}
     if (status !== undefined) update.status = status
     if (grade !== undefined) update.grade = grade
     if (feedback !== undefined) update.feedback = feedback
+    
+    // Add review metadata
+    update.reviewed_at = new Date().toISOString()
+    update.reviewed_by = auth.user.id
 
     console.log('Updating submission:', submissionId, 'with:', update)
 
@@ -103,10 +107,12 @@ Deno.serve(async (req) => {
       auth: { persistSession: false }
     })
     
-    const { error: updErr } = await service
+    const { data: updatedSubmission, error: updErr } = await service
       .from("submissions")
       .update(update)
       .eq("id", submissionId)
+      .select()
+      .single()
 
     if (updErr) {
       console.error("update-submission DB error", updErr)
@@ -122,7 +128,7 @@ Deno.serve(async (req) => {
     console.log('Submission updated successfully:', submissionId)
 
     return new Response(
-      JSON.stringify({ ok: true }), 
+      JSON.stringify({ ok: true, submission: updatedSubmission }), 
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

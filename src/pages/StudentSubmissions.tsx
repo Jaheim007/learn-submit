@@ -24,6 +24,14 @@ import {
 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
+// Status mapping from English DB values to French labels
+const reverseStatusMap: Record<string, "Reçu" | "En révision" | "Validé" | "Refusé"> = {
+  "received": "Reçu",
+  "in_review": "En révision", 
+  "approved": "Validé",
+  "rejected": "Refusé",
+};
+
 interface Submission {
   id: number;
   status: 'Reçu' | 'En révision' | 'Validé' | 'Refusé';
@@ -180,6 +188,7 @@ export default function StudentSubmissions() {
 
       const formattedSubmissions: Submission[] = (submissions || []).map(sub => ({
         ...sub,
+        status: (reverseStatusMap[sub.status] || sub.status) as "Reçu" | "En révision" | "Validé" | "Refusé",
         project: sub.projects,
         class: sub.classes
       }));
