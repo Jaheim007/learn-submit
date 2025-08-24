@@ -44,6 +44,7 @@ export default function AdminStudents() {
 
   const loadData = async () => {
     try {
+      // Use direct students table query with simplified enrollments join
       const [studentsResponse, classesResponse] = await Promise.all([
         supabase
           .from('students')
@@ -54,9 +55,10 @@ export default function AdminStudents() {
             email,
             is_active,
             created_at,
-            enrollments!inner(
-              classes!inner(id, code, title)
-            )
+            phone,
+            whatsapp,
+            telegram,
+            github_profile
           `)
           .order('created_at', { ascending: false }),
         
@@ -72,17 +74,37 @@ export default function AdminStudents() {
       }
 
       if (studentsResponse.data) {
-        // Get submission counts for each student
+        // Get enrollments and submission counts for each student
         const studentIds = studentsResponse.data.map(s => s.id);
-        const submissionsResponse = await supabase
-          .from('submissions')
-          .select('student_id')
-          .in('student_id', studentIds);
+        
+        const [enrollmentsResponse, submissionsResponse] = await Promise.all([
+          supabase
+            .from('enrollments')
+            .select(`
+              student_id,
+              classes!inner(id, code, title)
+            `)
+            .in('student_id', studentIds),
+          
+          supabase
+            .from('submissions')
+            .select('student_id')
+            .in('student_id', studentIds)
+        ]);
 
         const submissionCounts = submissionsResponse.data?.reduce((acc, sub) => {
           acc[sub.student_id] = (acc[sub.student_id] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {};
+
+        // Group enrollments by student
+        const enrollmentsByStudent = enrollmentsResponse.data?.reduce((acc, enrollment: any) => {
+          if (!acc[enrollment.student_id]) {
+            acc[enrollment.student_id] = [];
+          }
+          acc[enrollment.student_id].push(enrollment.classes);
+          return acc;
+        }, {} as Record<string, any[]>) || {};
 
         // Format students data
         const formattedStudents = studentsResponse.data.map((student: any) => ({
@@ -92,7 +114,7 @@ export default function AdminStudents() {
           email: student.email,
           is_active: student.is_active,
           created_at: student.created_at,
-          classes: student.enrollments.map((e: any) => e.classes),
+          classes: enrollmentsByStudent[student.id] || [],
           submissions_count: submissionCounts[student.id] || 0,
         }));
 

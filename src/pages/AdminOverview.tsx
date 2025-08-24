@@ -92,10 +92,11 @@ export default function AdminOverview() {
         .not('deadline_at', 'is', null)
         .lte('deadline_at', nextWeek.toISOString());
 
-      // Get user counts
+      // Get user counts - use students table with is_active filter for consistency
       const { data: students } = await supabase
         .from('students')
-        .select('id');
+        .select('id')
+        .eq('is_active', true);
 
       const { data: supervisors } = await supabase
         .from('user_roles')
