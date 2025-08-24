@@ -201,13 +201,6 @@ export type Database = {
             foreignKeyName: "enrollments_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
-            referencedRelation: "students_v"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "enrollments_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
             referencedRelation: "v_students_admin"
             referencedColumns: ["id"]
           },
@@ -725,13 +718,6 @@ export type Database = {
             foreignKeyName: "submissions_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
-            referencedRelation: "students_v"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "submissions_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
             referencedRelation: "v_students_admin"
             referencedColumns: ["id"]
           },
@@ -864,48 +850,6 @@ export type Database = {
       }
     }
     Views: {
-      admins_v: {
-        Row: {
-          created_at: string | null
-          email: string | null
-          full_name: string | null
-          id: string | null
-          phone: string | null
-          updated_at: string | null
-        }
-        Relationships: []
-      }
-      students_v: {
-        Row: {
-          class_id: number | null
-          created_at: string | null
-          email: string | null
-          full_name: string | null
-          id: string | null
-          phone: string | null
-          updated_at: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "students_primary_class_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "classes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      supervisors_v: {
-        Row: {
-          created_at: string | null
-          email: string | null
-          full_name: string | null
-          id: string | null
-          phone: string | null
-          updated_at: string | null
-        }
-        Relationships: []
-      }
       v_students_admin: {
         Row: {
           created_at: string | null
