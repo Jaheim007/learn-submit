@@ -49,68 +49,54 @@ export default function AdminRegister() {
     setLoading(true);
 
     try {
-      // 1. Sign up the user
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/admin`,
-          data: {
-            full_name: fullName.trim()
-          }
+      // Call the register-admin edge function
+      const { data, error } = await supabase.functions.invoke('register-admin', {
+        body: {
+          email: email.trim(),
+          password,
+          full_name: fullName.trim()
         }
       });
 
-      if (signUpError) {
-        console.error('Signup error:', signUpError);
+      if (error || data?.error) {
+        let errorMessage = "Une erreur s'est produite";
         
-        if (signUpError.message.includes('already registered')) {
-          toast.error('Cet email est déjà enregistré. Utilisez la page de connexion.');
-          return;
+        const err = error || data?.error;
+        if (typeof err === 'string') {
+          if (err.includes('already registered') || err.includes('User already registered')) {
+            errorMessage = "Cette adresse email est déjà utilisée";
+          } else if (err.includes('Password should be at least 6 characters')) {
+            errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
+          } else {
+            errorMessage = err;
+          }
+        } else if (err?.message) {
+          if (err.message.includes('already registered') || err.message.includes('User already registered')) {
+            errorMessage = "Cette adresse email est déjà utilisée";
+          } else if (err.message.includes('Password should be at least 6 characters')) {
+            errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
+          } else {
+            errorMessage = err.message;
+          }
         }
-        
-        toast.error(signUpError.message || 'Erreur lors de l\'inscription');
+
+        toast.error(errorMessage);
         return;
       }
 
-      if (!data.user) {
-        toast.error('Erreur lors de la création du compte');
-        return;
-      }
+      toast.success('Compte administrateur créé avec succès !');
 
-      // 2. If no session (email confirmation enabled), sign in immediately
-      if (!data.session) {
-        console.log('No session after signup, signing in to get session...');
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password
-        });
-        
-        if (signInError) {
-          console.error('Auto sign-in error:', signInError);
-          toast.error('Compte créé mais erreur de connexion automatique. Veuillez vous connecter manuellement.');
-          navigate('/admin/login');
-          return;
-        }
-      }
-
-      // 3. Promote to admin using edge function
-      const { error: promoteError } = await supabase.functions.invoke('promote-self-to-admin');
-
-      if (promoteError) {
-        console.error('Promotion error:', promoteError);
-        toast.error('Compte créé mais erreur lors de l\'attribution du rôle admin. Contactez le support.');
-        return;
-      }
-
-      // 4. Force refresh session and roles
-      await supabase.auth.refreshSession();
-      await refetchRoles();
-
-      toast.success('Compte administrateur créé. Redirection vers le tableau de bord…');
+      // Sign in the user after successful registration
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password
+      });
       
-      // 5. Navigate to admin dashboard
-      navigate('/admin', { replace: true });
+      if (!signInError) {
+        // Refetch roles to update the state
+        await refetchRoles();
+        navigate('/admin', { replace: true });
+      }
 
     } catch (error) {
       console.error('Unexpected error:', error);

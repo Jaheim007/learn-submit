@@ -90,27 +90,36 @@ export default function StudentRegister() {
     setLoading(true);
 
     try {
-      // Sign up with metadata
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/etudiant/login`,
-          data: {
-            full_name: fullName.trim()
-          }
+      // Call the register-student edge function
+      const { data, error } = await supabase.functions.invoke('register-student', {
+        body: {
+          email,
+          password,
+          full_name: fullName.trim(),
+          class_id: selectedClassId
         }
       });
 
-      if (error) {
+      if (error || data?.error) {
         let errorMessage = "Une erreur s'est produite";
         
-        if (error.message.includes('User already registered')) {
-          errorMessage = "Cette adresse email est déjà utilisée";
-        } else if (error.message.includes('Password should be at least')) {
-          errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
-        } else if (error.message.includes('Invalid email')) {
-          errorMessage = "Adresse email invalide";
+        const err = error || data?.error;
+        if (typeof err === 'string') {
+          if (err.includes('already registered') || err.includes('User already registered')) {
+            errorMessage = "Cette adresse email est déjà utilisée";
+          } else if (err.includes('Password should be at least 6 characters')) {
+            errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
+          } else {
+            errorMessage = err;
+          }
+        } else if (err?.message) {
+          if (err.message.includes('already registered') || err.message.includes('User already registered')) {
+            errorMessage = "Cette adresse email est déjà utilisée";
+          } else if (err.message.includes('Password should be at least 6 characters')) {
+            errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
+          } else {
+            errorMessage = err.message;
+          }
         }
 
         toast({
@@ -121,59 +130,19 @@ export default function StudentRegister() {
         return;
       }
 
-      // If user was created and we have a session, create the student profile
-      if (data.user && data.session) {
-        try {
-          // Create student profile
-          const { error: studentError } = await supabase
-            .from('students')
-            .insert({
-              user_id: data.user.id,
-              email: data.user.email,
-              full_name: fullName.trim(),
-              primary_class_id: parseInt(selectedClassId)
-            });
+      toast({
+        title: "Compte créé avec succès !",
+        description: "Bienvenue dans NYS Submissions",
+      });
 
-          if (studentError) throw studentError;
-
-          // Create enrollment
-          const { error: enrollmentError } = await supabase
-            .from('enrollments')
-            .insert({
-              student_id: data.user.id, // Will be replaced by student.id from trigger
-              class_id: parseInt(selectedClassId)
-            });
-
-          if (enrollmentError) {
-            console.warn('Enrollment creation failed, but student profile was created:', enrollmentError);
-          }
-
-          toast({
-            title: "Compte créé avec succès !",
-            description: "Bienvenue ! Redirection en cours...",
-          });
-
-          // Redirect to student dashboard
-          navigate('/etudiant/mes-projets', { replace: true });
-        } catch (profileError) {
-          console.error('Error creating student profile:', profileError);
-          
-          // Clean up auth user if profile creation fails
-          await supabase.auth.signOut();
-          
-          toast({
-            title: "Erreur de création du profil",
-            description: "Veuillez réessayer ou contacter l'administration",
-            variant: "destructive"
-          });
-        }
-      } else {
-        // Email confirmation required
-        toast({
-          title: "Inscription réussie !",
-          description: "Vérifiez votre email pour confirmer votre compte, puis connectez-vous",
-        });
-        navigate('/etudiant/login');
+      // Sign in the user after successful registration
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (!signInError) {
+        navigate('/etudiant/mes-projets', { replace: true });
       }
     } catch (error) {
       console.error('Registration error:', error);
