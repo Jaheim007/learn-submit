@@ -177,19 +177,16 @@ export default function AdminProjects() {
         return;
       }
 
-      const projectData = {
-        title: formData.title.trim(),
-        description: formData.description.trim() || null,
-        deadline_at: new Date(formData.deadline_at).toISOString(),
-        allow_resubmit: formData.allow_resubmit,
-        max_resubmits: formData.allow_resubmit ? parseInt(formData.max_resubmits) || 3 : null,
-        code: formData.title.trim().replace(/\s+/g, '-').toLowerCase(),
-      };
-
-      let projectId: number;
-
       if (editingProject) {
-        // Update existing project
+        // Update existing project via direct Supabase
+        const projectData = {
+          title: formData.title.trim(),
+          description: formData.description.trim() || null,
+          deadline_at: new Date(formData.deadline_at).toISOString(),
+          allow_resubmit: formData.allow_resubmit,
+          max_resubmits: formData.allow_resubmit ? parseInt(formData.max_resubmits) || 3 : null,
+        };
+
         const { data, error } = await supabase
           .from('projects')
           .update(projectData)
@@ -198,43 +195,57 @@ export default function AdminProjects() {
           .single();
 
         if (error) throw error;
-        projectId = data.id;
 
         // Delete existing class assignments
         await supabase
           .from('class_projects')
           .delete()
-          .eq('project_id', projectId);
+          .eq('project_id', editingProject.id);
 
+        // Create new class assignments
+        const classAssignments = formData.class_ids.map(classId => ({
+          project_id: editingProject.id,
+          class_id: classId,
+        }));
+
+        const { error: assignmentError } = await supabase
+          .from('class_projects')
+          .insert(classAssignments);
+
+        if (assignmentError) throw assignmentError;
+
+        toast.success('Projet mis à jour avec succès');
       } else {
-        // Create new project
-        const { data, error } = await supabase
-          .from('projects')
-          .insert(projectData)
-          .select()
-          .single();
+        // Create new project via edge function
+        const payload = {
+          title: formData.title.trim(),
+          description: formData.description.trim() || null,
+          deadline_at: new Date(formData.deadline_at).toISOString(),
+          allow_resubmit: formData.allow_resubmit,
+          max_resubmits: formData.allow_resubmit ? parseInt(formData.max_resubmits) || 1 : 1,
+          is_active: true,
+          class_ids: formData.class_ids
+        };
 
-        if (error) throw error;
-        projectId = data.id;
+        console.log('Calling create-project with payload:', payload);
+
+        const { data, error } = await supabase.functions.invoke('create-project', {
+          body: payload
+        });
+
+        if (error) {
+          console.error('Edge function error:', error);
+          throw new Error(error.message || 'Erreur lors de la création du projet');
+        }
+
+        if (data?.error) {
+          console.error('Server error:', data.error);
+          throw new Error(data.error);
+        }
+
+        console.log('Project created successfully:', data);
+        toast.success('Projet créé avec succès');
       }
-
-      // Create class assignments
-      const classAssignments = formData.class_ids.map(classId => ({
-        project_id: projectId,
-        class_id: classId,
-      }));
-
-      const { error: assignmentError } = await supabase
-        .from('class_projects')
-        .insert(classAssignments);
-
-      if (assignmentError) throw assignmentError;
-
-      toast.success(
-        editingProject 
-          ? 'Projet mis à jour avec succès' 
-          : 'Projet créé avec succès'
-      );
 
       setIsCreateDialogOpen(false);
       setIsEditDialogOpen(false);
@@ -243,7 +254,7 @@ export default function AdminProjects() {
 
     } catch (error) {
       console.error('Error saving project:', error);
-      toast.error('Erreur lors de l\'enregistrement du projet');
+      toast.error(error.message || 'Erreur lors de l\'enregistrement du projet');
     }
   };
 
