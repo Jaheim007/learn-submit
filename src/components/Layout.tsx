@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useRoles } from '@/hooks/useRoles';
 import { Button } from '@/components/ui/button';
 import { NotificationBell } from '@/components/NotificationBell';
 import { LogOut, User, BookOpen, Upload, FileText } from 'lucide-react';
@@ -11,7 +12,8 @@ interface LayoutProps {
 }
 
 export function Layout({ children, showNavigation = true }: LayoutProps) {
-  const { user, signOut, isAdmin, isSupervisor } = useAuth();
+  const { user, signOut } = useAuth();
+  const { isAdmin, isSupervisor } = useRoles();
   const navigate = useNavigate();
   const location = useLocation();
   

@@ -7,8 +7,6 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   authLoading: boolean;
-  isAdmin: boolean;
-  isSupervisor: boolean;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
   signUpWithClass: (email: string, password: string, classId: number) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
@@ -22,28 +20,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isSupervisor, setIsSupervisor] = useState(false);
 
-  const checkUserRole = async (userId: string) => {
-    try {
-      const { data: roles } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId);
-
-      if (roles) {
-        const hasAdmin = roles.some(r => r.role === 'admin');
-        const hasSupervisor = roles.some(r => r.role === 'supervisor');
-        setIsAdmin(hasAdmin);
-        setIsSupervisor(hasSupervisor);
-      }
-    } catch (error) {
-      console.error('Error checking user role:', error);
-      setIsAdmin(false);
-      setIsSupervisor(false);
-    }
-  };
+  // Removed checkUserRole - roles are now handled by useRoles hook
 
 
   useEffect(() => {
@@ -54,38 +32,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          // Defer student profile creation to avoid blocking login
           setTimeout(async () => {
-            await checkUserRole(session.user.id);
-            
-            // Only create student profile for non-admin/supervisor users
-            // AND only when they're actually accessing student features
+            // Only create student profile for users accessing student routes
+            // AND only after they've been authenticated (not during login flow)
             const currentPath = window.location.pathname;
-            const isStudentRoute = currentPath.startsWith('/etudiant') || 
-                                 currentPath.startsWith('/student') ||
-                                 currentPath === '/';
-            
-            // Check if user is admin or supervisor before creating student profile
-            const { data: userRoles } = await supabase
-              .from('user_roles')
-              .select('role')
-              .eq('user_id', session.user.id);
-            
-            const hasAdminRole = userRoles?.some(r => r.role === 'admin');
-            const hasSupervisorRole = userRoles?.some(r => r.role === 'supervisor');
-            
-            // Only create student profile if:
-            // 1. Not admin or supervisor
-            // 2. On a student route or homepage
-            // 3. Just signed in (to avoid repeated profile creation)
-            // 4. Not currently on admin routes
+            const isStudentRoute = currentPath.startsWith('/etudiant') || currentPath === '/';
             const isAdminRoute = currentPath.startsWith('/admin');
-            if (!hasAdminRole && !hasSupervisorRole && isStudentRoute && !isAdminRoute && event === 'SIGNED_IN') {
-              await createStudentProfileIfNeeded(session.user);
+            
+            // Skip profile creation on admin routes entirely
+            if (!isAdminRoute && isStudentRoute && event === 'SIGNED_IN') {
+              // Check if user has admin/supervisor roles before creating student profile
+              const { data: userRoles } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', session.user.id);
+              
+              const hasAdminRole = userRoles?.some(r => r.role === 'admin');
+              const hasSupervisorRole = userRoles?.some(r => r.role === 'supervisor');
+              
+              // Only create student profile if not admin/supervisor
+              if (!hasAdminRole && !hasSupervisorRole) {
+                await createStudentProfileIfNeeded(session.user);
+              }
             }
           }, 0);
-        } else {
-          setIsAdmin(false);
-          setIsSupervisor(false);
         }
         
         setLoading(false);
@@ -98,11 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user) {
-        setTimeout(() => {
-          checkUserRole(session.user.id);
-        }, 0);
-      }
+      // Role checking is now handled by useRoles hook
       
       setLoading(false);
       setAuthLoading(false);
@@ -214,8 +181,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session,
     loading,
     authLoading,
-    isAdmin,
-    isSupervisor,
     signUp,
     signUpWithClass,
     signIn,

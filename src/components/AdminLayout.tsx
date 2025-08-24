@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useRoles } from '@/hooks/useRoles';
 import { Button } from '@/components/ui/button';
 import { LogOut, User, FileText, Users, BarChart3 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -9,7 +10,8 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut } = useAuth();
+  const { isAdmin } = useRoles();
   const navigate = useNavigate();
   const location = useLocation();
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useRoles } from '@/hooks/useRoles';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, FileText, Clock, AlertTriangle } from 'lucide-react';
@@ -18,7 +19,8 @@ interface Stats {
 }
 
 export default function AdminOverview() {
-  const { isAdmin, loading, user } = useAuth();
+  const { loading, user } = useAuth();
+  const { isAdmin } = useRoles();
   const [stats, setStats] = useState<Stats>({
     totalSubmissions: 0,
     submissionsToday: 0,

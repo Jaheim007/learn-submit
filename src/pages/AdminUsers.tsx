@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useRoles } from '@/hooks/useRoles';
 import { supabase } from '@/integrations/supabase/client';
 import { AdminLayout } from '@/components/AdminLayout';
 import AdminGuard from '@/components/admin/AdminGuard';
@@ -33,7 +34,8 @@ interface Class {
 }
 
 export default function AdminUsers() {
-  const { isAdmin, loading } = useAuth();
+  const { loading } = useAuth();
+  const { isAdmin } = useRoles();
   const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [loadingData, setLoadingData] = useState(true);

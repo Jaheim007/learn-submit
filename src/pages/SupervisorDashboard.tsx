@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useRoles } from '@/hooks/useRoles';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +21,8 @@ interface SupervisorStats {
 }
 
 export default function SupervisorDashboard() {
-  const { isSupervisor, loading } = useAuth();
+  const { loading } = useAuth();
+  const { isSupervisor } = useRoles();
   const [stats, setStats] = useState<SupervisorStats>({
     assignedClasses: [],
     totalStudents: 0,

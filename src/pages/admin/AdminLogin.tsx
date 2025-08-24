@@ -50,6 +50,11 @@ export default function AdminLogin() {
       await supabase.auth.refreshSession();
       await refetchRoles();
       
+      // Wait a bit for roles to be updated, then navigate
+      setTimeout(() => {
+        navigate('/admin', { replace: true });
+      }, 100);
+      
     } catch (error) {
       console.error('Unexpected login error:', error);
       toast.error('Erreur inattendue lors de la connexion');

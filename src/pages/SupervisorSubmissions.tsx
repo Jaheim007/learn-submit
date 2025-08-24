@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useRoles } from '@/hooks/useRoles';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -60,7 +61,8 @@ interface Project {
 }
 
 export default function SupervisorSubmissions() {
-  const { isSupervisor, loading } = useAuth();
+  const { loading } = useAuth();
+  const { isSupervisor } = useRoles();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);

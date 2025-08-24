@@ -1,4 +1,5 @@
 import { useAuth } from '@/hooks/useAuth';
+import { useRoles } from '@/hooks/useRoles';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,9 +17,25 @@ interface StudentClass {
 
 export default function Home() {
   const { user, loading } = useAuth();
+  const { isAdmin, isSupervisor, isLoading: rolesLoading } = useRoles();
   const navigate = useNavigate();
   const [studentClasses, setStudentClasses] = useState<StudentClass[]>([]);
   const [loadingClasses, setLoadingClasses] = useState(true);
+
+  // Redirect authenticated users to appropriate dashboard
+  useEffect(() => {
+    if (user && !loading && !rolesLoading) {
+      if (isAdmin) {
+        navigate('/admin', { replace: true });
+        return;
+      }
+      if (isSupervisor) {
+        navigate('/superviseur', { replace: true });
+        return;
+      }
+      // For regular students, stay on home page to show dashboard
+    }
+  }, [user, loading, rolesLoading, isAdmin, isSupervisor, navigate]);
 
   useEffect(() => {
     if (user) {
@@ -236,8 +253,8 @@ export default function Home() {
             </Card>
           </div>
 
-          {/* Admin Access */}
-          {user?.email && ['admin@nys-africa.com', 'formation@nys-africa.com', 'contact@nys-africa.com'].includes(user.email) && (
+          {/* Admin Access - shown only for actual admins */}
+          {isAdmin && (
             <Card className="card-educational mb-8">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -255,7 +272,7 @@ export default function Home() {
                     </div>
                   </div>
                   <Button 
-                    onClick={() => navigate('/admin/soumissions')}
+                    onClick={() => navigate('/admin')}
                     variant="outline"
                     className="border-destructive text-destructive hover:bg-destructive hover:text-white"
                   >
