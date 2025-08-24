@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
     const body = await req.json()
     const { submissionId, status, grade, feedback } = body
 
-    if (!submissionId || typeof submissionId !== 'string') {
+    if (!submissionId || (typeof submissionId !== 'string' && typeof submissionId !== 'number')) {
       return new Response(
         JSON.stringify({ error: "validation_failed", detail: "submissionId is required" }), 
         { 
