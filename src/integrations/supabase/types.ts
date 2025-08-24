@@ -638,6 +638,8 @@ export type Database = {
           link3: string | null
           locked_at: string | null
           project_id: number
+          reviewed_at: string | null
+          reviewed_by: string | null
           status: Database["public"]["Enums"]["submission_status"]
           student_id: string
           submitted_at: string
@@ -659,6 +661,8 @@ export type Database = {
           link3?: string | null
           locked_at?: string | null
           project_id: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["submission_status"]
           student_id: string
           submitted_at?: string
@@ -680,6 +684,8 @@ export type Database = {
           link3?: string | null
           locked_at?: string | null
           project_id?: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["submission_status"]
           student_id?: string
           submitted_at?: string
@@ -941,7 +947,15 @@ export type Database = {
       }
     }
     Enums: {
-      submission_status: "Reçu" | "En révision" | "Validé" | "Refusé"
+      submission_status:
+        | "Reçu"
+        | "En révision"
+        | "Validé"
+        | "Refusé"
+        | "received"
+        | "in_review"
+        | "approved"
+        | "rejected"
       user_role: "admin" | "user" | "supervisor"
     }
     CompositeTypes: {
@@ -1070,7 +1084,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      submission_status: ["Reçu", "En révision", "Validé", "Refusé"],
+      submission_status: [
+        "Reçu",
+        "En révision",
+        "Validé",
+        "Refusé",
+        "received",
+        "in_review",
+        "approved",
+        "rejected",
+      ],
       user_role: ["admin", "user", "supervisor"],
     },
   },
