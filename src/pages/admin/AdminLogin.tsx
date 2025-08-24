@@ -46,14 +46,15 @@ export default function AdminLogin() {
         return;
       }
 
+      console.log('Login successful, refreshing roles...');
+
       // Refresh session and roles after successful login
       await supabase.auth.refreshSession();
       await refetchRoles();
       
-      // Wait a bit for roles to be updated, then navigate
-      setTimeout(() => {
-        navigate('/admin', { replace: true });
-      }, 100);
+      // Check if user is admin after roles are refreshed
+      // Note: The useEffect in the component will handle the redirect
+      toast.success('Connexion réussie');
       
     } catch (error) {
       console.error('Unexpected login error:', error);
@@ -72,7 +73,7 @@ export default function AdminLogin() {
     );
   }
 
-  // If user is authenticated but not admin, show access denied
+  // If user is authenticated but not admin, show inline error (do NOT redirect to student)
   if (user && !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
@@ -81,12 +82,15 @@ export default function AdminLogin() {
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
               <Shield className="h-6 w-6 text-red-600" />
             </div>
-            <CardTitle className="text-2xl text-red-600">Accès restreint</CardTitle>
+            <CardTitle className="text-2xl text-red-600">Accès non autorisé</CardTitle>
             <CardDescription>
-              Cette zone est réservée aux administrateurs. Vous êtes connecté mais n'avez pas les privilèges requis.
+              Cette zone est réservée aux administrateurs. Votre compte n'a pas les privilèges requis.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Vous devez être administrateur pour accéder à cette zone.
+            </p>
             <Button 
               onClick={() => navigate('/')}
               variant="outline"

@@ -12,10 +12,10 @@ export default function StudentGuard({ children }: StudentGuardProps) {
   // Wait for auth to finish loading
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-sm text-muted-foreground">Chargement...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-sm text-muted-foreground">Chargement...</p>
         </div>
       </div>
     );
@@ -26,6 +26,6 @@ export default function StudentGuard({ children }: StudentGuardProps) {
     return <Navigate to="/auth" replace />;
   }
 
-  // User is authenticated - allow access (admins can also view student pages if needed)
+  // User is authenticated - allow access to student pages
   return <>{children}</>;
 }

@@ -28,8 +28,14 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
+      console.log('Auth error or no user:', authError);
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
+        JSON.stringify({ 
+          roles: [],
+          isAdmin: false,
+          isSupervisor: false,
+          error: 'Unauthorized'
+        }),
         { 
           status: 401, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -37,7 +43,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Fetch user roles
+    console.log('Fetching roles for user:', user.id);
+
+    // Fetch user roles using anon key (policy allows users to read their own roles)
     const { data: roleData, error: roleError } = await supabase
       .from('user_roles')
       .select('role')
@@ -46,7 +54,12 @@ Deno.serve(async (req) => {
     if (roleError) {
       console.error('Error fetching roles:', roleError);
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch roles' }),
+        JSON.stringify({ 
+          roles: [],
+          isAdmin: false,
+          isSupervisor: false,
+          error: 'Failed to fetch roles'
+        }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -55,6 +68,7 @@ Deno.serve(async (req) => {
     }
 
     const roles = roleData?.map(r => r.role) || [];
+    console.log('Found roles:', roles);
 
     return new Response(
       JSON.stringify({ 
@@ -69,9 +83,14 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Unexpected error:', error);
+    console.error('Unexpected error in me-roles:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ 
+        roles: [],
+        isAdmin: false,
+        isSupervisor: false,
+        error: 'Internal server error'
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRoles } from '@/hooks/useRoles';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 interface AdminGuardProps {
   children: ReactNode;
@@ -10,15 +10,14 @@ interface AdminGuardProps {
 export default function AdminGuard({ children }: AdminGuardProps) {
   const { user, authLoading } = useAuth();
   const { isAdmin, isLoading: rolesLoading } = useRoles();
-  const location = useLocation();
 
-  // Wait for both auth and roles to finish loading
+  // Wait for both auth and roles to finish loading - NO REDIRECTS WHILE LOADING
   if (authLoading || rolesLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-sm text-muted-foreground">Chargement...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-sm text-muted-foreground">Vérification des autorisations...</p>
         </div>
       </div>
     );
@@ -29,11 +28,11 @@ export default function AdminGuard({ children }: AdminGuardProps) {
     return <Navigate to="/admin/login" replace />;
   }
 
-  // If authenticated but not admin, redirect to forbidden
-  if (user && !isAdmin) {
-    return <Navigate to="/forbidden" replace />;
+  // If authenticated and is admin, allow access
+  if (user && isAdmin) {
+    return <>{children}</>;
   }
 
-  // User is authenticated and is admin - allow access
-  return <>{children}</>;
+  // If authenticated but not admin, redirect to forbidden
+  return <Navigate to="/forbidden" replace />;
 }

@@ -55,7 +55,7 @@ export default function Auth() {
 
   // Redirect if already authenticated to student area
   if (user) {
-    navigate('/etudiant/mes-projets');
+    navigate('/etudiant/mes-projets', { replace: true });
     return null;
   }
 
@@ -114,7 +114,8 @@ export default function Auth() {
             title: "Connexion réussie !",
             description: "Redirection en cours...",
           });
-          navigate('/etudiant/mes-projets');
+          // Single replace navigation to student dashboard
+          navigate('/etudiant/mes-projets', { replace: true });
         }
       }
     } catch (error) {

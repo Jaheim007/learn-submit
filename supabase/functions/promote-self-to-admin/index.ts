@@ -1,9 +1,9 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.56.0'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.56.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
 
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
@@ -44,9 +44,7 @@ Deno.serve(async (req) => {
       .insert({ 
         user_id: user.id,
         full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Admin'
-      })
-      .select()
-      .single();
+      });
 
     if (adminError && adminError.code !== '23505') { // Ignore duplicate key error
       console.error('Error inserting admin:', adminError);

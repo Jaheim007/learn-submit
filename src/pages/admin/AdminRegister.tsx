@@ -80,6 +80,7 @@ export default function AdminRegister() {
 
       // 2. If no session (email confirmation enabled), sign in immediately
       if (!data.session) {
+        console.log('No session after signup, signing in to get session...');
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password

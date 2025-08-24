@@ -6,6 +6,7 @@ interface RolesResponse {
   roles: string[];
   isAdmin: boolean;
   isSupervisor: boolean;
+  error?: string;
 }
 
 export function useRoles() {
@@ -24,19 +25,25 @@ export function useRoles() {
 
     setIsLoading(true);
     try {
+      console.log('Fetching roles for user:', user.id);
       const { data, error } = await supabase.functions.invoke('me-roles');
       
       if (error) {
-        console.error('Error fetching roles:', error);
+        console.error('Error invoking me-roles function:', error);
+        setIsAdmin(false);
+        setIsSupervisor(false);
+      } else if (data?.error) {
+        console.error('Error in me-roles response:', data.error);
         setIsAdmin(false);
         setIsSupervisor(false);
       } else {
         const roleData = data as RolesResponse;
-        setIsAdmin(roleData.isAdmin);
-        setIsSupervisor(roleData.isSupervisor);
+        console.log('Roles fetched successfully:', roleData);
+        setIsAdmin(roleData.isAdmin || false);
+        setIsSupervisor(roleData.isSupervisor || false);
       }
     } catch (error) {
-      console.error('Error fetching roles:', error);
+      console.error('Unexpected error fetching roles:', error);
       setIsAdmin(false);
       setIsSupervisor(false);
     } finally {
@@ -45,6 +52,7 @@ export function useRoles() {
   }, [user]);
 
   const refetch = useCallback(async () => {
+    console.log('Refetching roles...');
     await fetchRoles();
   }, [fetchRoles]);
 

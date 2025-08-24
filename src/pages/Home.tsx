@@ -37,6 +37,30 @@ export default function Home() {
     }
   }, [user, loading, rolesLoading, isAdmin, isSupervisor, navigate]);
 
+  const handleGetStarted = () => {
+    if (user) {
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/etudiant/mes-projets');
+      }
+    } else {
+      navigate('/auth');
+    }
+  };
+
+  const handleReturnHome = () => {
+    if (user) {
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/etudiant/mes-projets');
+      }
+    } else {
+      navigate('/');
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchStudentClasses();
