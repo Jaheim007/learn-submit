@@ -63,9 +63,18 @@ export default function Profile() {
           )
         `)
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching student classes:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger le profil",
+          variant: "destructive"
+        });
+        navigate('/etudiant/register');
+        return;
+      }
 
       if (data) {
         setProfile({
@@ -79,6 +88,10 @@ export default function Profile() {
           primary_class_id: data.primary_class_id,
           primary_class: data.primary_class
         });
+      } else {
+        // No student profile found, redirect to registration
+        navigate('/etudiant/register');
+        return;
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -87,6 +100,7 @@ export default function Profile() {
         description: "Impossible de charger le profil",
         variant: "destructive"
       });
+      navigate('/etudiant/register');
     } finally {
       setLoading(false);
     }
