@@ -231,10 +231,44 @@ export default function AdminDashboard() {
     }
   };
 
-  const downloadFile = async (filePath: string) => {
-    const url = await getSignedUrl(filePath);
-    if (url) {
-      window.open(url, '_blank');
+  const downloadFile = async (filePath: string, submissionId: number) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('download-submission-file', {
+        body: { submissionId, filePath }
+      });
+
+      if (error) {
+        console.error('Error downloading file:', error);
+        toast({
+          title: "Erreur",
+          description: "Erreur lors du téléchargement du fichier",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (data?.signedUrl) {
+        // Create a temporary anchor element to trigger download
+        const link = document.createElement('a');
+        link.href = data.signedUrl;
+        link.download = data.fileName || filePath.split('/').pop() || 'file';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        toast({
+          title: "Erreur",
+          description: "URL de téléchargement non disponible",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors du téléchargement du fichier",
+        variant: "destructive"
+      });
     }
   };
 
@@ -538,11 +572,11 @@ export default function AdminDashboard() {
                           {[submission.file1_url, submission.file2_url, submission.file3_url]
                             .filter(Boolean)
                             .map((fileUrl, idx) => (
-                              <Button
+                               <Button
                                 key={idx}
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => downloadFile(fileUrl!)}
+                                onClick={() => downloadFile(fileUrl!, submission.id)}
                                 className="text-xs p-1 h-auto"
                               >
                                 <Download className="w-3 h-3 mr-1" />

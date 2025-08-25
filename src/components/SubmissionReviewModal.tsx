@@ -40,7 +40,7 @@ interface SubmissionReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUpdate: (submissionId: number, updates: { status?: string; grade?: number | null; feedback?: string }) => void;
-  onDownloadFile: (fileUrl: string) => void;
+  onDownloadFile: (fileUrl: string, submissionId: number) => void;
 }
 
 export function SubmissionReviewModal({ 
@@ -167,7 +167,7 @@ export function SubmissionReviewModal({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => onDownloadFile(fileUrl)}
+                          onClick={() => onDownloadFile(fileUrl, submission.id)}
                           className="h-auto p-1"
                         >
                           <Download className="w-4 h-4" />

@@ -102,14 +102,28 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
     }
   };
 
-  const downloadFile = async (filePath: string) => {
+  const downloadFile = async (filePath: string, submissionId: string) => {
     try {
-      const { data } = await supabase.storage
-        .from('submissions')
-        .createSignedUrl(filePath, 60); // 1 minute expiry
+      const { data, error } = await supabase.functions.invoke('download-submission-file', {
+        body: { submissionId, filePath }
+      });
+
+      if (error) {
+        console.error('Error downloading file:', error);
+        toast.error('Erreur lors du téléchargement du fichier');
+        return;
+      }
 
       if (data?.signedUrl) {
-        window.open(data.signedUrl, '_blank');
+        // Create a temporary anchor element to trigger download
+        const link = document.createElement('a');
+        link.href = data.signedUrl;
+        link.download = data.fileName || filePath.split('/').pop() || 'file';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        toast.error('URL de téléchargement non disponible');
       }
     } catch (error) {
       console.error('Error downloading file:', error);
@@ -195,7 +209,7 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => downloadFile(file)}
+                      onClick={() => downloadFile(file, submission.id)}
                     >
                       <Download className="h-4 w-4" />
                     </Button>
