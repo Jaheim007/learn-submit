@@ -11,34 +11,57 @@ export default function StudentGuard({ children }: StudentGuardProps) {
   const { user, authLoading } = useAuth();
   const [studentCheck, setStudentCheck] = useState<'loading' | 'found' | 'not_found'>('loading');
 
-  // Check if user has student profile
+  // Check if user has student role
   useEffect(() => {
     if (!user || authLoading) return;
 
-    const checkStudentProfile = async () => {
+    const checkStudentRole = async () => {
       try {
-        // Check if user exists in students table
-        const { data: studentData, error } = await supabase
-          .from('students')
-          .select('id')
+        // Check if user has student role in user_roles table
+        const { data: roleData, error } = await supabase
+          .from('user_roles')
+          .select('role')
           .eq('user_id', user.id)
+          .eq('role', 'student')
           .maybeSingle();
 
         if (error) {
-          console.error('Error checking student class:', error);
+          console.error('Error checking student role:', error);
           setStudentCheck('not_found');
-        } else if (studentData) {
+        } else if (roleData) {
           setStudentCheck('found');
         } else {
-          setStudentCheck('not_found');
+          // If no student role, check if student profile exists
+          const { data: studentData, error: studentError } = await supabase
+            .from('students')
+            .select('id')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          if (studentError) {
+            console.error('Error checking student profile:', studentError);
+            setStudentCheck('not_found');
+          } else if (studentData) {
+            // Student exists but no role, assign role automatically
+            const { error: roleInsertError } = await supabase
+              .from('user_roles')
+              .insert({ user_id: user.id, role: 'student' });
+              
+            if (roleInsertError) {
+              console.error('Error assigning student role:', roleInsertError);
+            }
+            setStudentCheck('found');
+          } else {
+            setStudentCheck('not_found');
+          }
         }
       } catch (error) {
-        console.error('Error checking student profile:', error);
+        console.error('Error checking student role:', error);
         setStudentCheck('not_found');
       }
     };
 
-    checkStudentProfile();
+    checkStudentRole();
   }, [user, authLoading]);
 
   // Wait for auth to finish loading
