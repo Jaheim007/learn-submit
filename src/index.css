@@ -1,131 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* NYS Submissions Portal - Design System 
-Professional educational platform with modern aesthetics */
+/* Matrix Digital Portal - Cyberpunk Design System 
+The Code is Everything. Enter the Matrix. */
 
 @layer base {
   :root {
-    /* Educational Primary Colors - Deep academic blue */
-    --background: 0 0% 100%;
-    --foreground: 215 20% 15%;
+    /* Matrix Core Colors - Deep Digital Black */
+    --background: 0 0% 5%;
+    --foreground: 120 100% 85%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 215 20% 15%;
+    --card: 0 0% 8%;
+    --card-foreground: 120 100% 85%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 20% 15%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 120 100% 85%;
 
-    /* Academic Blue Theme */
-    --primary: 215 85% 55%;
-    --primary-foreground: 0 0% 98%;
-    --primary-hover: 215 85% 45%;
-    --primary-light: 215 85% 95%;
+    /* Matrix Primary - Neon Green */
+    --primary: 120 100% 50%;
+    --primary-foreground: 0 0% 5%;
+    --primary-hover: 120 100% 40%;
+    --primary-light: 120 100% 25%;
+    --primary-glow: 120 100% 60%;
 
-    /* Educational Purple Accents */
-    --secondary: 260 60% 65%;
-    --secondary-foreground: 0 0% 98%;
-    --secondary-hover: 260 60% 55%;
-    --secondary-light: 260 60% 95%;
+    /* Matrix Secondary - Electric Cyan */
+    --secondary: 180 100% 50%;
+    --secondary-foreground: 0 0% 5%;
+    --secondary-hover: 180 100% 40%;
+    --secondary-light: 180 100% 25%;
+    --secondary-glow: 180 100% 60%;
 
-    /* Neutral System */
-    --muted: 215 15% 96%;
-    --muted-foreground: 215 15% 45%;
+    /* Neutral Matrix System */
+    --muted: 0 0% 15%;
+    --muted-foreground: 120 30% 60%;
 
-    --accent: 215 85% 95%;
-    --accent-foreground: 215 85% 25%;
+    --accent: 120 100% 15%;
+    --accent-foreground: 120 100% 80%;
 
-    /* Status Colors */
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 98%;
-    --success-light: 142 76% 95%;
+    /* Status Colors - Matrix Style */
+    --success: 120 100% 40%;
+    --success-foreground: 0 0% 5%;
+    --success-light: 120 100% 20%;
+    --success-glow: 120 100% 50%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 98%;
-    --warning-light: 38 92% 95%;
+    --warning: 45 100% 50%;
+    --warning-foreground: 0 0% 5%;
+    --warning-light: 45 100% 20%;
+    --warning-glow: 45 100% 60%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --destructive-light: 0 84% 95%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 95%;
+    --destructive-light: 0 100% 20%;
+    --destructive-glow: 0 100% 60%;
 
     /* Interface Elements */
-    --border: 215 15% 88%;
-    --input: 215 15% 96%;
-    --ring: 215 85% 55%;
+    --border: 120 50% 20%;
+    --input: 0 0% 12%;
+    --ring: 120 100% 50%;
 
     /* Layout & Spacing */
-    --radius: 0.75rem;
-    --content-max-width: 1200px;
+    --radius: 0.25rem;
+    --content-max-width: 1400px;
 
-    /* Gradients for visual appeal */
-    --gradient-primary: linear-gradient(135deg, hsl(215 85% 55%), hsl(260 60% 65%));
-    --gradient-hero: linear-gradient(135deg, hsl(215 85% 55%) 0%, hsl(260 60% 65%) 50%, hsl(215 85% 45%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(215 15% 98%) 100%);
+    /* Matrix Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(120 100% 50%) 0%, hsl(180 100% 50%) 50%, hsl(120 100% 40%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 5%) 0%, hsl(120 100% 5%) 30%, hsl(0 0% 8%) 70%, hsl(120 100% 3%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 8%) 0%, hsl(120 20% 10%) 50%, hsl(0 0% 6%) 100%);
+    --gradient-matrix: radial-gradient(circle at 50% 50%, hsl(120 100% 20% / 0.3) 0%, transparent 70%);
+    --gradient-glow: linear-gradient(90deg, transparent 0%, hsl(120 100% 50% / 0.3) 50%, transparent 100%);
 
-    /* Shadows for depth */
-    --shadow-sm: 0 1px 2px 0 hsl(215 15% 15% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(215 15% 15% / 0.1), 0 2px 4px -1px hsl(215 15% 15% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(215 15% 15% / 0.1), 0 4px 6px -2px hsl(215 15% 15% / 0.05);
-    --shadow-xl: 0 20px 25px -5px hsl(215 15% 15% / 0.1), 0 10px 10px -5px hsl(215 15% 15% / 0.04);
+    /* Matrix Shadows & Glows */
+    --shadow-sm: 0 1px 2px 0 hsl(120 100% 50% / 0.1);
+    --shadow-md: 0 4px 6px -1px hsl(120 100% 50% / 0.2), 0 2px 4px -1px hsl(120 100% 50% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(120 100% 50% / 0.3), 0 4px 6px -2px hsl(120 100% 50% / 0.2);
+    --shadow-xl: 0 20px 25px -5px hsl(120 100% 50% / 0.4), 0 10px 10px -5px hsl(120 100% 50% / 0.3);
+    --shadow-matrix: 0 0 30px hsl(120 100% 50% / 0.5), inset 0 0 30px hsl(120 100% 50% / 0.1);
+    --shadow-neon: 0 0 5px hsl(120 100% 50%), 0 0 10px hsl(120 100% 50%), 0 0 15px hsl(120 100% 50%);
 
     /* Animation easing */
     --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
     --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --ease-matrix: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar Matrix */
+    --sidebar-background: 0 0% 7%;
+    --sidebar-foreground: 120 100% 80%;
+    --sidebar-primary: 120 100% 50%;
+    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-accent: 120 50% 15%;
+    --sidebar-accent-foreground: 120 100% 80%;
+    --sidebar-border: 120 50% 20%;
+    --sidebar-ring: 120 100% 50%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Matrix mode is the default - keeping same values */
+    --background: 0 0% 5%;
+    --foreground: 120 100% 85%;
+    --card: 0 0% 8%;
+    --card-foreground: 120 100% 85%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 120 100% 85%;
+    --primary: 120 100% 50%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 180 100% 50%;
+    --secondary-foreground: 0 0% 5%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 120 30% 60%;
+    --accent: 120 100% 15%;
+    --accent-foreground: 120 100% 80%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 120 50% 20%;
+    --input: 0 0% 12%;
+    --ring: 120 100% 50%;
+    --sidebar-background: 0 0% 7%;
+    --sidebar-foreground: 120 100% 80%;
+    --sidebar-primary: 120 100% 50%;
+    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-accent: 120 50% 15%;
+    --sidebar-accent-foreground: 120 100% 80%;
+    --sidebar-border: 120 50% 20%;
+    --sidebar-ring: 120 100% 50%;
   }
 }
 
@@ -136,16 +135,56 @@ Professional educational platform with modern aesthetics */
 
   body {
     @apply bg-background text-foreground;
-    @apply font-sans antialiased;
+    @apply font-mono antialiased;
+    background-image: 
+      var(--gradient-matrix),
+      radial-gradient(circle at 20% 50%, hsl(120 100% 50% / 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, hsl(180 100% 50% / 0.02) 0%, transparent 50%);
+    background-attachment: fixed;
   }
 
-  /* Educational components */
+  /* Matrix Digital Rain Effect */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      linear-gradient(90deg, transparent 0%, hsl(120 100% 50% / 0.02) 50%, transparent 100%),
+      linear-gradient(0deg, transparent 0%, hsl(120 100% 50% / 0.01) 50%, transparent 100%);
+    background-size: 200px 200px, 100px 100px;
+    animation: matrix-flow 20s linear infinite;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* Matrix Components */
   .gradient-hero {
     background: var(--gradient-hero);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gradient-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: var(--gradient-glow);
+    animation: matrix-scan 3s ease-in-out infinite;
   }
 
   .gradient-card {
     background: var(--gradient-card);
+    border: 1px solid hsl(120 50% 20%);
+  }
+
+  .gradient-matrix {
+    background: var(--gradient-matrix);
   }
 
   .shadow-custom {
@@ -156,7 +195,15 @@ Professional educational platform with modern aesthetics */
     box-shadow: var(--shadow-lg);
   }
 
-  /* Smooth transitions for professional feel */
+  .shadow-matrix {
+    box-shadow: var(--shadow-matrix);
+  }
+
+  .shadow-neon {
+    box-shadow: var(--shadow-neon);
+  }
+
+  /* Matrix Transitions */
   .transition-smooth {
     transition: all 0.3s var(--ease-smooth);
   }
@@ -164,70 +211,195 @@ Professional educational platform with modern aesthetics */
   .transition-bounce {
     transition: all 0.4s var(--ease-bounce);
   }
+
+  .transition-matrix {
+    transition: all 0.4s var(--ease-matrix);
+  }
+
+  /* Matrix Text Effects */
+  .text-glow {
+    text-shadow: 0 0 10px currentColor;
+  }
+
+  .text-matrix {
+    font-family: 'JetBrains Mono', monospace;
+    text-shadow: 0 0 5px hsl(120 100% 50%);
+  }
+
+  .text-digital {
+    font-family: 'Orbitron', monospace;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+  }
 }
 
 @layer components {
-  /* Educational card component */
-  .card-educational {
-    @apply bg-card border border-border rounded-lg shadow-custom transition-smooth;
-    @apply hover:shadow-custom-lg hover:border-primary/20;
+  /* Matrix Card Component */
+  .card-matrix {
+    @apply bg-card border border-border rounded shadow-matrix transition-matrix;
+    @apply hover:shadow-neon hover:border-primary/50;
+    @apply relative overflow-hidden;
+    background: var(--gradient-card);
   }
 
-  /* Status badges */
+  .card-matrix::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, hsl(120 100% 50% / 0.1), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .card-matrix:hover::before {
+    left: 100%;
+  }
+
+  /* Matrix Status Badges */
   .badge-status {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-3 py-1 rounded text-xs font-mono font-medium;
+    @apply border transition-matrix;
+    text-shadow: 0 0 5px currentColor;
   }
 
   .badge-received {
-    @apply bg-accent text-accent-foreground;
+    @apply bg-accent text-accent-foreground border-accent;
+    box-shadow: 0 0 10px hsl(120 100% 15% / 0.5);
   }
 
   .badge-reviewing {
-    @apply bg-warning/10 text-warning border border-warning/20;
+    @apply bg-warning/20 text-warning border-warning/50;
+    box-shadow: 0 0 10px hsl(45 100% 50% / 0.3);
   }
 
   .badge-validated {
-    @apply bg-success/10 text-success border border-success/20;
+    @apply bg-success/20 text-success border-success/50;
+    box-shadow: 0 0 10px hsl(120 100% 40% / 0.4);
   }
 
   .badge-rejected {
-    @apply bg-destructive/10 text-destructive border border-destructive/20;
+    @apply bg-destructive/20 text-destructive border-destructive/50;
+    box-shadow: 0 0 10px hsl(0 100% 50% / 0.3);
   }
 
-  /* Educational form inputs */
-  .input-educational {
-    @apply border border-input bg-background px-3 py-2 text-sm;
+  /* Matrix Form Inputs */
+  .input-matrix {
+    @apply border border-border bg-input px-3 py-2 text-sm font-mono;
     @apply ring-offset-background placeholder:text-muted-foreground;
-    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-0;
     @apply disabled:cursor-not-allowed disabled:opacity-50;
-    @apply rounded-md transition-smooth;
+    @apply rounded transition-matrix;
+    background: linear-gradient(145deg, hsl(0 0% 12%), hsl(120 20% 15%));
+    border-color: hsl(120 50% 20%);
   }
 
-  /* Educational buttons */
-  .btn-primary {
-    @apply bg-primary text-primary-foreground;
-    @apply hover:bg-primary-hover focus:ring-primary;
-    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium;
-    @apply rounded-md ring-offset-background transition-smooth;
-    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+  .input-matrix:focus {
+    border-color: hsl(120 100% 50%);
+    box-shadow: 0 0 10px hsl(120 100% 50% / 0.3);
+    text-shadow: 0 0 5px hsl(120 100% 85%);
+  }
+
+  /* Matrix Buttons */
+  .btn-matrix {
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-mono font-medium;
+    @apply rounded ring-offset-background transition-matrix;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-0;
     @apply disabled:pointer-events-none disabled:opacity-50;
+    @apply relative overflow-hidden;
+    text-shadow: 0 0 5px currentColor;
+  }
+
+  .btn-matrix::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, hsl(120 100% 50% / 0.2), transparent);
+    transition: left 0.3s ease;
+  }
+
+  .btn-matrix:hover::before {
+    left: 100%;
+  }
+
+  .btn-primary {
+    @apply btn-matrix bg-primary text-primary-foreground;
+    @apply hover:bg-primary-hover focus:ring-primary;
+    border: 1px solid hsl(120 100% 50%);
+    box-shadow: 0 0 15px hsl(120 100% 50% / 0.4);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 0 25px hsl(120 100% 50% / 0.6);
   }
 
   .btn-secondary {
-    @apply bg-secondary text-secondary-foreground;
+    @apply btn-matrix bg-secondary text-secondary-foreground;
     @apply hover:bg-secondary-hover focus:ring-secondary;
-    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium;
-    @apply rounded-md ring-offset-background transition-smooth;
-    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
-    @apply disabled:pointer-events-none disabled:opacity-50;
+    border: 1px solid hsl(180 100% 50%);
+    box-shadow: 0 0 15px hsl(180 100% 50% / 0.4);
+  }
+
+  .btn-secondary:hover {
+    box-shadow: 0 0 25px hsl(180 100% 50% / 0.6);
   }
 
   .btn-outline {
-    @apply border border-primary text-primary bg-background;
+    @apply btn-matrix border border-primary text-primary bg-transparent;
     @apply hover:bg-primary hover:text-primary-foreground;
-    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium;
-    @apply rounded-md ring-offset-background transition-smooth;
-    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
-    @apply disabled:pointer-events-none disabled:opacity-50;
+    @apply focus:ring-primary;
+    background: linear-gradient(145deg, transparent, hsl(120 100% 50% / 0.05));
+  }
+
+  .btn-outline:hover {
+    box-shadow: 0 0 20px hsl(120 100% 50% / 0.5);
+  }
+
+  /* Matrix Animations */
+  @keyframes matrix-flow {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  @keyframes matrix-scan {
+    0%, 100% { left: -100%; }
+    50% { left: 100%; }
+  }
+
+  @keyframes matrix-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  @keyframes matrix-glow {
+    0%, 100% { text-shadow: 0 0 5px currentColor; }
+    50% { text-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+  }
+
+  /* Matrix Utility Classes */
+  .animate-matrix-pulse {
+    animation: matrix-pulse 2s ease-in-out infinite;
+  }
+
+  .animate-matrix-glow {
+    animation: matrix-glow 2s ease-in-out infinite;
+  }
+
+  .hover-matrix {
+    @apply transition-matrix hover:text-primary hover:shadow-neon;
+  }
+
+  .border-matrix {
+    border: 1px solid hsl(120 50% 20%);
+    background: linear-gradient(145deg, transparent, hsl(120 100% 50% / 0.03));
+  }
+
+  .border-matrix:hover {
+    border-color: hsl(120 100% 50%);
+    box-shadow: 0 0 10px hsl(120 100% 50% / 0.3);
   }
 }
