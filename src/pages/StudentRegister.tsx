@@ -244,6 +244,9 @@ export default function StudentRegister() {
                     minLength={6}
                     className="input-educational"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Doit contenir : majuscules, minuscules, chiffres et symboles
+                  </p>
                 </div>
                 
                 <div className="space-y-2">

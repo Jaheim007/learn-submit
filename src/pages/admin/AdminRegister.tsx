@@ -149,7 +149,7 @@ export default function AdminRegister() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mot de passe (min. 6 caractères)"
+                  placeholder="Mot de passe"
                   required
                 />
                 <Button
@@ -166,6 +166,9 @@ export default function AdminRegister() {
                   )}
                 </Button>
               </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Doit contenir : majuscules, minuscules, chiffres et symboles
+              </p>
             </div>
 
             <div>

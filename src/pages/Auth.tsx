@@ -206,6 +206,11 @@ export default function Auth() {
                     required
                     className="input-educational"
                   />
+                  {isSignUp && (
+                    <p className="text-xs text-muted-foreground">
+                      Doit contenir : majuscules, minuscules, chiffres et symboles
+                    </p>
+                  )}
                 </div>
                 
                 {isSignUp && (
