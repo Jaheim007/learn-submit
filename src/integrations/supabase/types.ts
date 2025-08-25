@@ -197,13 +197,6 @@ export type Database = {
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "enrollments_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "v_students_admin"
-            referencedColumns: ["id"]
-          },
         ]
       }
       formation_inscriptions: {
@@ -714,13 +707,6 @@ export type Database = {
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "submissions_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "v_students_admin"
-            referencedColumns: ["id"]
-          },
         ]
       }
       subsidy_applications: {
@@ -850,45 +836,7 @@ export type Database = {
       }
     }
     Views: {
-      v_students_admin: {
-        Row: {
-          created_at: string | null
-          email: string | null
-          full_name: string | null
-          github_profile: string | null
-          id: string | null
-          is_active: boolean | null
-          phone: string | null
-          telegram: string | null
-          user_id: string | null
-          whatsapp: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          email?: string | null
-          full_name?: string | null
-          github_profile?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          phone?: string | null
-          telegram?: string | null
-          user_id?: string | null
-          whatsapp?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          email?: string | null
-          full_name?: string | null
-          github_profile?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          phone?: string | null
-          telegram?: string | null
-          user_id?: string | null
-          whatsapp?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       is_admin: {
