@@ -565,6 +565,36 @@ export type Database = {
         }
         Relationships: []
       }
+      siteviraldomains: {
+        Row: {
+          created_at: string
+          description_activite: string
+          email: string
+          id: string
+          nom: string
+          sous_domaine: string
+          telephone: string
+        }
+        Insert: {
+          created_at?: string
+          description_activite: string
+          email: string
+          id?: string
+          nom: string
+          sous_domaine: string
+          telephone: string
+        }
+        Update: {
+          created_at?: string
+          description_activite?: string
+          email?: string
+          id?: string
+          nom?: string
+          sous_domaine?: string
+          telephone?: string
+        }
+        Relationships: []
+      }
       students: {
         Row: {
           created_at: string
@@ -816,6 +846,60 @@ export type Database = {
         }
         Relationships: []
       }
+      unified_registrations: {
+        Row: {
+          city: string | null
+          country: string
+          created_at: string
+          email: string
+          experience: string | null
+          financial_situation: string
+          first_name: string
+          id: string
+          last_name: string
+          motivation: string
+          optional_fees_acknowledgment: boolean
+          profession: string | null
+          status: string
+          updated_at: string
+          whatsapp: string
+        }
+        Insert: {
+          city?: string | null
+          country: string
+          created_at?: string
+          email: string
+          experience?: string | null
+          financial_situation: string
+          first_name: string
+          id?: string
+          last_name: string
+          motivation: string
+          optional_fees_acknowledgment?: boolean
+          profession?: string | null
+          status: string
+          updated_at?: string
+          whatsapp: string
+        }
+        Update: {
+          city?: string | null
+          country?: string
+          created_at?: string
+          email?: string
+          experience?: string | null
+          financial_situation?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          motivation?: string
+          optional_fees_acknowledgment?: boolean
+          profession?: string | null
+          status?: string
+          updated_at?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -831,6 +915,36 @@ export type Database = {
           created_at?: string
           role?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      vac25: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          subject?: string
+          updated_at?: string
         }
         Relationships: []
       }
