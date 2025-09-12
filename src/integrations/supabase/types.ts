@@ -143,6 +143,9 @@ export type Database = {
           description: string | null
           id: number
           is_active: boolean
+          is_open_for_signup: boolean | null
+          session_name: string | null
+          signup_deadline: string | null
           title: string
         }
         Insert: {
@@ -151,6 +154,9 @@ export type Database = {
           description?: string | null
           id?: number
           is_active?: boolean
+          is_open_for_signup?: boolean | null
+          session_name?: string | null
+          signup_deadline?: string | null
           title: string
         }
         Update: {
@@ -159,6 +165,9 @@ export type Database = {
           description?: string | null
           id?: number
           is_active?: boolean
+          is_open_for_signup?: boolean | null
+          session_name?: string | null
+          signup_deadline?: string | null
           title?: string
         }
         Relationships: []

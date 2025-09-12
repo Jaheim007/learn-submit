@@ -36,13 +36,17 @@ export function ClassSelectionModal({ isOpen, onClassSelected }: ClassSelectionM
     try {
       const { data, error } = await supabase
         .from('classes')
-        .select('id, code, title')
-        .in('code', ['G1', 'G2', 'G3', 'G4', 'G5'])
+        .select('id, code, title, session_name')
+        .eq('is_open_for_signup', true)
         .eq('is_active', true)
         .order('code');
 
       if (error) throw error;
       setClasses(data || []);
+      
+      if (!data || data.length === 0) {
+        setError('Aucun groupe ouvert aux inscriptions pour le moment.');
+      }
     } catch (error) {
       console.error('Error fetching classes:', error);
       setError('Erreur lors du chargement des groupes de classe');
@@ -118,7 +122,7 @@ export function ClassSelectionModal({ isOpen, onClassSelected }: ClassSelectionM
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Sélectionnez votre groupe. Ce choix est définitif et ne pourra pas être modifié.
+              Choisissez votre groupe (2ème Session). Ce choix est définitif.
             </AlertDescription>
           </Alert>
 

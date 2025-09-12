@@ -41,8 +41,8 @@ export default function Auth() {
     try {
       const { data, error } = await supabase
         .from('classes')
-        .select('id, code, title')
-        .in('code', ['G1', 'G2', 'G3', 'G4', 'G5'])
+        .select('id, code, title, session_name')
+        .eq('is_open_for_signup', true)
         .eq('is_active', true)
         .order('code');
 
@@ -230,10 +230,10 @@ export default function Auth() {
 
                 {isSignUp && (
                   <div className="space-y-2">
-                    <Label htmlFor="class-select">Choisissez votre groupe de classe</Label>
+                    <Label htmlFor="class-select">Choisissez votre groupe (2ème Session)</Label>
                     <Select value={selectedClassId} onValueChange={setSelectedClassId}>
                       <SelectTrigger className="input-educational">
-                        <SelectValue placeholder="Sélectionnez votre groupe..." />
+                        <SelectValue placeholder={classes.length > 0 ? "Sélectionnez votre groupe..." : "Aucun groupe ouvert aux inscriptions"} />
                       </SelectTrigger>
                       <SelectContent>
                         {classes.map((cls) => (
@@ -246,7 +246,10 @@ export default function Auth() {
                     <Alert>
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
-                        Sélectionnez votre groupe. Ce choix est définitif.
+                        {classes.length > 0 
+                          ? "Choisissez votre groupe (2ème Session). Ce choix est définitif."
+                          : "Aucun groupe ouvert aux inscriptions pour le moment."
+                        }
                       </AlertDescription>
                     </Alert>
                   </div>

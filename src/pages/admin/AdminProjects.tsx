@@ -32,6 +32,7 @@ interface Class {
   id: number;
   code: string;
   title: string;
+  session_name?: string;
 }
 
 interface ProjectFormData {
@@ -85,9 +86,10 @@ export default function AdminProjects() {
         
         supabase
           .from('classes')
-          .select('id, code, title')
+          .select('id, code, title, session_name')
           .eq('is_active', true)
-          .order('code')
+          .order('session_name', { ascending: true })
+          .order('code', { ascending: true })
       ]);
 
       if (classesResponse.data) {
@@ -476,21 +478,52 @@ export default function AdminProjects() {
 
         <div>
           <Label>Classes cibles *</Label>
-          <div className="grid grid-cols-2 gap-2 mt-2">
-            {classes.map((classe) => (
-              <div key={classe.id} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id={`class-${classe.id}`}
-                  checked={formData.class_ids.includes(classe.id)}
-                  onChange={() => handleClassToggle(classe.id)}
-                  className="rounded"
-                />
-                <label htmlFor={`class-${classe.id}`} className="text-sm">
-                  {classe.code} - {classe.title}
-                </label>
+          <div className="space-y-4 mt-2">
+            {/* Group classes by session */}
+            {Array.from(new Set(classes.map(c => c.session_name).filter(Boolean))).map(sessionName => (
+              <div key={sessionName} className="space-y-2">
+                <h4 className="font-medium text-sm text-muted-foreground">{sessionName}</h4>
+                <div className="grid grid-cols-2 gap-2 pl-4">
+                  {classes.filter(c => c.session_name === sessionName).map((classe) => (
+                    <div key={classe.id} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`class-${classe.id}`}
+                        checked={formData.class_ids.includes(classe.id)}
+                        onChange={() => handleClassToggle(classe.id)}
+                        className="rounded"
+                      />
+                      <label htmlFor={`class-${classe.id}`} className="text-sm">
+                        {classe.code} - {classe.title}
+                      </label>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
+            
+            {/* Show classes without session */}
+            {classes.filter(c => !c.session_name).length > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm text-muted-foreground">Autres classes</h4>
+                <div className="grid grid-cols-2 gap-2 pl-4">
+                  {classes.filter(c => !c.session_name).map((classe) => (
+                    <div key={classe.id} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`class-${classe.id}`}
+                        checked={formData.class_ids.includes(classe.id)}
+                        onChange={() => handleClassToggle(classe.id)}
+                        className="rounded"
+                      />
+                      <label htmlFor={`class-${classe.id}`} className="text-sm">
+                        {classe.code} - {classe.title}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

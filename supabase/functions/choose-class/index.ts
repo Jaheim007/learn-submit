@@ -41,18 +41,24 @@ serve(async (req) => {
       )
     }
 
-    // Validate class exists and is a valid group
+    // Validate class exists and is open for signup
     const { data: classData, error: classError } = await supabaseClient
       .from('classes')
-      .select('id, code, title')
+      .select('id, code, title, is_open_for_signup')
       .eq('id', class_id)
-      .in('code', ['G1', 'G2', 'G3', 'G4', 'G5'])
       .eq('is_active', true)
       .single()
 
     if (classError || !classData) {
       return new Response(
         JSON.stringify({ error: 'Invalid class selection' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (!classData.is_open_for_signup) {
+      return new Response(
+        JSON.stringify({ error: 'Les inscriptions pour ce groupe sont fermées. Veuillez choisir un groupe de la 2ème Session.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
