@@ -172,6 +172,153 @@ export type Database = {
         }
         Relationships: []
       }
+      end_of_training_forms: {
+        Row: {
+          additional_resources: string | null
+          attendance_mode: string | null
+          attended_all_sessions: boolean
+          certificate_email: string
+          certificate_name: string
+          city: string | null
+          cohort: string
+          company_name: string | null
+          company_sector: string | null
+          completed_projects: string[] | null
+          concrete_builds: string
+          country: string | null
+          created_at: string
+          current_address: string
+          current_occupation: string
+          date_of_birth: string
+          declaration_accepted: boolean
+          education_level: string
+          email: string
+          full_name: string
+          gender: string
+          generated_income: boolean
+          has_partners_clients: boolean
+          id: string
+          improvement_suggestions: string | null
+          income_amount: string | null
+          main_goal: string
+          main_trainers: string[] | null
+          most_useful_skill: string
+          nationality: string
+          overall_rating: number
+          partners_clients_count: number | null
+          phone: string
+          plans_to_launch_company: boolean
+          portfolio_link: string
+          projected_income_12m: string | null
+          projected_income_3m: string | null
+          projected_income_6m: string | null
+          recommendation_reason: string | null
+          skill_needs_improvement: string
+          submitted_all_projects: boolean
+          trainer_ratings: Json | null
+          updated_at: string
+          vision_3_years: string
+          wants_certificate: boolean
+          would_recommend: boolean
+        }
+        Insert: {
+          additional_resources?: string | null
+          attendance_mode?: string | null
+          attended_all_sessions: boolean
+          certificate_email: string
+          certificate_name: string
+          city?: string | null
+          cohort: string
+          company_name?: string | null
+          company_sector?: string | null
+          completed_projects?: string[] | null
+          concrete_builds: string
+          country?: string | null
+          created_at?: string
+          current_address: string
+          current_occupation: string
+          date_of_birth: string
+          declaration_accepted: boolean
+          education_level: string
+          email: string
+          full_name: string
+          gender: string
+          generated_income: boolean
+          has_partners_clients: boolean
+          id?: string
+          improvement_suggestions?: string | null
+          income_amount?: string | null
+          main_goal: string
+          main_trainers?: string[] | null
+          most_useful_skill: string
+          nationality: string
+          overall_rating: number
+          partners_clients_count?: number | null
+          phone: string
+          plans_to_launch_company: boolean
+          portfolio_link: string
+          projected_income_12m?: string | null
+          projected_income_3m?: string | null
+          projected_income_6m?: string | null
+          recommendation_reason?: string | null
+          skill_needs_improvement: string
+          submitted_all_projects: boolean
+          trainer_ratings?: Json | null
+          updated_at?: string
+          vision_3_years: string
+          wants_certificate: boolean
+          would_recommend: boolean
+        }
+        Update: {
+          additional_resources?: string | null
+          attendance_mode?: string | null
+          attended_all_sessions?: boolean
+          certificate_email?: string
+          certificate_name?: string
+          city?: string | null
+          cohort?: string
+          company_name?: string | null
+          company_sector?: string | null
+          completed_projects?: string[] | null
+          concrete_builds?: string
+          country?: string | null
+          created_at?: string
+          current_address?: string
+          current_occupation?: string
+          date_of_birth?: string
+          declaration_accepted?: boolean
+          education_level?: string
+          email?: string
+          full_name?: string
+          gender?: string
+          generated_income?: boolean
+          has_partners_clients?: boolean
+          id?: string
+          improvement_suggestions?: string | null
+          income_amount?: string | null
+          main_goal?: string
+          main_trainers?: string[] | null
+          most_useful_skill?: string
+          nationality?: string
+          overall_rating?: number
+          partners_clients_count?: number | null
+          phone?: string
+          plans_to_launch_company?: boolean
+          portfolio_link?: string
+          projected_income_12m?: string | null
+          projected_income_3m?: string | null
+          projected_income_6m?: string | null
+          recommendation_reason?: string | null
+          skill_needs_improvement?: string
+          submitted_all_projects?: boolean
+          trainer_ratings?: Json | null
+          updated_at?: string
+          vision_3_years?: string
+          wants_certificate?: boolean
+          would_recommend?: boolean
+        }
+        Relationships: []
+      }
       enrollments: {
         Row: {
           class_id: number
@@ -574,6 +721,84 @@ export type Database = {
         }
         Relationships: []
       }
+      sensitive_data_access_logs: {
+        Row: {
+          access_reason: string | null
+          accessed_fields: string[] | null
+          action: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          record_id: string | null
+          table_name: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          access_reason?: string | null
+          accessed_fields?: string[] | null
+          action: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          record_id?: string | null
+          table_name: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          access_reason?: string | null
+          accessed_fields?: string[] | null
+          action?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          record_id?: string | null
+          table_name?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      session3: {
+        Row: {
+          country: string
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          motivation: string
+          phone: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          motivation: string
+          phone?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          motivation?: string
+          phone?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       siteviraldomains: {
         Row: {
           created_at: string
@@ -962,6 +1187,97 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_full_training_form: {
+        Args: { access_reason: string; form_id: string }
+        Returns: {
+          additional_resources: string | null
+          attendance_mode: string | null
+          attended_all_sessions: boolean
+          certificate_email: string
+          certificate_name: string
+          city: string | null
+          cohort: string
+          company_name: string | null
+          company_sector: string | null
+          completed_projects: string[] | null
+          concrete_builds: string
+          country: string | null
+          created_at: string
+          current_address: string
+          current_occupation: string
+          date_of_birth: string
+          declaration_accepted: boolean
+          education_level: string
+          email: string
+          full_name: string
+          gender: string
+          generated_income: boolean
+          has_partners_clients: boolean
+          id: string
+          improvement_suggestions: string | null
+          income_amount: string | null
+          main_goal: string
+          main_trainers: string[] | null
+          most_useful_skill: string
+          nationality: string
+          overall_rating: number
+          partners_clients_count: number | null
+          phone: string
+          plans_to_launch_company: boolean
+          portfolio_link: string
+          projected_income_12m: string | null
+          projected_income_3m: string | null
+          projected_income_6m: string | null
+          recommendation_reason: string | null
+          skill_needs_improvement: string
+          submitted_all_projects: boolean
+          trainer_ratings: Json | null
+          updated_at: string
+          vision_3_years: string
+          wants_certificate: boolean
+          would_recommend: boolean
+        }[]
+      }
+      get_masked_training_forms: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          additional_resources: string
+          attendance_mode: string
+          attended_all_sessions: boolean
+          city_masked: string
+          cohort: string
+          concrete_builds: string
+          country: string
+          created_at: string
+          current_occupation: string
+          date_of_birth: string
+          declaration_accepted: boolean
+          education_level: string
+          email_masked: string
+          full_name_masked: string
+          gender: string
+          generated_income: boolean
+          id: string
+          improvement_suggestions: string
+          main_goal: string
+          most_useful_skill: string
+          nationality: string
+          overall_rating: number
+          phone_masked: string
+          plans_to_launch_company: boolean
+          recommendation_reason: string
+          skill_needs_improvement: string
+          submitted_all_projects: boolean
+          updated_at: string
+          vision_3_years: string
+          wants_certificate: boolean
+          would_recommend: boolean
+        }[]
+      }
+      get_training_forms_stats: {
+        Args: { access_reason: string; date_from?: string; date_to?: string }
+        Returns: Json
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -973,6 +1289,20 @@ export type Database = {
       is_supervisor: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      log_sensitive_data_access: {
+        Args: {
+          p_access_reason?: string
+          p_accessed_fields?: string[]
+          p_action: string
+          p_record_id?: string
+          p_table_name: string
+        }
+        Returns: undefined
+      }
+      mask_sensitive_data: {
+        Args: { mask_type?: string; original_value: string }
+        Returns: string
       }
     }
     Enums: {
