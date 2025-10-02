@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,8 @@ import { Search, Eye, FileText, ExternalLink, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useRefreshInterval } from '@/hooks/useRefreshInterval';
+import { RefreshHeader } from '@/components/admin/RefreshHeader';
 
 interface Submission {
   id: string;
@@ -302,6 +304,7 @@ export default function AdminSubmissions() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [selectedProject, setSelectedProject] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
@@ -309,9 +312,13 @@ export default function AdminSubmissions() {
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
+  // Debounce search term
   useEffect(() => {
-    loadData();
-  }, [latestOnly]);
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const loadData = async () => {
     try {
@@ -385,6 +392,17 @@ export default function AdminSubmissions() {
     }
   };
 
+  // Initial load only
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // Reload only when latestOnly changes
+  useEffect(() => {
+    if (!loading) loadData();
+  }, [latestOnly]);
+
+  const { lastRefreshTime, refresh } = useRefreshInterval(loadData);
 
   const updateSubmission = async (submissionId: string, updates: { status?: string; grade?: number; feedback?: string }) => {
     try {
@@ -446,11 +464,11 @@ export default function AdminSubmissions() {
     }
   };
 
-  const getFilteredSubmissions = () => {
+  const getFilteredSubmissions = useMemo(() => {
     return submissions.filter(submission => {
       // Search filter
-      if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
+      if (debouncedSearchTerm) {
+        const searchLower = debouncedSearchTerm.toLowerCase();
         if (!submission.student.full_name.toLowerCase().includes(searchLower) &&
             !submission.student.email.toLowerCase().includes(searchLower) &&
             !submission.project.title.toLowerCase().includes(searchLower)) {
@@ -475,7 +493,7 @@ export default function AdminSubmissions() {
       
       return true;
     });
-  };
+  }, [submissions, debouncedSearchTerm, selectedClass, selectedProject, selectedStatus]);
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -487,7 +505,7 @@ export default function AdminSubmissions() {
     }
   };
 
-  const filteredSubmissions = getFilteredSubmissions();
+  const filteredSubmissions = getFilteredSubmissions;
 
   if (loading) {
     return (
@@ -502,11 +520,18 @@ export default function AdminSubmissions() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Révision des soumissions</h1>
-        <p className="text-muted-foreground">
-          {filteredSubmissions.length} soumission{filteredSubmissions.length > 1 ? 's' : ''} trouvée{filteredSubmissions.length > 1 ? 's' : ''}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Révision des soumissions</h1>
+          <p className="text-muted-foreground">
+            {filteredSubmissions.length} soumission{filteredSubmissions.length > 1 ? 's' : ''} trouvée{filteredSubmissions.length > 1 ? 's' : ''}
+          </p>
+        </div>
+        <RefreshHeader 
+          lastRefreshTime={lastRefreshTime} 
+          onRefresh={refresh}
+          isRefreshing={loading}
+        />
       </div>
 
       {/* Filters */}

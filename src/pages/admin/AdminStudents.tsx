@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useRefreshInterval } from '@/hooks/useRefreshInterval';
+import { RefreshHeader } from '@/components/admin/RefreshHeader';
 
 interface Student {
   id: string;
@@ -35,12 +37,17 @@ export default function AdminStudents() {
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [showInactive, setShowInactive] = useState(false);
 
+  // Debounce search term
   useEffect(() => {
-    loadData();
-  }, []);
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const loadData = async () => {
     try {
@@ -128,6 +135,12 @@ export default function AdminStudents() {
     }
   };
 
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const { lastRefreshTime, refresh } = useRefreshInterval(loadData);
+
   const toggleStudentStatus = async (studentId: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
@@ -157,7 +170,7 @@ export default function AdminStudents() {
   };
 
   const exportToCSV = () => {
-    const filteredStudents = getFilteredStudents();
+    const filteredStudents = getFilteredStudents;
     const csvData = [
       ['Nom', 'Email', 'Classes', 'Soumissions', 'Statut', 'Date d\'inscription'],
       ...filteredStudents.map(student => [
@@ -178,14 +191,14 @@ export default function AdminStudents() {
     link.click();
   };
 
-  const getFilteredStudents = () => {
+  const getFilteredStudents = useMemo(() => {
     return students.filter(student => {
       // Status filter
       if (!showInactive && !student.is_active) return false;
       
       // Search filter
-      if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
+      if (debouncedSearchTerm) {
+        const searchLower = debouncedSearchTerm.toLowerCase();
         if (!student.full_name.toLowerCase().includes(searchLower) &&
             !student.email.toLowerCase().includes(searchLower)) {
           return false;
@@ -201,9 +214,9 @@ export default function AdminStudents() {
       
       return true;
     });
-  };
+  }, [students, debouncedSearchTerm, selectedClass, showInactive]);
 
-  const filteredStudents = getFilteredStudents();
+  const filteredStudents = getFilteredStudents;
 
   if (loading) {
     return (
@@ -225,10 +238,17 @@ export default function AdminStudents() {
             {filteredStudents.length} étudiant{filteredStudents.length > 1 ? 's' : ''} trouvé{filteredStudents.length > 1 ? 's' : ''}
           </p>
         </div>
-        <Button onClick={exportToCSV} variant="outline">
-          <Download className="h-4 w-4 mr-2" />
-          Exporter CSV
-        </Button>
+        <div className="flex items-center gap-4">
+          <RefreshHeader 
+            lastRefreshTime={lastRefreshTime} 
+            onRefresh={refresh}
+            isRefreshing={loading}
+          />
+          <Button onClick={exportToCSV} variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            Exporter CSV
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}

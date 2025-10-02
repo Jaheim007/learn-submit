@@ -14,6 +14,8 @@ import { Plus, Edit, Trash2, Eye, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useRefreshInterval } from '@/hooks/useRefreshInterval';
+import { RefreshHeader } from '@/components/admin/RefreshHeader';
 
 interface Project {
   id: number;
@@ -59,10 +61,6 @@ export default function AdminProjects() {
     max_resubmits: '3',
     class_ids: [],
   });
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   const loadData = async () => {
     try {
@@ -132,6 +130,12 @@ export default function AdminProjects() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const { lastRefreshTime, refresh } = useRefreshInterval(loadData);
 
   const resetForm = () => {
     setFormData({
@@ -317,7 +321,13 @@ export default function AdminProjects() {
             {projects.length} projet{projects.length > 1 ? 's' : ''}
           </p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <div className="flex items-center gap-4">
+          <RefreshHeader 
+            lastRefreshTime={lastRefreshTime} 
+            onRefresh={refresh}
+            isRefreshing={loading}
+          />
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openCreateDialog}>
               <Plus className="h-4 w-4 mr-2" />
@@ -331,6 +341,7 @@ export default function AdminProjects() {
             <ProjectForm />
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Projects Table */}
