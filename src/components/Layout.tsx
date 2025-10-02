@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRoles } from '@/hooks/useRoles';
 import { Button } from '@/components/ui/button';
 import { NotificationBell } from '@/components/NotificationBell';
-import { LogOut, User, BookOpen, Upload, FileText } from 'lucide-react';
+import { LogOut, User, BookOpen, Upload, FileText, Trophy } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface LayoutProps {
@@ -47,6 +47,7 @@ export function Layout({ children, showNavigation = true }: LayoutProps) {
     return [
       { label: 'Mes Projets', path: '/etudiant/mes-projets', icon: BookOpen },
       { label: 'Mes Soumissions', path: '/etudiant/mes-soumissions', icon: FileText },
+      { label: 'Classement', path: '/etudiant/leaderboard', icon: Trophy },
       { label: 'Mon Profil', path: '/profil', icon: User }
     ];
   };

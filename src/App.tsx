@@ -14,6 +14,7 @@ import Profile from "./pages/Profile";
 import StudentProjects from "./pages/StudentProjects";
 import SubmitProject from "./pages/SubmitProject";
 import StudentSubmissions from "./pages/StudentSubmissions";
+import StudentLeaderboard from "./pages/StudentLeaderboard";
 import StudentGuard from "./components/StudentGuard";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminGuard from "./components/admin/AdminGuard";
@@ -56,6 +57,7 @@ const App = () => (
               <Route path="/etudiant/mes-projets" element={<StudentGuard><StudentProjects /></StudentGuard>} />
               <Route path="/etudiant/soumettre" element={<StudentGuard><SubmitProject /></StudentGuard>} />
               <Route path="/etudiant/mes-soumissions" element={<StudentGuard><StudentSubmissions /></StudentGuard>} />
+              <Route path="/etudiant/leaderboard" element={<StudentGuard><StudentLeaderboard /></StudentGuard>} />
               
               {/* Admin auth routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
