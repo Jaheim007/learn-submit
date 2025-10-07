@@ -230,7 +230,7 @@ export default function Auth() {
 
                 {isSignUp && (
                   <div className="space-y-2">
-                    <Label htmlFor="class-select">Choisissez votre groupe (2ème Session)</Label>
+                    <Label htmlFor="class-select">Choisissez votre groupe</Label>
                     <Select value={selectedClassId} onValueChange={setSelectedClassId}>
                       <SelectTrigger className="input-educational">
                         <SelectValue placeholder={classes.length > 0 ? "Sélectionnez votre groupe..." : "Aucun groupe ouvert aux inscriptions"} />
@@ -247,7 +247,7 @@ export default function Auth() {
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
                         {classes.length > 0 
-                          ? "Choisissez votre groupe (2ème Session). Ce choix est définitif."
+                          ? "Choisissez votre groupe. Ce choix est définitif."
                           : "Aucun groupe ouvert aux inscriptions pour le moment."
                         }
                       </AlertDescription>
