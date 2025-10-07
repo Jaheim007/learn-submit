@@ -122,7 +122,7 @@ export function ClassSelectionModal({ isOpen, onClassSelected }: ClassSelectionM
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Choisissez votre groupe (2ème Session). Ce choix est définitif.
+              Choisissez votre groupe . Ce choix est définitif.
             </AlertDescription>
           </Alert>
 
