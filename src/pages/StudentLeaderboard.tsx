@@ -127,6 +127,7 @@ export default function StudentLeaderboard() {
   const cohortLabels: Record<string, string> = {
     phase1: 'Phase 1 (G1-G5)',
     phase2: 'Phase 2 (G6-G12)',
+    phase3: 'Formation 1000Sites 3eme Session (G31-G35)',
     advanced: 'Advanced Hacking'
   };
 
@@ -163,6 +164,7 @@ export default function StudentLeaderboard() {
                   <SelectContent>
                     <SelectItem value="phase1">Phase 1 (G1-G5)</SelectItem>
                     <SelectItem value="phase2">Phase 2 (G6-G12)</SelectItem>
+                    <SelectItem value="phase3">Formation 1000Sites 3eme Session (G31-G35)</SelectItem>
                     <SelectItem value="advanced">Advanced Hacking</SelectItem>
                   </SelectContent>
                 </Select>

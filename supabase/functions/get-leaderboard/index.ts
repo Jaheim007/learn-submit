@@ -24,6 +24,7 @@ serve(async (req) => {
     const cohortMap: Record<string, string[]> = {
       'phase1': ['G1', 'G2', 'G3', 'G4', 'G5'],
       'phase2': ['G6', 'G7', 'G8', 'G9', 'G10', 'G11', 'G12'],
+      'phase3': ['G31', 'G32', 'G33', 'G34', 'G35'],
       'advanced': ['AH']
     };
 
