@@ -38,6 +38,48 @@ export type Database = {
         }
         Relationships: []
       }
+      applications: {
+        Row: {
+          created_at: string
+          email: string
+          experience_level: string
+          first_name: string
+          id: string
+          last_name: string
+          motivation: string
+          phone: string
+          program: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          experience_level: string
+          first_name: string
+          id?: string
+          last_name: string
+          motivation: string
+          phone: string
+          program: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          experience_level?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          motivation?: string
+          phone?: string
+          program?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       class_enrollments: {
         Row: {
           class_id: number
@@ -169,6 +211,42 @@ export type Database = {
           session_name?: string | null
           signup_deadline?: string | null
           title?: string
+        }
+        Relationships: []
+      }
+      efi_preinscriptions: {
+        Row: {
+          created_at: string
+          email: string
+          format_cours: string
+          id: string
+          logiciels_souhaites: string[]
+          message: string | null
+          nom: string
+          telephone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          format_cours: string
+          id?: string
+          logiciels_souhaites: string[]
+          message?: string | null
+          nom: string
+          telephone: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          format_cours?: string
+          id?: string
+          logiciels_souhaites?: string[]
+          message?: string | null
+          nom?: string
+          telephone?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -728,7 +806,7 @@ export type Database = {
           action: string
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           record_id: string | null
           table_name: string
           user_agent: string | null
@@ -740,7 +818,7 @@ export type Database = {
           action: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           record_id?: string | null
           table_name: string
           user_agent?: string | null
@@ -752,7 +830,7 @@ export type Database = {
           action?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           record_id?: string | null
           table_name?: string
           user_agent?: string | null
@@ -1237,9 +1315,15 @@ export type Database = {
           wants_certificate: boolean
           would_recommend: boolean
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "end_of_training_forms"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_masked_training_forms: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           additional_resources: string
           attendance_mode: string
@@ -1278,18 +1362,9 @@ export type Database = {
         Args: { access_reason: string; date_from?: string; date_to?: string }
         Returns: Json
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_admin_user: {
-        Args: { uid?: string }
-        Returns: boolean
-      }
-      is_supervisor: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
+      is_admin_user: { Args: { uid?: string }; Returns: boolean }
+      is_supervisor: { Args: never; Returns: boolean }
       log_sensitive_data_access: {
         Args: {
           p_access_reason?: string
