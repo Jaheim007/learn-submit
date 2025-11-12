@@ -75,14 +75,6 @@ export default function AdminCourses() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const filesArray = Array.from(e.target.files);
-      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-      
-      const invalidFiles = filesArray.filter(file => !allowedTypes.includes(file.type));
-      if (invalidFiles.length > 0) {
-        toast.error('Seuls les fichiers PDF et Word sont autorisés');
-        return;
-      }
-      
       setFormData({ ...formData, files: filesArray });
     }
   };
@@ -184,7 +176,7 @@ export default function AdminCourses() {
       <Card>
         <CardHeader>
           <CardTitle>Uploader un nouveau cours</CardTitle>
-          <CardDescription>Ajoutez des PDF ou documents Word pour vos étudiants</CardDescription>
+          <CardDescription>Ajoutez tous types de fichiers pour vos étudiants</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleUpload} className="space-y-4">
@@ -229,11 +221,10 @@ export default function AdminCourses() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="file">Fichiers (PDF ou Word) *</Label>
+              <Label htmlFor="file">Fichiers *</Label>
               <Input
                 id="file"
                 type="file"
-                accept=".pdf,.doc,.docx"
                 onChange={handleFileChange}
                 multiple
                 required
