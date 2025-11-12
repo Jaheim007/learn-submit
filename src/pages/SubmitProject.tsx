@@ -161,7 +161,7 @@ const ProjectCard = ({ project, classId, existingSubmission, onSubmissionSuccess
 
   // Check deadline and resubmission limits
   const now = new Date();
-  const isAfterDeadline = project.deadline_at && new Date(project.deadline_at) < now;
+  const isAfterDeadline = project.deadline_at && new Date(project.deadline_at) <= now;
   const canResubmit = project.allow_resubmit && existingSubmission;
   const resubmitCount = existingSubmission?.version || 0;
   const hasReachedMaxResubmits = canResubmit && resubmitCount >= project.max_resubmits;

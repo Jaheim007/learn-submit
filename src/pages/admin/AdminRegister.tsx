@@ -108,101 +108,26 @@ export default function AdminRegister() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md border-destructive">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Créer un compte administrateur</CardTitle>
+          <CardTitle className="text-2xl font-bold text-destructive">Inscription fermée</CardTitle>
           <CardDescription>
-            Enregistrez-vous en tant qu'administrateur de la plateforme NYS
+            La création de comptes administrateurs est actuellement fermée
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="fullName">Nom complet</Label>
-              <Input
-                id="fullName"
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Votre nom complet"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@nys-africa.com"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="password">Mot de passe</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mot de passe"
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Doit contenir : majuscules, minuscules, chiffres et symboles
-              </p>
-            </div>
-
-            <div>
-              <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirmez votre mot de passe"
-                required
-              />
-            </div>
-
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={loading}
+        <CardContent className="space-y-4">
+          <p className="text-center text-muted-foreground">
+            Veuillez contacter un administrateur existant pour obtenir l'accès à la plateforme.
+          </p>
+          
+          <div className="pt-4 text-center">
+            <Button
+              variant="default"
+              onClick={() => navigate('/admin/login')}
+              className="w-full"
             >
-              {loading ? 'Création du compte...' : 'Créer le compte administrateur'}
+              Retour à la connexion
             </Button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
-              Vous avez déjà un compte administrateur ?{' '}
-              <Button
-                variant="link"
-                className="p-0 h-auto text-primary"
-                onClick={() => navigate('/admin/login')}
-              >
-                Connectez-vous
-              </Button>
-            </p>
           </div>
         </CardContent>
       </Card>

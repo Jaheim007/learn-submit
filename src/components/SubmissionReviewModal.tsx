@@ -126,7 +126,7 @@ export function SubmissionReviewModal({
                 <div>
                   <Label className="text-sm font-medium">Description du projet</Label>
                   <div className="mt-2 p-3 bg-muted rounded-md">
-                    <p className="text-sm">{submission.description}</p>
+                    <p className="text-sm whitespace-pre-wrap break-words">{submission.description}</p>
                   </div>
                 </div>
               )}
