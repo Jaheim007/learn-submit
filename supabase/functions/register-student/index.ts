@@ -83,10 +83,23 @@ serve(async (req) => {
 
     if (authError || !authUser.user) {
       console.error('Auth user creation failed:', authError);
+      
+      // Check for specific error codes
+      let errorMessage = authError?.message || 'Failed to create user';
+      let statusCode = 400;
+      
+      // Handle duplicate email error
+      if (authError?.message?.includes('already been registered') || authError?.code === 'email_exists') {
+        errorMessage = 'Cette adresse email est déjà utilisée';
+        statusCode = 422;
+      } else if (authError?.message?.includes('Password should be at least')) {
+        errorMessage = 'Le mot de passe doit contenir au moins 6 caractères';
+      }
+      
       return new Response(
-        JSON.stringify({ error: authError?.message || 'Failed to create user' }),
+        JSON.stringify({ error: errorMessage }),
         { 
-          status: 400, 
+          status: statusCode, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );

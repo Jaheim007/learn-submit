@@ -101,25 +101,22 @@ export default function StudentRegister() {
       });
 
       if (error || data?.error) {
-        let errorMessage = "Une erreur s'est produite";
+        let errorMessage = "Une erreur s'est produite lors de l'inscription";
         
         const err = error || data?.error;
+        
+        // Handle string errors (from edge function)
         if (typeof err === 'string') {
-          if (err.includes('already registered') || err.includes('User already registered')) {
-            errorMessage = "Cette adresse email est déjà utilisée";
-          } else if (err.includes('Password should be at least 6 characters')) {
-            errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
-          } else {
-            errorMessage = err;
-          }
-        } else if (err?.message) {
-          if (err.message.includes('already registered') || err.message.includes('User already registered')) {
-            errorMessage = "Cette adresse email est déjà utilisée";
-          } else if (err.message.includes('Password should be at least 6 characters')) {
-            errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
-          } else {
-            errorMessage = err.message;
-          }
+          errorMessage = err;
+        } 
+        // Handle error objects with message property
+        else if (err?.message) {
+          errorMessage = err.message;
+        }
+        // Handle FunctionsHttpError or FunctionsRelayError
+        else if (error) {
+          console.error('Edge function error:', error);
+          errorMessage = "Erreur de connexion au serveur. Veuillez réessayer.";
         }
 
         toast({
