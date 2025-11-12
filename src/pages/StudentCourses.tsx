@@ -15,14 +15,31 @@ interface CourseMaterial {
   file_type: string;
   file_url: string;
   created_at: string;
+  course_group_id: string;
   classes: {
     title: string;
     code: string;
   };
 }
 
+interface GroupedCourse {
+  course_group_id: string;
+  title: string;
+  description: string;
+  created_at: string;
+  class_code: string;
+  class_title: string;
+  files: {
+    id: string;
+    file_name: string;
+    file_url: string;
+    file_type: string;
+  }[];
+}
+
 export default function StudentCourses() {
   const [materials, setMaterials] = useState<CourseMaterial[]>([]);
+  const [groupedCourses, setGroupedCourses] = useState<GroupedCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -66,6 +83,39 @@ export default function StudentCourses() {
 
       if (error) throw error;
       setMaterials(data as any);
+      
+      // Group materials by course_group_id
+      const grouped = (data as CourseMaterial[]).reduce((acc, material) => {
+        const existingGroup = acc.find(g => g.course_group_id === material.course_group_id);
+        
+        if (existingGroup) {
+          existingGroup.files.push({
+            id: material.id,
+            file_name: material.file_name,
+            file_url: material.file_url,
+            file_type: material.file_type
+          });
+        } else {
+          acc.push({
+            course_group_id: material.course_group_id,
+            title: material.title,
+            description: material.description,
+            created_at: material.created_at,
+            class_code: material.classes.code,
+            class_title: material.classes.title,
+            files: [{
+              id: material.id,
+              file_name: material.file_name,
+              file_url: material.file_url,
+              file_type: material.file_type
+            }]
+          });
+        }
+        
+        return acc;
+      }, [] as GroupedCourse[]);
+      
+      setGroupedCourses(grouped);
     } catch (error: any) {
       toast.error('Erreur lors du chargement des cours');
       console.error(error);
@@ -74,24 +124,31 @@ export default function StudentCourses() {
     }
   };
 
-  const handleDownload = async (filePath: string, fileName: string) => {
+  const handleDownloadAll = async (files: GroupedCourse['files'], courseTitle: string) => {
     try {
-      const { data, error } = await supabase.storage
-        .from('course-materials')
-        .download(filePath);
-
-      if (error) throw error;
-
-      const url = URL.createObjectURL(data);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      toast.info(`Téléchargement de ${files.length} fichier${files.length > 1 ? 's' : ''}...`);
       
-      toast.success('Téléchargement réussi');
+      for (const file of files) {
+        const { data, error } = await supabase.storage
+          .from('course-materials')
+          .download(file.file_url);
+
+        if (error) throw error;
+
+        const url = URL.createObjectURL(data);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.file_name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        // Small delay between downloads to avoid browser blocking
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+      
+      toast.success('Tous les fichiers ont été téléchargés');
     } catch (error: any) {
       toast.error('Erreur lors du téléchargement');
       console.error(error);
@@ -127,7 +184,7 @@ export default function StudentCourses() {
         </div>
       </div>
 
-      {materials.length === 0 ? (
+      {groupedCourses.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">
             <BookOpen className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -139,32 +196,41 @@ export default function StudentCourses() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {materials.map((material) => (
-            <Card key={material.id} className="hover:shadow-lg transition-shadow">
+          {groupedCourses.map((course) => (
+            <Card key={course.course_group_id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <FileText className="h-8 w-8 text-primary" />
                   <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                    {material.classes.code}
+                    {course.class_code}
                   </span>
                 </div>
-                <CardTitle className="text-lg mt-2">{material.title}</CardTitle>
-                <CardDescription>{material.classes.title}</CardDescription>
+                <CardTitle className="text-lg mt-2">{course.title}</CardTitle>
+                <CardDescription>{cleanClassName(course.class_title)}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {material.description && (
+                {course.description && (
                   <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {material.description}
+                    {course.description}
                   </p>
                 )}
                 
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <FileText className="h-4 w-4" />
-                  <span>{material.file_name}</span>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {course.files.length} fichier{course.files.length > 1 ? 's' : ''} :
+                  </p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    {course.files.map((file) => (
+                      <li key={file.id} className="flex items-center gap-2">
+                        <FileText className="h-3 w-3" />
+                        <span className="truncate">{file.file_name}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
                 
                 <div className="text-xs text-muted-foreground">
-                  Ajouté le {new Date(material.created_at).toLocaleDateString('fr-FR', {
+                  Ajouté le {new Date(course.created_at).toLocaleDateString('fr-FR', {
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric'
@@ -172,11 +238,11 @@ export default function StudentCourses() {
                 </div>
 
                 <Button
-                  onClick={() => handleDownload(material.file_url, material.file_name)}
+                  onClick={() => handleDownloadAll(course.files, course.title)}
                   className="w-full"
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Télécharger
+                  Télécharger tout ({course.files.length})
                 </Button>
               </CardContent>
             </Card>

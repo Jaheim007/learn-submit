@@ -217,6 +217,7 @@ export type Database = {
       course_materials: {
         Row: {
           class_id: number
+          course_group_id: string | null
           created_at: string
           description: string | null
           file_name: string
@@ -229,6 +230,7 @@ export type Database = {
         }
         Insert: {
           class_id: number
+          course_group_id?: string | null
           created_at?: string
           description?: string | null
           file_name: string
@@ -241,6 +243,7 @@ export type Database = {
         }
         Update: {
           class_id?: number
+          course_group_id?: string | null
           created_at?: string
           description?: string | null
           file_name?: string

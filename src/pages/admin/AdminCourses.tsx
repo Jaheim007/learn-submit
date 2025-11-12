@@ -100,6 +100,8 @@ export default function AdminCourses() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
+      // Generate a single course_group_id for all files in this upload
+      const courseGroupId = crypto.randomUUID();
       let successCount = 0;
       
       for (const file of formData.files) {
@@ -115,20 +117,21 @@ export default function AdminCourses() {
         const { error: dbError } = await supabase
           .from('course_materials')
           .insert({
-            title: `${formData.title}${formData.files.length > 1 ? ` - ${file.name}` : ''}`,
+            title: formData.title,
             description: formData.description,
             class_id: parseInt(formData.class_id),
             file_url: filePath,
             file_name: file.name,
             file_type: file.type,
-            uploaded_by: user.id
+            uploaded_by: user.id,
+            course_group_id: courseGroupId
           });
 
         if (dbError) throw dbError;
         successCount++;
       }
 
-      toast.success(`${successCount} cours uploadé${successCount > 1 ? 's' : ''} avec succès`);
+      toast.success(`Cours "${formData.title}" uploadé avec ${successCount} fichier${successCount > 1 ? 's' : ''}`);
       setFormData({ title: '', description: '', class_id: '', files: [] });
       fetchMaterials();
     } catch (error: any) {
