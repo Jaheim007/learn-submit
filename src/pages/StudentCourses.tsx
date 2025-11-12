@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Download, FileText, BookOpen, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { cleanClassName } from '@/lib/utils';
 
 interface CourseMaterial {
   id: string;

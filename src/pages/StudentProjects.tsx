@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { BookOpen, Calendar, Send, Filter, Clock, RefreshCw, AlertTriangle } from 'lucide-react';
+import { cleanClassName } from '@/lib/utils';
 
 interface StudentClass {
   id: number;
@@ -424,7 +425,7 @@ export default function StudentProjects() {
             {selectedClassId && (
               <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
                 <p className="text-sm text-primary font-medium">
-                  Projets pour : {classes.find(c => c.id === selectedClassId)?.title}
+                  Projets pour : {cleanClassName(classes.find(c => c.id === selectedClassId)?.title || '')}
                 </p>
               </div>
             )}

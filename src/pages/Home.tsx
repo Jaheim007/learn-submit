@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { BookOpen, User, Upload, ArrowRight, GraduationCap, Target, Users, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { cleanClassName } from '@/lib/utils';
 
 interface StudentClass {
   id: number;
@@ -327,7 +328,7 @@ export default function Home() {
                         <div className="flex items-center justify-between">
                           <div>
                             <CardTitle className="text-lg">
-                              {studentClass.code} - {studentClass.title}
+                              {cleanClassName(studentClass.title)}
                             </CardTitle>
                             <CardDescription>
                               {studentClass.description}

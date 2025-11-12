@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, User, Phone, MessageCircle, Send, Github, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { cleanClassName } from '@/lib/utils';
 
 interface StudentProfile {
   id: string;
@@ -276,7 +277,7 @@ export default function Profile() {
                       <div className="space-y-2">
                         <Label>Votre groupe (lecture seule)</Label>
                         <div className="px-3 py-2 bg-muted rounded-md border">
-                          <span className="font-medium">{profile.primary_class.title}</span>
+                          <span className="font-medium">{cleanClassName(profile.primary_class.title)}</span>
                           <p className="text-sm text-muted-foreground mt-1">
                             Votre groupe est défini par l'administration. Contactez un admin en cas d'erreur.
                           </p>
