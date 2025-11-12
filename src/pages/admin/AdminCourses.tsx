@@ -40,7 +40,7 @@ export default function AdminCourses() {
     title: '',
     description: '',
     class_id: '',
-    file: null as File | null
+    files: [] as File[]
   });
 
   useEffect(() => {
@@ -73,23 +73,24 @@ export default function AdminCourses() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files);
       const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
       
-      if (!allowedTypes.includes(file.type)) {
+      const invalidFiles = filesArray.filter(file => !allowedTypes.includes(file.type));
+      if (invalidFiles.length > 0) {
         toast.error('Seuls les fichiers PDF et Word sont autorisés');
         return;
       }
       
-      setFormData({ ...formData, file });
+      setFormData({ ...formData, files: filesArray });
     }
   };
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.file || !formData.title || !formData.class_id) {
+    if (formData.files.length === 0 || !formData.title || !formData.class_id) {
       toast.error('Veuillez remplir tous les champs requis');
       return;
     }
@@ -99,35 +100,36 @@ export default function AdminCourses() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      const fileName = `${Date.now()}_${formData.file.name}`;
-      const filePath = `${formData.class_id}/${fileName}`;
+      let successCount = 0;
+      
+      for (const file of formData.files) {
+        const fileName = `${Date.now()}_${file.name}`;
+        const filePath = `${formData.class_id}/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('course-materials')
-        .upload(filePath, formData.file);
+        const { error: uploadError } = await supabase.storage
+          .from('course-materials')
+          .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+        if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('course-materials')
-        .getPublicUrl(filePath);
+        const { error: dbError } = await supabase
+          .from('course_materials')
+          .insert({
+            title: `${formData.title}${formData.files.length > 1 ? ` - ${file.name}` : ''}`,
+            description: formData.description,
+            class_id: parseInt(formData.class_id),
+            file_url: filePath,
+            file_name: file.name,
+            file_type: file.type,
+            uploaded_by: user.id
+          });
 
-      const { error: dbError } = await supabase
-        .from('course_materials')
-        .insert({
-          title: formData.title,
-          description: formData.description,
-          class_id: parseInt(formData.class_id),
-          file_url: filePath,
-          file_name: formData.file.name,
-          file_type: formData.file.type,
-          uploaded_by: user.id
-        });
+        if (dbError) throw dbError;
+        successCount++;
+      }
 
-      if (dbError) throw dbError;
-
-      toast.success('Cours uploadé avec succès');
-      setFormData({ title: '', description: '', class_id: '', file: null });
+      toast.success(`${successCount} cours uploadé${successCount > 1 ? 's' : ''} avec succès`);
+      setFormData({ title: '', description: '', class_id: '', files: [] });
       fetchMaterials();
     } catch (error: any) {
       toast.error(error.message);
@@ -224,18 +226,24 @@ export default function AdminCourses() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="file">Fichier (PDF ou Word) *</Label>
+              <Label htmlFor="file">Fichiers (PDF ou Word) *</Label>
               <Input
                 id="file"
                 type="file"
                 accept=".pdf,.doc,.docx"
                 onChange={handleFileChange}
+                multiple
                 required
               />
-              {formData.file && (
-                <p className="text-sm text-muted-foreground">
-                  Fichier sélectionné: {formData.file.name}
-                </p>
+              {formData.files.length > 0 && (
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-medium mb-1">{formData.files.length} fichier{formData.files.length > 1 ? 's' : ''} sélectionné{formData.files.length > 1 ? 's' : ''} :</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    {formData.files.map((file, index) => (
+                      <li key={index}>{file.name}</li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
 
