@@ -47,6 +47,7 @@ export function Layout({ children, showNavigation = true }: LayoutProps) {
     return [
       { label: 'Mes Projets', path: '/etudiant/mes-projets', icon: BookOpen },
       { label: 'Mes Soumissions', path: '/etudiant/mes-soumissions', icon: FileText },
+      { label: 'Mes Cours', path: '/etudiant/cours', icon: BookOpen },
       { label: 'Classement', path: '/etudiant/leaderboard', icon: Trophy },
       { label: 'Mon Profil', path: '/profil', icon: User }
     ];

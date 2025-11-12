@@ -214,6 +214,53 @@ export type Database = {
         }
         Relationships: []
       }
+      course_materials: {
+        Row: {
+          class_id: number
+          created_at: string
+          description: string | null
+          file_name: string
+          file_type: string
+          file_url: string
+          id: string
+          title: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          class_id: number
+          created_at?: string
+          description?: string | null
+          file_name: string
+          file_type: string
+          file_url: string
+          id?: string
+          title: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          class_id?: number
+          created_at?: string
+          description?: string | null
+          file_name?: string
+          file_type?: string
+          file_url?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_materials_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       efi_preinscriptions: {
         Row: {
           created_at: string
@@ -432,6 +479,90 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      formation_evaluation: {
+        Row: {
+          amelioration: string | null
+          appreciation: string | null
+          autres_besoins: string | null
+          autres_sites: string | null
+          besoins: string[]
+          competences: string[]
+          created_at: string
+          date_naissance: string
+          date_soumission: string
+          email: string
+          github: string
+          id: string
+          liens_ecommerce: string | null
+          liens_mvp: string | null
+          nom_complet: string
+          note_assistant: number
+          note_formateur: number
+          note_globale: number
+          participation_confirmee: boolean
+          portfolio: string
+          projets_preferes: string[]
+          recommandation: boolean
+          updated_at: string
+          vague: string
+          whatsapp: string
+        }
+        Insert: {
+          amelioration?: string | null
+          appreciation?: string | null
+          autres_besoins?: string | null
+          autres_sites?: string | null
+          besoins?: string[]
+          competences?: string[]
+          created_at?: string
+          date_naissance: string
+          date_soumission?: string
+          email: string
+          github: string
+          id?: string
+          liens_ecommerce?: string | null
+          liens_mvp?: string | null
+          nom_complet: string
+          note_assistant: number
+          note_formateur: number
+          note_globale: number
+          participation_confirmee?: boolean
+          portfolio: string
+          projets_preferes?: string[]
+          recommandation: boolean
+          updated_at?: string
+          vague: string
+          whatsapp: string
+        }
+        Update: {
+          amelioration?: string | null
+          appreciation?: string | null
+          autres_besoins?: string | null
+          autres_sites?: string | null
+          besoins?: string[]
+          competences?: string[]
+          created_at?: string
+          date_naissance?: string
+          date_soumission?: string
+          email?: string
+          github?: string
+          id?: string
+          liens_ecommerce?: string | null
+          liens_mvp?: string | null
+          nom_complet?: string
+          note_assistant?: number
+          note_formateur?: number
+          note_globale?: number
+          participation_confirmee?: boolean
+          portfolio?: string
+          projets_preferes?: string[]
+          recommandation?: boolean
+          updated_at?: string
+          vague?: string
+          whatsapp?: string
+        }
+        Relationships: []
       }
       formation_inscriptions: {
         Row: {

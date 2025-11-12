@@ -2,7 +2,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, BarChart3, Users, FileText, FolderOpen, UserCheck, Settings } from 'lucide-react';
+import { LogOut, BarChart3, Users, FileText, FolderOpen, UserCheck, Settings, BookOpen } from 'lucide-react';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
@@ -19,6 +19,7 @@ export default function AdminLayout() {
     { path: '/admin/students', label: 'Étudiants', icon: Users },
     { path: '/admin/submissions', label: 'Soumissions', icon: FileText },
     { path: '/admin/projects', label: 'Projets', icon: FolderOpen },
+    { path: '/admin/courses', label: 'Cours', icon: BookOpen },
     { path: '/admin/users', label: 'Superviseurs', icon: UserCheck },
     { path: '/admin/settings', label: 'Paramètres', icon: Settings },
   ];

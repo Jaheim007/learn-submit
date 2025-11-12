@@ -24,8 +24,10 @@ import AdminSubmissions from "./pages/admin/AdminSubmissions";
 import AdminProjects from "./pages/admin/AdminProjects";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminCourses from "./pages/admin/AdminCourses";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminRegister from "./pages/admin/AdminRegister";
+import StudentCourses from "./pages/StudentCourses";
 
 import SupervisorDashboard from "./pages/SupervisorDashboard";
 import SupervisorSubmissions from "./pages/SupervisorSubmissions";
@@ -58,6 +60,7 @@ const App = () => (
               <Route path="/etudiant/soumettre" element={<StudentGuard><SubmitProject /></StudentGuard>} />
               <Route path="/etudiant/mes-soumissions" element={<StudentGuard><StudentSubmissions /></StudentGuard>} />
               <Route path="/etudiant/leaderboard" element={<StudentGuard><StudentLeaderboard /></StudentGuard>} />
+              <Route path="/etudiant/cours" element={<StudentGuard><StudentCourses /></StudentGuard>} />
               
               {/* Admin auth routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
@@ -69,6 +72,7 @@ const App = () => (
                 <Route path="students" element={<AdminStudents />} />
                 <Route path="submissions" element={<AdminSubmissions />} />
                 <Route path="projects" element={<AdminProjects />} />
+                <Route path="courses" element={<AdminCourses />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
