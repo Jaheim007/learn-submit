@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CheckCheck, Bell, AlertCircle, Star, MessageSquare } from "lucide-react";
+import { CheckCheck, Bell, AlertCircle, Star, MessageSquare, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const typeIcons = {
   submission_created: Bell,
@@ -25,6 +26,7 @@ const typeLabels = {
 export default function Notifications() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ['notifications'],
@@ -92,25 +94,36 @@ export default function Notifications() {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Notifications</h1>
+      <div className="mb-6">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="mb-4"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Retour
+        </Button>
+        
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Notifications</h1>
+            {unreadCount > 0 && (
+              <p className="text-muted-foreground">
+                {unreadCount} notification{unreadCount > 1 ? 's' : ''} non lue{unreadCount > 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
           {unreadCount > 0 && (
-            <p className="text-muted-foreground">
-              {unreadCount} notification{unreadCount > 1 ? 's' : ''} non lue{unreadCount > 1 ? 's' : ''}
-            </p>
+            <Button 
+              onClick={() => markAllAsReadMutation.mutate()}
+              disabled={markAllAsReadMutation.isPending}
+              variant="outline"
+            >
+              <CheckCheck className="w-4 h-4 mr-2" />
+              Tout marquer comme lu
+            </Button>
           )}
         </div>
-        {unreadCount > 0 && (
-          <Button 
-            onClick={() => markAllAsReadMutation.mutate()}
-            disabled={markAllAsReadMutation.isPending}
-            variant="outline"
-          >
-            <CheckCheck className="w-4 h-4 mr-2" />
-            Tout marquer comme lu
-          </Button>
-        )}
       </div>
 
       {notifications.length === 0 ? (

@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, FileText, BookOpen } from 'lucide-react';
+import { Download, FileText, BookOpen, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface CourseMaterial {
   id: string;
@@ -22,6 +23,7 @@ interface CourseMaterial {
 export default function StudentCourses() {
   const [materials, setMaterials] = useState<CourseMaterial[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCourseMaterials();
@@ -107,6 +109,15 @@ export default function StudentCourses() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <Button
+        variant="ghost"
+        onClick={() => navigate(-1)}
+        className="mb-2"
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Retour
+      </Button>
+      
       <div className="flex items-center gap-3">
         <BookOpen className="h-8 w-8 text-primary" />
         <div>
