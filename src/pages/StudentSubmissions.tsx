@@ -96,17 +96,24 @@ export default function StudentSubmissions() {
         link.download = fileName;
         link.click();
       } else {
-        // It's a storage path - use Supabase storage
-        const { data, error } = await supabase.storage
+        // It's a storage path - create a signed URL for private bucket
+        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
           .from('submissions')
-          .download(filePath);
+          .createSignedUrl(filePath, 60); // 60 seconds expiry
         
-        if (error) {
-          console.error('Storage download error:', error);
-          throw error;
+        if (signedUrlError) {
+          console.error('Signed URL error:', signedUrlError);
+          throw signedUrlError;
         }
         
-        const blob = new Blob([data]);
+        if (!signedUrlData?.signedUrl) {
+          throw new Error('No signed URL generated');
+        }
+        
+        // Download using the signed URL
+        const response = await fetch(signedUrlData.signedUrl);
+        if (!response.ok) throw new Error('Download failed');
+        const blob = await response.blob();
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = fileName;
