@@ -84,9 +84,16 @@ export default function StudentSubmissions() {
   const downloadFile = async (filePath: string) => {
     try {
       const fileName = filePath.split('/').pop() || 'file';
-      const { data, error } = await supabase.storage.from('submissions').download(filePath);
       
-      if (error) throw error;
+      // Try to download from storage
+      const { data, error } = await supabase.storage
+        .from('submissions')
+        .download(filePath);
+      
+      if (error) {
+        console.error('Download error:', error);
+        throw error;
+      }
       
       const blob = new Blob([data]);
       const link = document.createElement('a');
@@ -94,9 +101,9 @@ export default function StudentSubmissions() {
       link.download = fileName;
       link.click();
       toast.success('Téléchargement réussi');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Download error:', error);
-      toast.error('Erreur lors du téléchargement');
+      toast.error('Erreur: ' + (error.message || 'Téléchargement impossible'));
     }
   };
 

@@ -933,6 +933,39 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_docs: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          format: string | null
+          history_id: string | null
+          id: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          format?: string | null
+          history_id?: string | null
+          id?: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          format?: string | null
+          history_id?: string | null
+          id?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       sensitive_data_access_logs: {
         Row: {
           access_reason: string | null
@@ -1043,6 +1076,7 @@ export type Database = {
       }
       students: {
         Row: {
+          avatar_url: string | null
           created_at: string
           email: string | null
           full_name: string | null
@@ -1056,6 +1090,7 @@ export type Database = {
           whatsapp: string | null
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -1069,6 +1104,7 @@ export type Database = {
           whatsapp?: string | null
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -1288,6 +1324,36 @@ export type Database = {
           full_name?: string | null
           phone?: string | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trash: {
+        Row: {
+          deleted_at: string | null
+          expires_at: string | null
+          id: string
+          item_data: Json
+          item_id: string
+          item_type: string
+          user_id: string
+        }
+        Insert: {
+          deleted_at?: string | null
+          expires_at?: string | null
+          id?: string
+          item_data: Json
+          item_id: string
+          item_type: string
+          user_id: string
+        }
+        Update: {
+          deleted_at?: string | null
+          expires_at?: string | null
+          id?: string
+          item_data?: Json
+          item_id?: string
+          item_type?: string
           user_id?: string
         }
         Relationships: []
