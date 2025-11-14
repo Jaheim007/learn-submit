@@ -195,7 +195,7 @@ export default function StudentLogin() {
             </Button>
           </form>
 
-          <div className="relative">
+          <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-white/10" />
             </div>
@@ -204,7 +204,7 @@ export default function StudentLogin() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <Button
               type="button"
               variant="outline"
@@ -233,7 +233,7 @@ export default function StudentLogin() {
             </Button>
           </div>
 
-          <p className="text-center text-sm text-gray-400">
+          <p className="mt-6 text-center text-sm text-gray-400">
             Pas de compte?{' '}
             <Link 
               to="/etudiant/register" 
