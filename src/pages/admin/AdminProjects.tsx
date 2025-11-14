@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit, Trash2, Eye, Calendar } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Calendar, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -64,6 +64,9 @@ export default function AdminProjects() {
     class_ids: [],
     image_url: '',
   });
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [lastRefreshTime, setLastRefreshTime] = useState(new Date());
 
   const loadData = async () => {
     try {
@@ -111,26 +114,40 @@ export default function AdminProjects() {
           return acc;
         }, {} as Record<number, number>) || {};
 
-        // Format projects data
-        const formattedProjects = projectsResponse.data.map((project: any) => ({
-          id: project.id,
-          title: project.title,
-          description: project.description,
-          image_url: project.image_url,
-          deadline_at: project.deadline_at,
-          allow_resubmit: project.allow_resubmit,
-          max_resubmits: project.max_resubmits,
-          is_active: project.is_active,
-          created_at: project.created_at,
-          classes: project.class_projects.map((cp: any) => cp.classes),
-          submissions_count: submissionCounts[project.id] || 0,
-        }));
+        // Transform the data to group classes
+        const transformedProjects = projectsResponse.data.reduce((acc, item: any) => {
+          const existingProject = acc.find(p => p.id === item.id);
+          const classData = Array.isArray(item.class_projects) 
+            ? item.class_projects[0]?.classes 
+            : item.class_projects?.classes;
+          
+          if (existingProject && classData) {
+            existingProject.classes.push(classData);
+          } else if (classData) {
+            acc.push({
+              id: item.id,
+              title: item.title,
+              description: item.description,
+              deadline_at: item.deadline_at,
+              allow_resubmit: item.allow_resubmit,
+              max_resubmits: item.max_resubmits,
+              is_active: item.is_active,
+              created_at: item.created_at,
+              image_url: item.image_url,
+              classes: [classData],
+              submissions_count: submissionCounts[item.id] || 0
+            });
+          }
+          
+          return acc;
+        }, [] as Project[]);
 
-        setProjects(formattedProjects);
+        setProjects(transformedProjects);
       }
+      setLastRefreshTime(new Date());
     } catch (error) {
-      console.error('Error loading projects:', error);
-      toast.error('Erreur lors du chargement des projets');
+      console.error('Error loading data:', error);
+      toast.error('Erreur lors du chargement des données');
     } finally {
       setLoading(false);
     }
@@ -140,7 +157,31 @@ export default function AdminProjects() {
     loadData();
   }, []);
 
-  const { lastRefreshTime, refresh } = useRefreshInterval(loadData);
+  const openEditDialog = async (project: Project) => {
+    setEditingProject(project);
+    
+    // Format deadline_at for datetime-local input
+    const deadlineDate = new Date(project.deadline_at);
+    const formattedDeadline = new Date(deadlineDate.getTime() - (deadlineDate.getTimezoneOffset() * 60000))
+      .toISOString()
+      .slice(0, 16);
+    
+    setFormData({
+      title: project.title,
+      description: project.description || '',
+      deadline_at: formattedDeadline,
+      allow_resubmit: project.allow_resubmit,
+      max_resubmits: String(project.max_resubmits || 3),
+      class_ids: project.classes.map(c => c.id),
+      image_url: project.image_url || '',
+    });
+    
+    if (project.image_url) {
+      setImagePreview(project.image_url);
+    }
+    
+    setIsEditDialogOpen(true);
+  };
 
   const resetForm = () => {
     setFormData({
@@ -152,53 +193,50 @@ export default function AdminProjects() {
       class_ids: [],
       image_url: '',
     });
+    setSelectedImage(null);
+    setImagePreview('');
+    setEditingProject(null);
   };
 
-  const openCreateDialog = () => {
-    resetForm();
-    setIsCreateDialogOpen(true);
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const openEditDialog = (project: Project) => {
-    setEditingProject(project);
-    setFormData({
-      title: project.title,
-      description: project.description || '',
-      deadline_at: project.deadline_at.slice(0, 16), // Format for datetime-local input
-      allow_resubmit: project.allow_resubmit,
-      max_resubmits: project.max_resubmits?.toString() || '3',
-      class_ids: project.classes.map(c => c.id),
-      image_url: project.image_url || '',
-    });
-    setIsEditDialogOpen(true);
-  };
+    if (!formData.title.trim() || !formData.deadline_at || formData.class_ids.length === 0) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
 
-  const handleSubmit = async () => {
     try {
-      if (!formData.title.trim()) {
-        toast.error('Le titre est requis');
-        return;
-      }
+      let imageUrl = formData.image_url;
 
-      if (!formData.deadline_at) {
-        toast.error('La date limite est requise');
-        return;
-      }
+      // Upload image if selected
+      if (selectedImage) {
+        const fileExt = selectedImage.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `project-images/${fileName}`;
 
-      if (formData.class_ids.length === 0) {
-        toast.error('Au moins une classe doit être sélectionnée');
-        return;
+        const { error: uploadError } = await supabase.storage
+          .from('submissions')
+          .upload(filePath, selectedImage);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('submissions')
+          .getPublicUrl(filePath);
+
+        imageUrl = publicUrl;
       }
 
       if (editingProject) {
-        // Update existing project via direct Supabase
+        // Update existing project
         const projectData = {
           title: formData.title.trim(),
           description: formData.description.trim() || null,
           deadline_at: new Date(formData.deadline_at).toISOString(),
           allow_resubmit: formData.allow_resubmit,
           max_resubmits: formData.allow_resubmit ? parseInt(formData.max_resubmits) || 3 : null,
-          image_url: formData.image_url.trim() || null,
+          image_url: imageUrl || null,
         };
 
         const { data, error } = await supabase
@@ -239,7 +277,7 @@ export default function AdminProjects() {
           max_resubmits: formData.allow_resubmit ? parseInt(formData.max_resubmits) || 1 : 1,
           is_active: true,
           class_ids: formData.class_ids,
-          image_url: formData.image_url.trim() || null
+          image_url: imageUrl || null
         };
 
         console.log('Calling create-project with payload:', payload);
@@ -264,7 +302,7 @@ export default function AdminProjects() {
 
       setIsCreateDialogOpen(false);
       setIsEditDialogOpen(false);
-      setEditingProject(null);
+      resetForm();
       loadData();
 
     } catch (error) {
@@ -321,36 +359,217 @@ export default function AdminProjects() {
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Gestion des projets</h1>
-          <p className="text-muted-foreground">
-            {projects.length} projet{projects.length > 1 ? 's' : ''}
+  // ProjectForm Component
+  const ProjectForm = () => (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div>
+        <Label htmlFor="title">Titre du projet *</Label>
+        <Input
+          id="title"
+          value={formData.title}
+          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          placeholder="Titre du projet"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          placeholder="Description du projet (optionnel)"
+          rows={4}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="deadline">Date limite *</Label>
+        <Input
+          id="deadline"
+          type="datetime-local"
+          value={formData.deadline_at}
+          onChange={(e) => setFormData(prev => ({ ...prev, deadline_at: e.target.value }))}
+        />
+      </div>
+
+      <div>
+        <Label>Classes cibles *</Label>
+        <div className="space-y-4 mt-2">
+          {/* Group classes by session */}
+          {Array.from(new Set(classes.map(c => c.session_name).filter(Boolean))).map(sessionName => (
+            <div key={sessionName} className="space-y-2">
+              <h4 className="font-medium text-sm text-muted-foreground">{sessionName}</h4>
+              <div className="grid grid-cols-2 gap-2 pl-4">
+                {classes.filter(c => c.session_name === sessionName).map((classe) => (
+                  <div key={classe.id} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`class-${classe.id}`}
+                      checked={formData.class_ids.includes(classe.id)}
+                      onChange={() => handleClassToggle(classe.id)}
+                      className="rounded"
+                    />
+                    <label htmlFor={`class-${classe.id}`} className="text-sm">
+                      {classe.code} - {classe.title}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+          
+          {/* Show classes without session */}
+          {classes.filter(c => !c.session_name).length > 0 && (
+            <div className="space-y-2">
+              <h4 className="font-medium text-sm text-muted-foreground">Autres classes</h4>
+              <div className="grid grid-cols-2 gap-2 pl-4">
+                {classes.filter(c => !c.session_name).map((classe) => (
+                  <div key={classe.id} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`class-${classe.id}`}
+                      checked={formData.class_ids.includes(classe.id)}
+                      onChange={() => handleClassToggle(classe.id)}
+                      className="rounded"
+                    />
+                    <label htmlFor={`class-${classe.id}`} className="text-sm">
+                      {classe.code} - {classe.title}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="image-upload">Image du projet (optionnel)</Label>
+        <div className="space-y-4">
+          {imagePreview && (
+            <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-full h-full object-cover"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute top-2 right-2"
+                onClick={() => {
+                  setSelectedImage(null);
+                  setImagePreview('');
+                  setFormData(prev => ({ ...prev, image_url: '' }));
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+          <div className="flex items-center gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => document.getElementById('image-upload')?.click()}
+              className="gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              {imagePreview ? 'Changer l\'image' : 'Choisir une image'}
+            </Button>
+            <input
+              id="image-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  // Validate file size (max 5MB)
+                  if (file.size > 5 * 1024 * 1024) {
+                    toast.error('L\'image ne doit pas dépasser 5 MB');
+                    return;
+                  }
+                  setSelectedImage(file);
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setImagePreview(reader.result as string);
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Ajouter une image pour rendre le projet plus attrayant (max 5 MB)
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <RefreshHeader 
-            lastRefreshTime={lastRefreshTime} 
-            onRefresh={refresh}
-            isRefreshing={loading}
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="allow-resubmit"
+          checked={formData.allow_resubmit}
+          onCheckedChange={(checked) => setFormData(prev => ({ ...prev, allow_resubmit: checked }))}
+        />
+        <Label htmlFor="allow-resubmit">Autoriser les resoumissions</Label>
+      </div>
+
+      {formData.allow_resubmit && (
+        <div>
+          <Label htmlFor="max-resubmits">Nombre maximum de resoumissions</Label>
+          <Input
+            id="max-resubmits"
+            type="number"
+            min="1"
+            max="10"
+            value={formData.max_resubmits}
+            onChange={(e) => setFormData(prev => ({ ...prev, max_resubmits: e.target.value }))}
           />
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        </div>
+      )}
+
+      <div className="flex justify-end gap-4 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            setIsCreateDialogOpen(false);
+            setIsEditDialogOpen(false);
+            resetForm();
+          }}
+        >
+          Annuler
+        </Button>
+        <Button type="submit">
+          {editingProject ? 'Mettre à jour' : 'Créer'}
+        </Button>
+      </div>
+    </form>
+  );
+
+  return (
+    <div className="space-y-6">
+      <RefreshHeader lastRefreshTime={lastRefreshTime} onRefresh={loadData} />
+
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Projets</h1>
+          <p className="text-muted-foreground">Gérer les projets et leurs échéances</p>
+        </div>
+        <Dialog open={isCreateDialogOpen} onOpenChange={(open) => {
+          setIsCreateDialogOpen(open);
+          if (!open) resetForm();
+        }}>
           <DialogTrigger asChild>
-            <Button onClick={openCreateDialog}>
-              <Plus className="h-4 w-4 mr-2" />
-              Créer un projet
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Nouveau projet
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Créer un nouveau projet</DialogTitle>
-            </DialogHeader>
-            <ProjectForm />
-          </DialogContent>
         </Dialog>
-        </div>
       </div>
 
       {/* Projects Table */}
@@ -475,145 +694,4 @@ export default function AdminProjects() {
       </Dialog>
     </div>
   );
-
-  function ProjectForm() {
-    return (
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="title">Titre *</Label>
-          <Input
-            id="title"
-            value={formData.title}
-            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            placeholder="Titre du projet"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            value={formData.description}
-            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-            placeholder="Description du projet (optionnelle)"
-            rows={3}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="deadline">Date limite *</Label>
-          <Input
-            id="deadline"
-            type="datetime-local"
-            value={formData.deadline_at}
-            onChange={(e) => setFormData(prev => ({ ...prev, deadline_at: e.target.value }))}
-          />
-        </div>
-
-        <div>
-          <Label>Classes cibles *</Label>
-          <div className="space-y-4 mt-2">
-            {/* Group classes by session */}
-            {Array.from(new Set(classes.map(c => c.session_name).filter(Boolean))).map(sessionName => (
-              <div key={sessionName} className="space-y-2">
-                <h4 className="font-medium text-sm text-muted-foreground">{sessionName}</h4>
-                <div className="grid grid-cols-2 gap-2 pl-4">
-                  {classes.filter(c => c.session_name === sessionName).map((classe) => (
-                    <div key={classe.id} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id={`class-${classe.id}`}
-                        checked={formData.class_ids.includes(classe.id)}
-                        onChange={() => handleClassToggle(classe.id)}
-                        className="rounded"
-                      />
-                      <label htmlFor={`class-${classe.id}`} className="text-sm">
-                        {classe.code} - {classe.title}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-            
-            {/* Show classes without session */}
-            {classes.filter(c => !c.session_name).length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm text-muted-foreground">Autres classes</h4>
-                <div className="grid grid-cols-2 gap-2 pl-4">
-                  {classes.filter(c => !c.session_name).map((classe) => (
-                    <div key={classe.id} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id={`class-${classe.id}`}
-                        checked={formData.class_ids.includes(classe.id)}
-                        onChange={() => handleClassToggle(classe.id)}
-                        className="rounded"
-                      />
-                      <label htmlFor={`class-${classe.id}`} className="text-sm">
-                        {classe.code} - {classe.title}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <Label htmlFor="image-url">URL de l'image du projet</Label>
-          <Input
-            id="image-url"
-            type="url"
-            value={formData.image_url}
-            onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-            placeholder="https://example.com/image.jpg (optionnel)"
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Ajouter une image pour rendre le projet plus attrayant
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="allow-resubmit"
-            checked={formData.allow_resubmit}
-            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, allow_resubmit: checked }))}
-          />
-          <Label htmlFor="allow-resubmit">Autoriser les resoumissions</Label>
-        </div>
-
-        {formData.allow_resubmit && (
-          <div>
-            <Label htmlFor="max-resubmits">Nombre maximum de resoumissions</Label>
-            <Input
-              id="max-resubmits"
-              type="number"
-              min="1"
-              max="10"
-              value={formData.max_resubmits}
-              onChange={(e) => setFormData(prev => ({ ...prev, max_resubmits: e.target.value }))}
-            />
-          </div>
-        )}
-
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              setIsCreateDialogOpen(false);
-              setIsEditDialogOpen(false);
-              setEditingProject(null);
-            }}
-          >
-            Annuler
-          </Button>
-          <Button onClick={handleSubmit}>
-            {editingProject ? 'Mettre à jour' : 'Créer'}
-          </Button>
-        </div>
-      </div>
-    );
-  }
 }
