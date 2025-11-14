@@ -120,8 +120,9 @@ export default function Profile() {
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
-      const filePath = fileName; // Remove 'avatars/' prefix as bucket is already specified
+      const fileName = `${Date.now()}.${fileExt}`;
+      // Store avatars in user-specific folder: {user_id}/filename
+      const filePath = `${user?.id}/${fileName}`;
 
       // Upload to Supabase storage
       const { error: uploadError } = await supabase.storage
