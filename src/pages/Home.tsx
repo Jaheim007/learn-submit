@@ -47,7 +47,7 @@ export default function Home() {
       if (isAdmin) {
         navigate('/admin');
       } else {
-        navigate('/etudiant/mes-projets');
+        navigate('/etudiant/projets');
       }
     } else {
       navigate('/etudiant/login');
@@ -59,7 +59,7 @@ export default function Home() {
       if (isAdmin) {
         navigate('/admin');
       } else {
-        navigate('/etudiant/mes-projets');
+        navigate('/etudiant/projets');
       }
     } else {
       navigate('/');
@@ -258,7 +258,7 @@ export default function Home() {
         <div className="max-w-content mx-auto p-4 md:p-6 lg:p-8">
           {/* Quick Actions */}
           <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <Card className="card-educational group cursor-pointer" onClick={() => navigate('/etudiant/mes-projets')}>
+            <Card className="card-educational group cursor-pointer" onClick={() => navigate('/etudiant/projets')}>
               <CardHeader>
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-smooth">
@@ -354,7 +354,7 @@ export default function Home() {
                           <Button 
                             variant="outline"
                             size="sm"
-                            onClick={() => navigate(`/etudiant/mes-projets?class=${studentClass.id}`)}
+                            onClick={() => navigate(`/etudiant/projets?class=${studentClass.id}`)}
                           >
                             Voir projets
                             <ArrowRight className="ml-2 w-4 h-4" />

@@ -381,13 +381,13 @@ export default function StudentProjects() {
             
             <nav className="hidden md:flex items-center gap-1">
               <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10" asChild>
-                <Link to="/etudiant/mes-projets" className="flex items-center gap-2">
+                <Link to="/etudiant/projets" className="flex items-center gap-2">
                   <BookOpen className="w-4 h-4" />
                   Mes Projets
                 </Link>
               </Button>
               <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10" asChild>
-                <Link to="/etudiant/mes-soumissions" className="flex items-center gap-2">
+                <Link to="/etudiant/soumissions" className="flex items-center gap-2">
                   <FileText className="w-4 h-4" />
                   Mes Soumissions
                 </Link>
@@ -405,7 +405,7 @@ export default function StudentProjects() {
                 </Link>
               </Button>
               <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10" asChild>
-                <Link to="/profil" className="flex items-center gap-2">
+                <Link to="/etudiant/profil" className="flex items-center gap-2">
                   <User className="w-4 h-4" />
                   Mon Profil
                 </Link>
