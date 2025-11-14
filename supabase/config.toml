@@ -1,1 +1,4 @@
 project_id = "ucgaxcnfvrbhsxxcwceo"
+
+[functions.handle-oauth-signup]
+verify_jwt = true

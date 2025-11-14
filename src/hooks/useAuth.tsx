@@ -26,12 +26,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Remove auto-creation of student profiles
-        // Students must explicitly register through the registration flow
+        // Handle OAuth sign-in - create student profile if needed
+        if (event === 'SIGNED_IN' && session?.user) {
+          const provider = session?.user?.app_metadata?.provider;
+          
+          // Check if this is an OAuth login (Google, GitHub, etc.)
+          if (provider && provider !== 'email') {
+            console.log('OAuth sign-in detected:', provider);
+            
+            // Call edge function to create student profile if needed
+            setTimeout(async () => {
+              try {
+                const { error } = await supabase.functions.invoke('handle-oauth-signup', {
+                  headers: {
+                    Authorization: `Bearer ${session.access_token}`
+                  }
+                });
+                
+                if (error) {
+                  console.error('Error in OAuth signup handler:', error);
+                }
+              } catch (err) {
+                console.error('Failed to call OAuth signup handler:', err);
+              }
+            }, 0);
+          }
+        }
         
         setLoading(false);
         setAuthLoading(false);
