@@ -13,12 +13,18 @@ import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useRefreshInterval } from '@/hooks/useRefreshInterval';
 import { RefreshHeader } from '@/components/admin/RefreshHeader';
+import { StudentProfileModal } from '@/components/admin/StudentProfileModal';
 
 interface Student {
   id: string;
   user_id: string;
   full_name: string;
   email: string;
+  phone: string | null;
+  whatsapp: string | null;
+  telegram: string | null;
+  github_profile: string | null;
+  avatar_url: string | null;
   is_active: boolean;
   created_at: string;
   last_activity?: string;
@@ -40,6 +46,8 @@ export default function AdminStudents() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [showInactive, setShowInactive] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   // Debounce search term
   useEffect(() => {
@@ -65,7 +73,8 @@ export default function AdminStudents() {
             phone,
             whatsapp,
             telegram,
-            github_profile
+            github_profile,
+            avatar_url
           `)
           .order('created_at', { ascending: false }),
         
@@ -119,6 +128,11 @@ export default function AdminStudents() {
           user_id: student.user_id,
           full_name: student.full_name,
           email: student.email,
+          phone: student.phone,
+          whatsapp: student.whatsapp,
+          telegram: student.telegram,
+          github_profile: student.github_profile,
+          avatar_url: student.avatar_url,
           is_active: student.is_active,
           created_at: student.created_at,
           classes: enrollmentsByStudent[student.id] || [],
@@ -341,7 +355,14 @@ export default function AdminStudents() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          setSelectedStudent(student);
+                          setProfileModalOpen(true);
+                        }}
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
                       
@@ -392,6 +413,13 @@ export default function AdminStudents() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Student Profile Modal */}
+      <StudentProfileModal 
+        student={selectedStudent}
+        open={profileModalOpen}
+        onOpenChange={setProfileModalOpen}
+      />
     </div>
   );
 }
