@@ -24,7 +24,7 @@ export const StudentSidebar = () => {
   };
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
+    <div className="fixed left-0 top-0 h-screen w-64 bg-sidebar/95 backdrop-blur-xl border-r border-sidebar-border flex flex-col z-50">
       {/* Logo Section */}
       <div className="p-6 border-b border-sidebar-border">
         <Link to="/etudiant/projets" className="flex items-center gap-3 group">

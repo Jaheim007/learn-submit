@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Layout } from '@/components/Layout';
+import { StudentDashboardLayout } from '@/components/StudentDashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -140,7 +140,7 @@ export default function StudentLeaderboard() {
   };
 
   return (
-    <Layout>
+    <StudentDashboardLayout>
       <div className="container mx-auto py-8 space-y-6">
         <div>
           <h1 className="text-3xl font-bold mb-2">Classement</h1>
@@ -293,6 +293,6 @@ export default function StudentLeaderboard() {
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    </StudentDashboardLayout>
   );
 }
