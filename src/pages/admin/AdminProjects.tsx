@@ -209,29 +209,24 @@ export default function AdminProjects() {
     try {
       let imageUrl = formData.image_url;
 
-      // Upload image if selected
+      // Upload image if selected using edge function
       if (selectedImage) {
-        const fileExt = selectedImage.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const filePath = fileName;
+        const formData = new FormData();
+        formData.append('file', selectedImage);
 
-        const { error: uploadError } = await supabase.storage
-          .from('project-images')
-          .upload(filePath, selectedImage, {
-            cacheControl: '3600',
-            upsert: false
-          });
+        const { data: uploadData, error: uploadError } = await supabase.functions.invoke(
+          'upload-project-image',
+          {
+            body: formData
+          }
+        );
 
-        if (uploadError) {
-          console.error('Upload error:', uploadError);
-          throw new Error(`Erreur lors de l'upload: ${uploadError.message}`);
+        if (uploadError || !uploadData?.success) {
+          console.error('Upload error:', uploadError || uploadData);
+          throw new Error(uploadData?.error || 'Erreur lors de l\'upload de l\'image');
         }
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('project-images')
-          .getPublicUrl(filePath);
-
-        imageUrl = publicUrl;
+        imageUrl = uploadData.url;
       }
 
       if (editingProject) {
