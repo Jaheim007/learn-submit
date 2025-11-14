@@ -62,7 +62,7 @@ export default function Profile() {
         .single();
 
       if (data) {
-        setProfile(data);
+        setProfile(data as any);
       }
     } catch (error) {
       toast.error('Erreur lors du chargement');
@@ -138,7 +138,7 @@ export default function Profile() {
       // Update profile with new avatar URL
       const { error: updateError } = await supabase
         .from('students')
-        .update({ avatar_url: publicUrl })
+        .update({ avatar_url: publicUrl } as any)
         .eq('user_id', user?.id);
 
       if (updateError) throw updateError;

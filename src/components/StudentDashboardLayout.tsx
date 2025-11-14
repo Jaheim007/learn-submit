@@ -30,7 +30,7 @@ export const StudentDashboardLayout = ({ children }: StudentDashboardLayoutProps
       .single();
 
     if (data) {
-      setProfile(data);
+      setProfile(data as any);
     }
   };
 
