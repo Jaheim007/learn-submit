@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Loader2, User, Phone, MessageCircle, Send, Github, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cleanClassName } from '@/lib/utils';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 
 interface StudentProfile {
   id: string;
@@ -158,19 +159,20 @@ export default function Profile() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-black relative overflow-hidden">
+        <AnimatedBackground />
         {/* Header */}
-        <section className="bg-gradient-card py-12 px-4 border-b border-border">
+        <section className="relative z-10 bg-gradient-to-r from-blue-950/50 to-purple-950/50 backdrop-blur-sm py-12 px-4 border-b border-white/10">
           <div className="max-w-content mx-auto">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center">
                 <User className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                <h1 className="text-2xl md:text-3xl font-bold text-white">
                   Mon Profil
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="text-gray-300">
                   Gérez vos informations personnelles et de contact
                 </p>
               </div>
@@ -178,9 +180,9 @@ export default function Profile() {
           </div>
         </section>
 
-        <div className="max-w-content mx-auto p-4 md:p-6 lg:p-8">
+        <div className="max-w-content mx-auto p-4 md:p-6 lg:p-8 relative z-10">
           <div className="max-w-2xl mx-auto">
-            <Card className="card-educational">
+            <Card className="bg-black/40 backdrop-blur-xl border-white/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="w-5 h-5" />

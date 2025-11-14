@@ -10,6 +10,7 @@ import { Layout } from '@/components/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Upload, AlertCircle, UserPlus, Github } from 'lucide-react';
 import nysLogo from '@/assets/nys-logo.png';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function StudentLogin() {
@@ -133,19 +134,16 @@ export default function StudentLogin() {
     <Layout showNavigation={false}>
       <div className="min-h-screen relative overflow-hidden bg-black flex items-center justify-center p-4">
         {/* Animated Background */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-950 via-purple-950 to-black"></div>
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/30 rounded-full blur-[120px] animate-pulse"></div>
-          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
-        </div>
+        <AnimatedBackground />
 
         <div className="w-full max-w-md space-y-6 relative z-10">
-          {/* Logo */}
+          {/* Logo - Clickable */}
           <div className="flex justify-center mb-8">
             <img 
               src={nysLogo} 
               alt="NYS Logo" 
-              className="h-20 w-auto"
+              className="h-20 w-auto cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => navigate('/')}
             />
           </div>
 
