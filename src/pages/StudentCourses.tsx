@@ -92,27 +92,44 @@ export default function StudentCourses() {
         return;
       }
 
-      // Private storage path -> create signed URL
-      const { data, error } = await supabase.storage
-        .from('course-materials')
-        .createSignedUrl(pathOrUrl, 60);
-
-      if (error || !data?.signedUrl) {
-        console.error('Signed URL error:', error);
-        throw new Error('Accès refusé ou fichier introuvable');
+      // Call edge function to get signed URL
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error('Session expirée, veuillez vous reconnecter');
+        return;
       }
 
-      // Open signed URL in new tab (let browser handle download)
+      const response = await fetch(
+        'https://ucgaxcnfvrbhsxxcwceo.supabase.co/functions/v1/download-course-material',
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ filePath: pathOrUrl }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Téléchargement refusé');
+      }
+
+      const { signedUrl } = await response.json();
+
+      // Download using signed URL
       const a = document.createElement('a');
-      a.href = data.signedUrl;
-      a.target = '_blank';
+      a.href = signedUrl;
       a.download = fileName;
+      a.target = '_blank';
       a.click();
 
       toast.success('Téléchargement lancé');
     } catch (error: any) {
-      console.error('Course download error', error);
-      toast.error('Téléchargement impossible: ' + (error.message || 'erreur inconnue'));
+      console.error('Course download error:', error);
+      toast.error(error.message || 'Téléchargement impossible');
     }
   };
 
