@@ -97,8 +97,8 @@ export default function AdminCourses() {
       let successCount = 0;
       
       for (const file of formData.files) {
-        const fileName = `${Date.now()}_${file.name}`;
-        const filePath = `${formData.class_id}/${fileName}`;
+        // Keep original filename without timestamp
+        const filePath = `${formData.class_id}/${file.name}`;
 
         const { error: uploadError } = await supabase.storage
           .from('course-materials')

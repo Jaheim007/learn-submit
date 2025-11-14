@@ -107,15 +107,15 @@ export default function SubmitProject() {
 
       // Upload files if present
       if (file1) {
-        const path = `${studentId}/${projectId}/${Date.now()}_${file1.name}`;
+        const path = `${studentId}/${projectId}/${file1.name}`;
         file1Url = await uploadFile(file1, path);
       }
       if (file2) {
-        const path = `${studentId}/${projectId}/${Date.now()}_${file2.name}`;
+        const path = `${studentId}/${projectId}/${file2.name}`;
         file2Url = await uploadFile(file2, path);
       }
       if (file3) {
-        const path = `${studentId}/${projectId}/${Date.now()}_${file3.name}`;
+        const path = `${studentId}/${projectId}/${file3.name}`;
         file3Url = await uploadFile(file3, path);
       }
 
