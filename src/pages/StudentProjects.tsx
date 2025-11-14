@@ -308,33 +308,32 @@ export default function StudentProjects() {
 
   // Loading state
   if (authLoading || apiState.loading) {
-    return (
-      <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Chargement de vos projets...</p>
-          </div>
-        </div>
-      </Layout>
-    );
+    return <LoadingScreen />;
   }
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (!error) {
+      navigate('/');
+    }
+  };
 
   // Error state with retry option
   if (apiState.error && apiState.data.classes.length === 0) {
     return (
-      <Layout>
-        <div className="container mx-auto px-4 py-8">
+      <div className="min-h-screen relative">
+        <AnimatedBackground />
+        <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="text-center max-w-md mx-auto">
-            <h1 className="text-3xl font-bold mb-4">Mes Projets</h1>
-            <p className="text-muted-foreground mb-8">Consultez et soumettez vos projets par classe</p>
+            <h1 className="text-3xl font-bold mb-4 text-white">Mes Projets</h1>
+            <p className="text-white/60 mb-8">Consultez et soumettez vos projets par classe</p>
             
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-yellow-100 rounded-full">
-                <AlertTriangle className="w-6 h-6 text-yellow-600" />
+            <div className="bg-yellow-500/20 border border-yellow-500/30 backdrop-blur-xl rounded-2xl p-6">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-yellow-500/20 rounded-full">
+                <AlertTriangle className="w-6 h-6 text-yellow-400" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-yellow-800">Service temporairement indisponible</h3>
-              <p className="text-yellow-700 mb-4">{apiState.error}</p>
+              <h3 className="text-lg font-semibold mb-2 text-yellow-300">Service temporairement indisponible</h3>
+              <p className="text-yellow-200 mb-4">{apiState.error}</p>
               <div className="space-y-2">
                 <Button 
                   onClick={handleRetry} 
@@ -354,7 +353,7 @@ export default function StudentProjects() {
                   )}
                 </Button>
                 {apiState.retryCount > 2 && (
-                  <p className="text-xs text-yellow-600 mt-2">
+                  <p className="text-xs text-yellow-400 mt-2">
                     Tentative {apiState.retryCount}/3 - Contactez le support si le problème persiste
                   </p>
                 )}
@@ -362,168 +361,234 @@ export default function StudentProjects() {
             </div>
           </div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   const { classes, projects } = apiState.data;
 
   return (
-    <Layout>
-      <div className="min-h-screen bg-background">
-        {/* Header */}
-        <section className="bg-gradient-card py-12 px-4 border-b border-border">
-          <div className="max-w-content mx-auto">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+    <div className="min-h-screen relative">
+      <AnimatedBackground />
+      
+      {/* Modern Header */}
+      <header className="relative z-10 bg-black/20 backdrop-blur-md border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-3 group">
+              <img src={nysLogo} alt="NYS" className="h-10 w-10 object-contain transition-transform group-hover:scale-110" />
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                NYS Submissions
+              </span>
+            </Link>
+            
+            <nav className="hidden md:flex items-center gap-1">
+              <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10" asChild>
+                <Link to="/etudiant/mes-projets" className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4" />
                   Mes Projets
-                </h1>
-                <p className="text-muted-foreground">
-                  Consultez et soumettez vos projets par classe
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <div className="max-w-content mx-auto p-4 md:p-6 lg:p-8">
-          {/* Class Filters */}
-          {classes.length > 1 && (
-            <div className="mb-8">
-              <div className="flex items-center gap-3 mb-4">
-                <Filter className="w-5 h-5 text-muted-foreground" />
-                <h2 className="text-lg font-medium text-foreground">
-                  Filtrer par classe
-                </h2>
-              </div>
+                </Link>
+              </Button>
+              <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10" asChild>
+                <Link to="/etudiant/mes-soumissions" className="flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Mes Soumissions
+                </Link>
+              </Button>
+              <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10" asChild>
+                <Link to="/etudiant/cours" className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  Mes Cours
+                </Link>
+              </Button>
+              <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10" asChild>
+                <Link to="/etudiant/leaderboard" className="flex items-center gap-2">
+                  <Trophy className="w-4 h-4" />
+                  Classement
+                </Link>
+              </Button>
+              <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10" asChild>
+                <Link to="/profil" className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  Mon Profil
+                </Link>
+              </Button>
               
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant={selectedClassId === null ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => handleClassFilter(null)}
-                >
-                  Toutes les classes
-                </Button>
-                {classes.map((studentClass) => (
-                  <Button
-                    key={studentClass.id}
-                    variant={selectedClassId === studentClass.id ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleClassFilter(studentClass.id)}
-                  >
-                    {studentClass.code}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Projects List */}
-          <div className="space-y-6">
-            {selectedClassId && (
-              <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-                <p className="text-sm text-primary font-medium">
-                  Projets pour : {cleanClassName(classes.find(c => c.id === selectedClassId)?.title || '')}
-                </p>
-              </div>
-            )}
-
-            {/* Empty States */}
-            {classes.length === 0 ? (
-              <Card className="card-educational">
-                <CardContent className="py-12 text-center">
-                  <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">
-                    Aucun projet disponible
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Vous n'êtes inscrit à aucune classe pour le moment.
-                  </p>
-                </CardContent>
-              </Card>
-            ) : projects.length === 0 ? (
-              <Card className="card-educational">
-                <CardContent className="py-12 text-center">
-                  <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">
-                    Aucun projet dans cette classe
-                  </h3>
-                  <p className="text-muted-foreground">
-                    {selectedClassId 
-                      ? "Aucun projet n'est assigné à cette classe pour le moment."
-                      : "Aucun projet n'est encore disponible dans vos classes."
-                    }
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-6">
-                {projects.map((project) => (
-                  <Card key={project.id} className="card-educational">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-3">
-                            <Badge variant="outline" className="font-mono">
-                              {project.code}
-                            </Badge>
-                            {project.due_at && (
-                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                <Calendar className="w-4 h-4" />
-                                <span>Échéance : {formatDueDate(project.due_at)}</span>
-                              </div>
-                            )}
-                          </div>
-                          <CardTitle className="text-xl">
-                            {project.title}
-                          </CardTitle>
-                          {project.description && (
-                            <p className="text-muted-foreground">
-                              {project.description}
-                            </p>
-                          )}
-                        </div>
-                        
-                        <div className="flex flex-col items-end gap-3">
-                          {project.latest_submission ? (
-                            <div className="text-right space-y-2">
-                              <StatusBadge status={project.latest_submission.status} />
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Clock className="w-3 h-3" />
-                                <span>
-                                  {new Date(project.latest_submission.submitted_at).toLocaleDateString('fr-FR')}
-                                </span>
-                              </div>
-                            </div>
-                          ) : (
-                            <Badge variant="secondary">
-                              Aucune soumission
-                            </Badge>
-                          )}
-                          
-                          <Button
-                            onClick={() => handleSubmitProject(project.id)}
-                            size="sm"
-                            className="btn-primary"
-                          >
-                            <Send className="w-4 h-4 mr-2" />
-                            {project.latest_submission ? 'Nouvelle soumission' : 'Soumettre'}
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                ))}
-              </div>
-            )}
+              <NotificationBell />
+              
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleSignOut}
+                className="text-white/80 hover:text-red-400 hover:bg-white/10"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Déconnexion
+              </Button>
+            </nav>
           </div>
         </div>
+      </header>
+
+      <div className="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
+        {/* Modern Hero Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-6">
+            <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-white/20 rounded-2xl p-4 shadow-2xl">
+              <BookOpen className="w-10 h-10 text-blue-400" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                Mes Projets
+              </h1>
+              <p className="text-white/60 mt-2 text-lg">
+                Consultez et soumettez vos projets par classe
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Modern Class Filter */}
+        <div className="mb-6 bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-500/20 p-2 rounded-lg">
+                <Filter className="w-5 h-5 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-white/60 text-sm">Classe sélectionnée</p>
+                <p className="text-white font-bold text-lg">
+                  {classes.find(c => c.id === selectedClassId)?.title || 'Toutes les classes'}
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={handleRetry}
+              disabled={apiState.loading}
+              className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 backdrop-blur-sm"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${apiState.loading ? 'animate-spin' : ''}`} />
+              Actualiser
+            </Button>
+          </div>
+        </div>
+
+        {/* Modern Projects Grid */}
+        {projects.length === 0 ? (
+          <div className="text-center py-16 bg-black/20 backdrop-blur-xl border border-white/10 rounded-2xl">
+            <BookOpen className="w-20 h-20 text-white/20 mx-auto mb-4" />
+            <p className="text-white/60 text-lg">
+              {selectedClassId 
+                ? 'Aucun projet disponible pour cette classe pour le moment.'
+                : 'Veuillez sélectionner une classe pour voir les projets disponibles.'}
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-6">
+            {projects.map((project) => {
+              const isLate = project.due_at && new Date(project.due_at) < new Date();
+              const daysUntilDue = project.due_at 
+                ? Math.ceil((new Date(project.due_at).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+                : null;
+
+              return (
+                <div 
+                  key={project.id}
+                  className={cleanClassName(`
+                    bg-black/30 backdrop-blur-xl border rounded-2xl p-6 shadow-2xl
+                    hover:shadow-blue-500/20 transition-all duration-300 hover:scale-[1.02]
+                    ${isLate ? 'border-red-500/50' : 'border-white/10'}
+                  `)}
+                >
+                  <div className="flex items-start justify-between gap-6">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Badge 
+                          className="font-mono text-xs bg-blue-500/20 text-blue-400 border-blue-500/30 px-3 py-1"
+                        >
+                          {project.code}
+                        </Badge>
+                        {project.latest_submission && (
+                          <StatusBadge status={project.latest_submission.status} />
+                        )}
+                        {isLate && !project.latest_submission && (
+                          <Badge className="bg-red-500/20 text-red-400 border-red-500/30 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            En retard
+                          </Badge>
+                        )}
+                      </div>
+                      <h3 className="text-2xl font-bold text-white mb-2">
+                        {project.title}
+                      </h3>
+                      <p className="text-white/60 text-sm line-clamp-2 mb-4">
+                        {project.description}
+                      </p>
+                      
+                      {project.latest_submission && (
+                        <div className="flex items-center gap-2 text-sm text-white/50">
+                          <Clock className="w-4 h-4" />
+                          <span>
+                            Dernière soumission le{' '}
+                            {new Date(project.latest_submission.submitted_at).toLocaleDateString('fr-FR', {
+                              day: 'numeric',
+                              month: 'long',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex flex-col items-end gap-3">
+                      {project.due_at && (
+                        <div className={cleanClassName(`
+                          text-sm flex items-center gap-2 px-4 py-2 rounded-xl backdrop-blur-sm
+                          ${isLate 
+                            ? 'bg-red-500/20 text-red-400 border border-red-500/30' 
+                            : daysUntilDue && daysUntilDue <= 3
+                            ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                            : 'bg-white/10 text-white/80 border border-white/20'
+                          }
+                        `)}>
+                          <Calendar className="w-4 h-4" />
+                          <span className="font-medium">
+                            {new Date(project.due_at).toLocaleDateString('fr-FR', {
+                              day: 'numeric',
+                              month: 'short',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                      )}
+                      
+                      {project.latest_submission ? (
+                        <Button
+                          onClick={() => navigate(`/etudiant/soumettre/${project.id}`)}
+                          className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/30 backdrop-blur-sm"
+                        >
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Soumettre
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => navigate(`/etudiant/soumettre/${project.id}`)}
+                          className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg shadow-blue-500/50"
+                        >
+                          <Send className="w-4 h-4 mr-2" />
+                          Soumettre
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
-    </Layout>
+    </div>
   );
 }
