@@ -101,7 +101,8 @@ export default function StudentProjects() {
             title,
             description,
             due_at,
-            deadline_at
+            deadline_at,
+            image_url
           )
         `)
         .eq('class_id', selectedClassId);
@@ -165,35 +166,53 @@ export default function StudentProjects() {
               <p className="text-muted-foreground">Contactez votre administrateur</p>
             </div>
           ) : (
-            projects.map((project) => (
-              <div key={project.id} className="premium-card p-6 hover:scale-[1.02] transition-transform">
-                <Badge variant="outline" className="mb-2">{project.code}</Badge>
-                <h3 className="text-xl font-bold mb-2">{project.title}</h3>
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{project.description}</p>
-
-                {project.deadline_at && (
-                  <div className="mb-4">
-                    <DeadlineCountdown deadline={project.deadline_at} />
+            projects.map((project: any) => (
+              <div key={project.id} className="premium-card overflow-hidden hover:scale-[1.02] transition-transform">
+                {project.image_url && (
+                  <div className="relative h-48 w-full overflow-hidden">
+                    <img 
+                      src={project.image_url} 
+                      alt={project.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
+                    <div className="absolute top-3 left-3">
+                      <Badge variant="outline" className="bg-background/80 backdrop-blur">{project.code}</Badge>
+                    </div>
                   </div>
                 )}
+                
+                <div className="p-6">
+                  {!project.image_url && (
+                    <Badge variant="outline" className="mb-2">{project.code}</Badge>
+                  )}
+                  <h3 className="text-xl font-bold mb-2">{project.title}</h3>
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{project.description}</p>
 
-                {project.due_at && !project.deadline_at && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                    <Calendar className="h-4 w-4" />
-                    <span>{new Date(project.due_at).toLocaleDateString('fr-FR')}</span>
-                  </div>
-                )}
+                  {project.deadline_at && (
+                    <div className="mb-4">
+                      <DeadlineCountdown deadline={project.deadline_at} />
+                    </div>
+                  )}
 
-                {project.latest_submission && (
-                  <div className="mb-4">
-                    <StatusBadge status={project.latest_submission.status} />
-                  </div>
-                )}
+                  {project.due_at && !project.deadline_at && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                      <Calendar className="h-4 w-4" />
+                      <span>{new Date(project.due_at).toLocaleDateString('fr-FR')}</span>
+                    </div>
+                  )}
 
-                <Button onClick={() => navigate(`/etudiant/soumettre/${project.id}`)} className="w-full">
-                  <Send className="h-4 w-4 mr-2" />
-                  Soumettre
-                </Button>
+                  {project.latest_submission && (
+                    <div className="mb-4">
+                      <StatusBadge status={project.latest_submission.status} />
+                    </div>
+                  )}
+
+                  <Button onClick={() => navigate(`/etudiant/soumettre/${project.id}`)} className="w-full">
+                    <Send className="h-4 w-4 mr-2" />
+                    Soumettre
+                  </Button>
+                </div>
               </div>
             ))
           )}
