@@ -119,14 +119,18 @@ export default function StudentCourses() {
 
       const { signedUrl } = await response.json();
 
-      // Download using signed URL
+      // Force download via blob to avoid inline opening in browser
+      const res = await fetch(signedUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = signedUrl;
+      a.href = url;
       a.download = fileName;
-      a.target = '_blank';
       a.click();
+      URL.revokeObjectURL(url);
 
-      toast.success('Téléchargement lancé');
+      toast.success('Téléchargement réussi');
     } catch (error: any) {
       console.error('Course download error:', error);
       toast.error(error.message || 'Téléchargement impossible');
@@ -162,7 +166,7 @@ export default function StudentCourses() {
                 )}
                 
                 <Button
-                  onClick={() => downloadFile(course.file_url, course.title)}
+                  onClick={() => downloadFile(course.file_url, course.file_name)}
                   className="w-full mt-4"
                 >
                   <Download className="h-4 w-4 mr-2" />

@@ -83,10 +83,19 @@ serve(async (req) => {
       });
     }
 
-    // Create signed URL (60 seconds expiry)
+    // Resolve a friendly download file name from DB if possible
+    const fileNameFromPath = filePath.split('/').pop() || 'file';
+    const { data: record } = await supabase
+      .from('course_materials')
+      .select('file_name')
+      .eq('file_url', filePath)
+      .maybeSingle();
+    const downloadName = record?.file_name || fileNameFromPath;
+
+    // Create signed URL (60 seconds expiry) with forced download
     const { data: signedData, error: signedError } = await supabase.storage
       .from('course-materials')
-      .createSignedUrl(filePath, 60);
+      .createSignedUrl(filePath, 60, { download: downloadName });
 
     if (signedError || !signedData?.signedUrl) {
       console.error('Signed URL error:', signedError);
