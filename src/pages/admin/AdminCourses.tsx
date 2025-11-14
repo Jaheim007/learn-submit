@@ -7,8 +7,26 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Upload, FileText, Trash2, Download } from 'lucide-react';
+import { Upload, FileText, Trash2, Download, Edit } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface CourseMaterial {
   id: string;
@@ -36,12 +54,22 @@ export default function AdminCourses() {
   const [materials, setMaterials] = useState<CourseMaterial[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [materialToDelete, setMaterialToDelete] = useState<{ id: string; filePath: string } | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingMaterial, setEditingMaterial] = useState<CourseMaterial | null>(null);
   
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     class_id: '',
     files: [] as File[],
+    image: null as File | null
+  });
+
+  const [editFormData, setEditFormData] = useState({
+    title: '',
+    description: '',
     image: null as File | null
   });
 
@@ -107,13 +135,19 @@ export default function AdminCourses() {
         const imagePath = `course-images/${Date.now()}.${imageExt}`;
         
         const { error: imageError } = await supabase.storage
-          .from('project-images')
-          .upload(imagePath, formData.image);
+          .from('course-materials')
+          .upload(imagePath, formData.image, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-        if (imageError) throw imageError;
+        if (imageError) {
+          console.error('Image upload error:', imageError);
+          throw new Error(`Erreur lors de l'upload de l'image: ${imageError.message}`);
+        }
 
         const { data: { publicUrl } } = supabase.storage
-          .from('project-images')
+          .from('course-materials')
           .getPublicUrl(imagePath);
         
         imageUrl = publicUrl;
@@ -161,17 +195,89 @@ export default function AdminCourses() {
     }
   };
 
-  const handleDelete = async (id: string, filePath: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce cours ?')) return;
+  const handleDeleteClick = (id: string, filePath: string) => {
+    setMaterialToDelete({ id, filePath });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!materialToDelete) return;
 
     try {
-      await supabase.storage.from('course-materials').remove([filePath]);
-      await supabase.from('course_materials').delete().eq('id', id);
+      await supabase.storage.from('course-materials').remove([materialToDelete.filePath]);
+      await supabase.from('course_materials').delete().eq('id', materialToDelete.id);
       
-      toast.success('Cours supprimé');
+      toast.success('Cours supprimé avec succès');
       fetchMaterials();
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(`Erreur: ${error.message}`);
+    } finally {
+      setDeleteDialogOpen(false);
+      setMaterialToDelete(null);
+    }
+  };
+
+  const handleEditClick = (material: CourseMaterial) => {
+    setEditingMaterial(material);
+    setEditFormData({
+      title: material.title,
+      description: material.description || '',
+      image: null
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSave = async () => {
+    if (!editingMaterial) return;
+
+    try {
+      let imageUrl = editingMaterial.image_url;
+
+      // Upload new image if provided
+      if (editFormData.image) {
+        const imageExt = editFormData.image.name.split('.').pop();
+        const imagePath = `course-images/${Date.now()}.${imageExt}`;
+        
+        const { error: imageError } = await supabase.storage
+          .from('course-materials')
+          .upload(imagePath, editFormData.image, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (imageError) throw new Error(`Erreur lors de l'upload de l'image: ${imageError.message}`);
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('course-materials')
+          .getPublicUrl(imagePath);
+        
+        imageUrl = publicUrl;
+
+        // Delete old image if it exists
+        if (editingMaterial.image_url) {
+          const oldImagePath = editingMaterial.image_url.split('/').slice(-2).join('/');
+          await supabase.storage.from('course-materials').remove([oldImagePath]);
+        }
+      }
+
+      const { error } = await supabase
+        .from('course_materials')
+        .update({
+          title: editFormData.title,
+          description: editFormData.description,
+          image_url: imageUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingMaterial.id);
+
+      if (error) throw error;
+
+      toast.success('Cours mis à jour avec succès');
+      setEditDialogOpen(false);
+      setEditingMaterial(null);
+      fetchMaterials();
+    } catch (error: any) {
+      toast.error(`Erreur: ${error.message}`);
     }
   };
 
@@ -336,9 +442,16 @@ export default function AdminCourses() {
                           <Download className="h-4 w-4" />
                         </Button>
                         <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditClick(material)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => handleDelete(material.id, material.file_url)}
+                          onClick={() => handleDeleteClick(material.id, material.file_url)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -351,6 +464,87 @@ export default function AdminCourses() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="bg-destructive/10 border-destructive/20">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">Supprimer ce cours ?</AlertDialogTitle>
+            <AlertDialogDescription className="text-foreground/80">
+              Cette action est irréversible. Le cours et tous ses fichiers seront définitivement supprimés.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-background hover:bg-muted">Annuler</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Edit Course Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[525px]">
+          <DialogHeader>
+            <DialogTitle>Modifier le cours</DialogTitle>
+            <DialogDescription>
+              Modifiez les informations du cours ci-dessous
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Titre du cours</Label>
+              <Input
+                id="edit-title"
+                value={editFormData.title}
+                onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                placeholder="Titre du cours"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-image">Nouvelle image (optionnel)</Label>
+              <Input
+                id="edit-image"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setEditFormData({ ...editFormData, image: e.target.files[0] });
+                  }
+                }}
+                className="cursor-pointer"
+              />
+              {editFormData.image && (
+                <p className="text-sm text-muted-foreground">
+                  {editFormData.image.name}
+                </p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editFormData.description}
+                onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                placeholder="Description du cours"
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Annuler
+            </Button>
+            <Button onClick={handleEditSave} className="bg-primary hover:bg-primary/90">
+              Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
