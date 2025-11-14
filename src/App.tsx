@@ -28,6 +28,7 @@ import AdminCourses from "./pages/admin/AdminCourses";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminRegister from "./pages/admin/AdminRegister";
 import StudentCourses from "./pages/StudentCourses";
+import CourseDetail from "./pages/CourseDetail";
 
 import SupervisorDashboard from "./pages/SupervisorDashboard";
 import SupervisorSubmissions from "./pages/SupervisorSubmissions";
@@ -61,7 +62,8 @@ const App = () => (
               <Route path="/etudiant/soumissions" element={<StudentGuard><StudentSubmissions /></StudentGuard>} />
               <Route path="/etudiant/classement" element={<StudentGuard><StudentLeaderboard /></StudentGuard>} />
               <Route path="/etudiant/cours" element={<StudentGuard><StudentCourses /></StudentGuard>} />
-              
+              <Route path="/etudiant/cours/:courseId" element={<StudentGuard><CourseDetail /></StudentGuard>} />
+
               {/* Admin auth routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/register" element={<AdminRegister />} />

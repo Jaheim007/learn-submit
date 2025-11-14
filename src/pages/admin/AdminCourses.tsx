@@ -17,6 +17,7 @@ interface CourseMaterial {
   file_name: string;
   file_type: string;
   file_url: string;
+  image_url: string | null;
   class_id: number;
   created_at: string;
   classes: {
@@ -40,7 +41,8 @@ export default function AdminCourses() {
     title: '',
     description: '',
     class_id: '',
-    files: [] as File[]
+    files: [] as File[],
+    image: null as File | null
   });
 
   useEffect(() => {
@@ -79,6 +81,12 @@ export default function AdminCourses() {
     }
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData({ ...formData, image: e.target.files[0] });
+    }
+  };
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -91,6 +99,25 @@ export default function AdminCourses() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
+
+      // Upload image first if provided
+      let imageUrl = null;
+      if (formData.image) {
+        const imageExt = formData.image.name.split('.').pop();
+        const imagePath = `course-images/${Date.now()}.${imageExt}`;
+        
+        const { error: imageError } = await supabase.storage
+          .from('project-images')
+          .upload(imagePath, formData.image);
+
+        if (imageError) throw imageError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('project-images')
+          .getPublicUrl(imagePath);
+        
+        imageUrl = publicUrl;
+      }
 
       // Generate a single course_group_id for all files in this upload
       const courseGroupId = crypto.randomUUID();
@@ -116,7 +143,8 @@ export default function AdminCourses() {
             file_name: file.name,
             file_type: file.type,
             uploaded_by: user.id,
-            course_group_id: courseGroupId
+            course_group_id: courseGroupId,
+            image_url: imageUrl
           });
 
         if (dbError) throw dbError;
@@ -124,7 +152,7 @@ export default function AdminCourses() {
       }
 
       toast.success(`Cours "${formData.title}" uploadé avec ${successCount} fichier${successCount > 1 ? 's' : ''}`);
-      setFormData({ title: '', description: '', class_id: '', files: [] });
+      setFormData({ title: '', description: '', class_id: '', files: [], image: null });
       fetchMaterials();
     } catch (error: any) {
       toast.error(error.message);
@@ -218,6 +246,22 @@ export default function AdminCourses() {
                 placeholder="Description du cours..."
                 rows={3}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="image">Image du cours</Label>
+              <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="cursor-pointer"
+              />
+              {formData.image && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {formData.image.name}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
