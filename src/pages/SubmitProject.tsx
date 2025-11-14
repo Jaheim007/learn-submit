@@ -19,6 +19,7 @@ interface Project {
   title: string;
   description: string;
   due_at: string | null;
+  deadline_at: string | null;
   image_url: string | null;
 }
 
@@ -229,8 +230,8 @@ export default function SubmitProject() {
         )}
 
         {/* Countdown Timer */}
-        {project.due_at && (
-          <DeadlineCountdown deadline={project.due_at} />
+        {project.deadline_at && (
+          <DeadlineCountdown deadline={project.deadline_at} className="my-6" />
         )}
 
         {/* Project Description */}
