@@ -3,24 +3,30 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { StudentDashboardLayout } from '@/components/StudentDashboardLayout';
-import { Download, BookOpen, AlertCircle } from 'lucide-react';
+import { Download, BookOpen, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 
-interface Course {
+interface CourseMaterial {
   id: string;
-  title: string;
   file_name: string;
   file_url: string;
+}
+
+interface GroupedCourse {
+  title: string;
   class_code: string;
   description: string | null;
+  materials: CourseMaterial[];
 }
 
 export default function StudentCourses() {
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [groupedCourses, setGroupedCourses] = useState<GroupedCourse[]>([]);
+  const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) fetchCourses();
@@ -63,17 +69,29 @@ export default function StudentCourses() {
         toast.error('Erreur: ' + error.message);
       }
 
-      const mapped = data?.map((c: any) => ({
-        id: c.id,
-        title: c.title,
-        file_name: c.file_name,
-        file_url: c.file_url,
-        description: c.description,
-        class_code: c.classes?.code || 'N/A'
-      })) || [];
+      // Group materials by title and class_code
+      const grouped: { [key: string]: GroupedCourse } = {};
+      
+      data?.forEach((c: any) => {
+        const key = `${c.title}_${c.class_id}`;
+        if (!grouped[key]) {
+          grouped[key] = {
+            title: c.title,
+            class_code: c.classes?.code || 'N/A',
+            description: c.description,
+            materials: []
+          };
+        }
+        grouped[key].materials.push({
+          id: c.id,
+          file_name: c.file_name,
+          file_url: c.file_url
+        });
+      });
 
-      console.log('Fetched courses:', mapped);
-      setCourses(mapped);
+      const groupedArray = Object.values(grouped);
+      console.log('Grouped courses:', groupedArray);
+      setGroupedCourses(groupedArray);
     } catch (error) {
       toast.error('Erreur lors du chargement');
     } finally {
@@ -139,6 +157,10 @@ export default function StudentCourses() {
 
   if (loading || authLoading) return <LoadingScreen />;
 
+  const toggleCourse = (title: string) => {
+    setExpandedCourse(expandedCourse === title ? null : title);
+  };
+
   return (
     <StudentDashboardLayout>
       <div className="max-w-7xl mx-auto space-y-6">
@@ -147,33 +169,77 @@ export default function StudentCourses() {
           <p className="text-muted-foreground">Accédez à vos supports de cours</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {courses.length === 0 ? (
-            <div className="col-span-full flex flex-col items-center justify-center py-16">
+        <div className="space-y-4">
+          {groupedCourses.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16">
               <BookOpen className="h-16 w-16 text-muted-foreground/50 mb-4" />
               <h3 className="text-xl font-semibold mb-2">Aucun cours</h3>
               <p className="text-muted-foreground">Aucun support de cours disponible</p>
             </div>
           ) : (
-            courses.map((course) => (
-              <div key={course.id} className="premium-card p-6 hover:scale-[1.02] transition-transform">
-                <BookOpen className="h-12 w-12 text-primary mb-4" />
-                <h3 className="text-xl font-bold mb-2">{course.title}</h3>
-                <Badge variant="outline" className="mb-2">{course.file_name}</Badge>
-                <p className="text-sm text-muted-foreground mb-2">Classe: {course.class_code}</p>
-                {course.description && (
-                  <p className="text-xs text-muted-foreground mb-4 line-clamp-2">{course.description}</p>
-                )}
-                
-                <Button
-                  onClick={() => downloadFile(course.file_url, course.file_name)}
-                  className="w-full mt-4"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Télécharger
-                </Button>
-              </div>
-            ))
+            groupedCourses.map((course, idx) => {
+              const isExpanded = expandedCourse === course.title;
+              return (
+                <Card key={idx} className="premium-card overflow-hidden">
+                  <div
+                    className="p-6 cursor-pointer hover:bg-accent/50 transition-colors"
+                    onClick={() => toggleCourse(course.title)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <BookOpen className="h-8 w-8 text-primary flex-shrink-0" />
+                          <h3 className="text-xl font-bold">{course.title}</h3>
+                        </div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="outline">{course.class_code}</Badge>
+                          <Badge variant="secondary">{course.materials.length} fichier{course.materials.length > 1 ? 's' : ''}</Badge>
+                        </div>
+                        {course.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
+                        )}
+                      </div>
+                      <div className="ml-4">
+                        {isExpanded ? (
+                          <ChevronUp className="h-6 w-6 text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="h-6 w-6 text-muted-foreground" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="border-t border-border/50 bg-muted/20 p-6">
+                      <h4 className="font-semibold mb-4 flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Fichiers disponibles
+                      </h4>
+                      <div className="space-y-3">
+                        {course.materials.map((material) => (
+                          <div
+                            key={material.id}
+                            className="flex items-center justify-between p-4 bg-background rounded-lg border border-border/50 hover:border-primary/50 transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <FileText className="h-5 w-5 text-primary" />
+                              <span className="font-medium">{material.file_name}</span>
+                            </div>
+                            <Button
+                              onClick={() => downloadFile(material.file_url, material.file_name)}
+                              size="sm"
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Télécharger
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              );
+            })
           )}
         </div>
       </div>
