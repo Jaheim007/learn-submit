@@ -202,51 +202,64 @@ export default function SubmitProject() {
           Retour
         </Button>
 
-        {/* Project Header with Image */}
-        {project.image_url && (
-          <div className="relative w-full h-64 rounded-xl overflow-hidden shadow-lg">
-            <img
-              src={project.image_url}
-              alt={project.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-            <div className="absolute bottom-0 left-0 p-6">
-              <div className="text-sm text-muted-foreground font-medium mb-2">
-                {project.code}
+        {/* Project Hero Section */}
+        <div className="space-y-6">
+          {/* Hero Image or Header */}
+          {project.image_url ? (
+            <div className="relative w-full h-[500px] rounded-2xl overflow-hidden shadow-2xl border border-border/50">
+              <img
+                src={project.image_url}
+                alt={project.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+                <div className="max-w-3xl">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30 mb-4">
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    <span className="text-sm font-semibold text-primary">{project.code}</span>
+                  </div>
+                  <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-3 leading-tight">
+                    {project.title}
+                  </h1>
+                </div>
               </div>
-              <h1 className="text-3xl font-bold text-foreground">{project.title}</h1>
             </div>
-          </div>
-        )}
-
-        {!project.image_url && (
-          <div>
-            <div className="text-sm text-muted-foreground font-medium mb-2">
-              {project.code}
+          ) : (
+            <div className="relative rounded-2xl overflow-hidden border border-border/50 bg-gradient-to-br from-primary/10 via-background to-accent/10 p-8 md:p-12">
+              <div className="max-w-3xl">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30 mb-4">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-sm font-semibold text-primary">{project.code}</span>
+                </div>
+                <h1 className="text-4xl md:text-6xl font-bold mb-3 leading-tight">{project.title}</h1>
+              </div>
             </div>
-            <h1 className="text-3xl font-bold">{project.title}</h1>
-          </div>
-        )}
+          )}
 
-        {/* Countdown Timer */}
-        {project.deadline_at && (
-          <DeadlineCountdown deadline={project.deadline_at} className="my-6" />
-        )}
+          {/* Countdown Timer */}
+          {project.deadline_at && (
+            <DeadlineCountdown deadline={project.deadline_at} />
+          )}
+        </div>
 
         {/* Project Description */}
         {project.description && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-lg">
+            <CardHeader className="border-b border-border/50">
+              <CardTitle className="flex items-center gap-3 text-2xl">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <FileText className="h-6 w-6 text-primary" />
+                </div>
                 Description du projet
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                {project.description}
-              </p>
+            <CardContent className="pt-6">
+              <div className="prose prose-invert max-w-none">
+                <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed text-lg">
+                  {project.description}
+                </p>
+              </div>
             </CardContent>
           </Card>
         )}
