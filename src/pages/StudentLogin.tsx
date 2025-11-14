@@ -199,7 +199,7 @@ export default function StudentLogin() {
                 
                 <Button 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white h-12 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-emerald-500/50" 
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white h-12 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-blue-500/50" 
                   disabled={loading}
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
