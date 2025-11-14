@@ -171,12 +171,13 @@ export default function StudentRegister() {
       <div className="w-full max-w-md space-y-6 relative z-10">
         {/* Logo - Clickable */}
         <div className="flex justify-center mb-8">
-          <img 
-            src={nysLogo} 
-            alt="NYS Logo" 
-            className="h-20 w-auto cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => navigate('/')}
-          />
+          <Link to="/">
+            <img 
+              src={nysLogo} 
+              alt="NYS Africa Logo" 
+              className="h-16 w-16 object-contain filter drop-shadow-[0_0_20px_hsl(217,91%,60%)] cursor-pointer hover:scale-110 transition-transform"
+            />
+          </Link>
         </div>
 
         {/* Register Card */}
