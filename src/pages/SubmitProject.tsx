@@ -272,7 +272,7 @@ export default function SubmitProject() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <LinkIcon className="h-5 w-5" />
-                  Liens (optionnels)
+                  Liens
                 </CardTitle>
                 <Button
                   type="button"
@@ -318,7 +318,7 @@ export default function SubmitProject() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="h-5 w-5" />
-                Fichiers (optionnels - Ajouter plusieurs fichiers)
+                Fichiers
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -368,7 +368,7 @@ export default function SubmitProject() {
           {/* Description Section */}
           <Card>
             <CardHeader>
-              <CardTitle>Description (optionnelle)</CardTitle>
+              <CardTitle>Description</CardTitle>
             </CardHeader>
             <CardContent>
               <Textarea
