@@ -45,58 +45,61 @@ export function DeadlineCountdown({ deadline, className }: DeadlineCountdownProp
 
   if (isExpired) {
     return (
-      <Card className={`bg-destructive/10 border-destructive p-6 ${className}`}>
+      <Card className={`bg-gradient-to-br from-red-500/20 via-red-600/10 to-red-700/20 border-red-500 p-6 animate-pulse ${className}`}>
         <div className="text-center">
-          <p className="text-destructive font-semibold text-lg">Délai expiré</p>
+          <h3 className="text-lg font-bold text-red-500 mb-4 uppercase tracking-wider animate-bounce">
+            ⚠️ Délai Expiré ⚠️
+          </h3>
+          <p className="text-red-400 font-semibold">Le temps de soumission est écoulé</p>
         </div>
       </Card>
     );
   }
 
   return (
-    <Card className={`bg-gradient-to-br from-primary/10 via-background to-accent/10 border-primary/20 p-6 ${className}`}>
+    <Card className={`bg-gradient-to-br from-green-500/20 via-green-600/10 to-emerald-700/20 border-green-500/50 p-6 ${className}`}>
       <div className="text-center mb-4">
-        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-          Temps restant
+        <h3 className="text-sm font-medium text-green-600 uppercase tracking-wider">
+          ⏰ Temps restant
         </h3>
       </div>
       <div className="grid grid-cols-4 gap-4">
         <div className="text-center">
-          <div className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-border shadow-sm">
-            <div className="text-3xl font-bold bg-gradient-to-br from-primary to-primary/60 bg-clip-text text-transparent">
+          <div className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-green-500/30 shadow-lg shadow-green-500/20">
+            <div className="text-3xl font-bold text-green-600">
               {timeLeft.days}
             </div>
-            <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">
+            <div className="text-xs text-green-700 mt-1 uppercase tracking-wide font-semibold">
               Jours
             </div>
           </div>
         </div>
         <div className="text-center">
-          <div className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-border shadow-sm">
-            <div className="text-3xl font-bold bg-gradient-to-br from-primary to-primary/60 bg-clip-text text-transparent">
+          <div className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-green-500/30 shadow-lg shadow-green-500/20">
+            <div className="text-3xl font-bold text-green-600">
               {timeLeft.hours}
             </div>
-            <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">
+            <div className="text-xs text-green-700 mt-1 uppercase tracking-wide font-semibold">
               Heures
             </div>
           </div>
         </div>
         <div className="text-center">
-          <div className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-border shadow-sm">
-            <div className="text-3xl font-bold bg-gradient-to-br from-primary to-primary/60 bg-clip-text text-transparent">
+          <div className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-green-500/30 shadow-lg shadow-green-500/20">
+            <div className="text-3xl font-bold text-green-600">
               {timeLeft.minutes}
             </div>
-            <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">
+            <div className="text-xs text-green-700 mt-1 uppercase tracking-wide font-semibold">
               Minutes
             </div>
           </div>
         </div>
         <div className="text-center">
-          <div className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-border shadow-sm">
-            <div className="text-3xl font-bold bg-gradient-to-br from-primary to-primary/60 bg-clip-text text-transparent">
+          <div className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-green-500/30 shadow-lg shadow-green-500/20">
+            <div className="text-3xl font-bold text-green-600">
               {timeLeft.seconds}
             </div>
-            <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">
+            <div className="text-xs text-green-700 mt-1 uppercase tracking-wide font-semibold">
               Secondes
             </div>
           </div>
