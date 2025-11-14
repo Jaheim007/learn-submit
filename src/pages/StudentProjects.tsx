@@ -377,9 +377,6 @@ export default function StudentProjects() {
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 group">
               <img src={nysLogo} alt="NYS" className="h-10 w-10 object-contain transition-transform group-hover:scale-110" />
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                NYS Submissions
-              </span>
             </Link>
             
             <nav className="hidden md:flex items-center gap-1">
@@ -431,33 +428,23 @@ export default function StudentProjects() {
       </header>
 
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
-        {/* Modern Hero Section */}
+        {/* Premium Hero Section */}
         <div className="mb-8">
-          <div className="flex items-center gap-6">
-            <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-white/20 rounded-2xl p-4 shadow-2xl">
-              <BookOpen className="w-10 h-10 text-blue-400" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-                Mes Projets
-              </h1>
-              <p className="text-white/60 mt-2 text-lg">
-                Consultez et soumettez vos projets par classe
-              </p>
-            </div>
-          </div>
+          <h1 className="text-4xl font-bold text-white mb-2">
+            Mes Projets
+          </h1>
+          <p className="text-white/50 text-lg">
+            Consultez et soumettez vos projets par classe
+          </p>
         </div>
 
-        {/* Modern Class Filter */}
-        <div className="mb-6 bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-500/20 p-2 rounded-lg">
-                <Filter className="w-5 h-5 text-blue-400" />
-              </div>
+        {/* Premium Filter Bar */}
+        <div className="mb-8 bg-background/40 backdrop-blur-xl border border-white/5 rounded-3xl p-5 shadow-2xl">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-4">
               <div>
-                <p className="text-white/60 text-sm">Classe sélectionnée</p>
-                <p className="text-white font-bold text-lg">
+                <p className="text-white/40 text-xs mb-1">Classe sélectionnée</p>
+                <p className="text-white font-semibold text-base">
                   {classes.find(c => c.id === selectedClassId)?.title || 'Toutes les classes'}
                 </p>
               </div>
@@ -465,7 +452,9 @@ export default function StudentProjects() {
             <Button
               onClick={handleRetry}
               disabled={apiState.loading}
-              className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 backdrop-blur-sm"
+              variant="ghost"
+              size="sm"
+              className="text-white/60 hover:text-white hover:bg-white/5"
             >
               <RefreshCw className={`w-4 h-4 mr-2 ${apiState.loading ? 'animate-spin' : ''}`} />
               Actualiser
@@ -473,114 +462,137 @@ export default function StudentProjects() {
           </div>
         </div>
 
-        {/* Modern Projects Grid */}
+        {/* Premium Projects Grid */}
         {projects.length === 0 ? (
-          <div className="text-center py-16 bg-black/20 backdrop-blur-xl border border-white/10 rounded-2xl">
-            <BookOpen className="w-20 h-20 text-white/20 mx-auto mb-4" />
-            <p className="text-white/60 text-lg">
+          <div className="text-center py-20 bg-background/20 backdrop-blur-xl border border-white/5 rounded-3xl">
+            <BookOpen className="w-16 h-16 text-white/10 mx-auto mb-4" />
+            <p className="text-white/40 text-base">
               {selectedClassId 
                 ? 'Aucun projet disponible pour cette classe pour le moment.'
                 : 'Veuillez sélectionner une classe pour voir les projets disponibles.'}
             </p>
           </div>
         ) : (
-          <div className="grid gap-6">
-            {projects.map((project) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {projects.map((project, index) => {
               const isLate = project.due_at && new Date(project.due_at) < new Date();
               const daysUntilDue = project.due_at 
                 ? Math.ceil((new Date(project.due_at).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
                 : null;
 
+              // Gradient colors based on index for visual variety
+              const gradients = [
+                'from-cyan-500/10 to-teal-500/10 border-cyan-500/20',
+                'from-amber-500/10 to-orange-500/10 border-amber-500/20',
+                'from-rose-500/10 to-red-500/10 border-rose-500/20',
+                'from-blue-500/10 to-indigo-500/10 border-blue-500/20',
+                'from-emerald-500/10 to-green-500/10 border-emerald-500/20',
+                'from-purple-500/10 to-pink-500/10 border-purple-500/20',
+              ];
+              
+              const gradient = isLate 
+                ? 'from-red-500/20 to-red-600/20 border-red-500/30'
+                : gradients[index % gradients.length];
+
               return (
                 <div 
                   key={project.id}
                   className={cleanClassName(`
-                    bg-black/30 backdrop-blur-xl border rounded-2xl p-6 shadow-2xl
-                    hover:shadow-blue-500/20 transition-all duration-300 hover:scale-[1.02]
-                    ${isLate ? 'border-red-500/50' : 'border-white/10'}
+                    bg-gradient-to-br ${gradient}
+                    backdrop-blur-xl border rounded-3xl p-6 shadow-xl
+                    hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]
+                    relative overflow-hidden group
                   `)}
                 >
-                  <div className="flex items-start justify-between gap-6">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
+                  {/* Decorative gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  <div className="relative">
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
                         <Badge 
-                          className="font-mono text-xs bg-blue-500/20 text-blue-400 border-blue-500/30 px-3 py-1"
+                          className="font-mono text-xs bg-background/40 text-white/90 border-white/20 px-3 py-1 mb-3"
                         >
                           {project.code}
                         </Badge>
-                        {project.latest_submission && (
-                          <StatusBadge status={project.latest_submission.status} />
-                        )}
-                        {isLate && !project.latest_submission && (
-                          <Badge className="bg-red-500/20 text-red-400 border-red-500/30 flex items-center gap-1">
-                            <AlertTriangle className="w-3 h-3" />
-                            En retard
-                          </Badge>
-                        )}
+                        <h3 className="text-xl font-bold text-white mb-2 leading-tight">
+                          {project.title}
+                        </h3>
                       </div>
-                      <h3 className="text-2xl font-bold text-white mb-2">
-                        {project.title}
-                      </h3>
-                      <p className="text-white/60 text-sm line-clamp-2 mb-4">
-                        {project.description}
-                      </p>
                       
+                      {/* Status Badge */}
                       {project.latest_submission && (
-                        <div className="flex items-center gap-2 text-sm text-white/50">
-                          <Clock className="w-4 h-4" />
-                          <span>
-                            Dernière soumission le{' '}
-                            {new Date(project.latest_submission.submitted_at).toLocaleDateString('fr-FR', {
-                              day: 'numeric',
-                              month: 'long',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </span>
-                        </div>
+                        <StatusBadge status={project.latest_submission.status} />
                       )}
                     </div>
-                    
-                    <div className="flex flex-col items-end gap-3">
-                      {project.due_at && (
-                        <div className={cleanClassName(`
-                          text-sm flex items-center gap-2 px-4 py-2 rounded-xl backdrop-blur-sm
-                          ${isLate 
-                            ? 'bg-red-500/20 text-red-400 border border-red-500/30' 
-                            : daysUntilDue && daysUntilDue <= 3
-                            ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                            : 'bg-white/10 text-white/80 border border-white/20'
+
+                    {/* Description */}
+                    <p className="text-white/50 text-sm line-clamp-2 mb-4 leading-relaxed">
+                      {project.description}
+                    </p>
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                      <div className="flex flex-col gap-2">
+                        {/* Deadline */}
+                        {project.due_at && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Calendar className="w-4 h-4 text-white/40" />
+                            <span className={cleanClassName(`
+                              font-medium
+                              ${isLate 
+                                ? 'text-red-400' 
+                                : daysUntilDue && daysUntilDue <= 3
+                                ? 'text-yellow-400'
+                                : 'text-white/60'
+                              }
+                            `)}>
+                              {new Date(project.due_at).toLocaleDateString('fr-FR', {
+                                day: 'numeric',
+                                month: 'short'
+                              })}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {/* Last submission */}
+                        {project.latest_submission && (
+                          <div className="flex items-center gap-2 text-xs text-white/40">
+                            <Clock className="w-3 h-3" />
+                            <span>
+                              {new Date(project.latest_submission.submitted_at).toLocaleDateString('fr-FR', {
+                                day: 'numeric',
+                                month: 'short'
+                              })}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Button */}
+                      <Button
+                        onClick={() => navigate(`/etudiant/soumettre/${project.id}`)}
+                        size="sm"
+                        className={cleanClassName(`
+                          ${project.latest_submission
+                            ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                            : 'bg-white/95 hover:bg-white text-background font-semibold shadow-lg'
                           }
-                        `)}>
-                          <Calendar className="w-4 h-4" />
-                          <span className="font-medium">
-                            {new Date(project.due_at).toLocaleDateString('fr-FR', {
-                              day: 'numeric',
-                              month: 'short',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </span>
-                        </div>
-                      )}
-                      
-                      {project.latest_submission ? (
-                        <Button
-                          onClick={() => navigate(`/etudiant/soumettre/${project.id}`)}
-                          className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/30 backdrop-blur-sm"
-                        >
-                          <RefreshCw className="w-4 h-4 mr-2" />
-                          Soumettre
-                        </Button>
-                      ) : (
-                        <Button
-                          onClick={() => navigate(`/etudiant/soumettre/${project.id}`)}
-                          className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg shadow-blue-500/50"
-                        >
-                          <Send className="w-4 h-4 mr-2" />
-                          Soumettre
-                        </Button>
-                      )}
+                        `)}
+                      >
+                        {project.latest_submission ? (
+                          <>
+                            <RefreshCw className="w-3 h-3 mr-1" />
+                            Revoir
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-3 h-3 mr-1" />
+                            Soumettre
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
                 </div>
