@@ -135,11 +135,13 @@ export default function StudentLogin() {
       
       <Card className="w-full max-w-md relative z-10 bg-card/95 backdrop-blur-sm border-border/50">
         <CardHeader className="text-center">
-          <img 
-            src={nysLogo} 
-            alt="NYS Africa Logo" 
-            className="h-16 w-16 object-contain mx-auto mb-4 filter drop-shadow-[0_0_20px_hsl(217,91%,60%)]"
-          />
+          <Link to="/" className="inline-block">
+            <img 
+              src={nysLogo} 
+              alt="NYS Africa Logo" 
+              className="h-16 w-16 object-contain mx-auto mb-4 filter drop-shadow-[0_0_20px_hsl(217,91%,60%)] cursor-pointer hover:scale-110 transition-transform"
+            />
+          </Link>
           <CardTitle className="text-2xl font-bold">Bienvenue</CardTitle>
           <CardDescription>
             Connectez-vous à votre compte

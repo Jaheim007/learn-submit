@@ -7,10 +7,10 @@ const Index = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative">
+    <div className="min-h-screen flex items-center justify-center relative px-4">
       <AnimatedBackground />
       
-      <div className="relative z-10 text-center max-w-4xl px-6">
+      <div className="relative z-10 text-center max-w-4xl px-6 w-full">
         <img 
           src={nysLogo} 
           alt="NYS Africa Logo" 
