@@ -238,17 +238,6 @@ export default function AdminCourses() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Description du cours..."
-                rows={3}
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="image">Image du cours</Label>
               <Input
                 id="image"
@@ -262,6 +251,17 @@ export default function AdminCourses() {
                   {formData.image.name}
                 </p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Description du cours..."
+                rows={3}
+              />
             </div>
 
             <div className="space-y-2">
