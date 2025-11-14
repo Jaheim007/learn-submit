@@ -85,21 +85,34 @@ export default function StudentSubmissions() {
     try {
       const fileName = filePath.split('/').pop() || 'file';
       
-      // Try to download from storage
-      const { data, error } = await supabase.storage
-        .from('submissions')
-        .download(filePath);
-      
-      if (error) {
-        console.error('Download error:', error);
-        throw error;
+      // Check if it's a full URL or a storage path
+      if (filePath.startsWith('http')) {
+        // It's a full URL - fetch directly
+        const response = await fetch(filePath);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const blob = await response.blob();
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+      } else {
+        // It's a storage path - use Supabase storage
+        const { data, error } = await supabase.storage
+          .from('submissions')
+          .download(filePath);
+        
+        if (error) {
+          console.error('Storage download error:', error);
+          throw error;
+        }
+        
+        const blob = new Blob([data]);
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
       }
       
-      const blob = new Blob([data]);
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName;
-      link.click();
       toast.success('Téléchargement réussi');
     } catch (error: any) {
       console.error('Download error:', error);
