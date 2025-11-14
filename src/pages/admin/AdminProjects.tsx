@@ -450,13 +450,27 @@ export default function AdminProjects() {
         </CardContent>
       </Card>
 
+      {/* Create Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Créer un projet</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-y-auto flex-1 pr-2">
+            <ProjectForm />
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Modifier le projet</DialogTitle>
           </DialogHeader>
-          <ProjectForm />
+          <div className="overflow-y-auto flex-1 pr-2">
+            <ProjectForm />
+          </div>
         </DialogContent>
       </Dialog>
     </div>
