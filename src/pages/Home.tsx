@@ -8,6 +8,7 @@ import { BookOpen, User, Upload, ArrowRight, GraduationCap, Target, Users, Setti
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { cleanClassName } from '@/lib/utils';
+import nysLogo from '@/assets/nys-logo.png';
 
 interface StudentClass {
   id: number;
@@ -108,21 +109,44 @@ export default function Home() {
   if (!user) {
     return (
       <Layout showNavigation={false}>
-        <div className="min-h-screen">
+        <div className="min-h-screen relative overflow-hidden">
+          {/* Animated Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-emerald-900/40 to-slate-800">
+            {/* Floating particles effect */}
+            <div className="absolute inset-0 opacity-30">
+              {[...Array(30)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-1 h-1 bg-emerald-400 rounded-full animate-float"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 5}s`,
+                    animationDuration: `${5 + Math.random() * 10}s`
+                  }}
+                />
+              ))}
+            </div>
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+          </div>
+
           {/* Hero Section */}
-          <section className="bg-gradient-hero py-20 px-4">
+          <section className="relative py-20 px-4">
             <div className="max-w-content mx-auto text-center">
-              <div className="flex justify-center mb-6">
-                <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-3xl flex items-center justify-center">
-                  <Upload className="w-10 h-10 text-white" />
-                </div>
+              <div className="flex justify-center mb-8">
+                <img 
+                  src={nysLogo} 
+                  alt="NYS Logo" 
+                  className="h-32 w-auto animate-fade-in"
+                />
               </div>
               
-              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
                 NYS Submissions Portal
               </h1>
               
-              <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto">
+              <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto animate-fade-in">
                 Plateforme centralisée pour la soumission et le suivi 
                 de vos projets étudiants
               </p>
