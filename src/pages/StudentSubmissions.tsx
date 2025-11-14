@@ -127,6 +127,11 @@ export default function StudentSubmissions() {
     }
   };
 
+  const withProtocol = (url?: string | null) => {
+    if (!url) return '';
+    return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+  };
+
   if (loading || authLoading) return <LoadingScreen />;
 
   return (
@@ -165,7 +170,7 @@ export default function StudentSubmissions() {
 
                 <div className="grid gap-2">
                   {[sub.link1, sub.link2, sub.link3].filter(Boolean).map((link, idx) => (
-                    <a key={idx} href={link!} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+                    <a key={idx} href={withProtocol(link!)} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
                       Lien {idx + 1}
                     </a>
                   ))}
