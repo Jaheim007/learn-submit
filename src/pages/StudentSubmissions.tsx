@@ -12,6 +12,7 @@ interface Submission {
   id: number;
   project_code: string;
   project_title: string;
+  project_image_url: string | null;
   class_code: string;
   submitted_at: string;
   status: 'Reçu' | 'En révision' | 'Validé' | 'Refusé';
@@ -60,7 +61,7 @@ export default function StudentSubmissions() {
           description,
           grade,
           feedback,
-          projects (code, title),
+          projects (code, title, image_url),
           classes (code)
         `)
         .eq('student_id', studentData.id)
@@ -70,6 +71,7 @@ export default function StudentSubmissions() {
         ...s,
         project_code: s.projects?.code,
         project_title: s.projects?.title,
+        project_image_url: s.projects?.image_url,
         class_code: s.classes?.code
       })) || [];
 
@@ -151,44 +153,81 @@ export default function StudentSubmissions() {
             </div>
           ) : (
             submissions.map((sub) => (
-              <div key={sub.id} className="premium-card p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <Badge variant="outline" className="mb-2">{sub.project_code}</Badge>
-                    <h3 className="text-xl font-bold mb-1">{sub.project_title}</h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span>{new Date(sub.submitted_at).toLocaleDateString('fr-FR')}</span>
+              <div key={sub.id} className="premium-card overflow-hidden">
+                {/* Project Image Hero */}
+                {sub.project_image_url ? (
+                  <div className="relative h-48 w-full overflow-hidden">
+                    <img
+                      src={sub.project_image_url}
+                      alt={sub.project_title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+                    <div className="absolute top-4 left-4">
+                      <Badge variant="outline" className="bg-background/90 backdrop-blur-sm border-border/50">
+                        {sub.project_code}
+                      </Badge>
+                    </div>
+                    <div className="absolute top-4 right-4">
+                      <StatusBadge status={sub.status} />
                     </div>
                   </div>
-                  <StatusBadge status={sub.status} />
-                </div>
-
-                {sub.description && (
-                  <p className="text-sm text-muted-foreground mb-4">{sub.description}</p>
-                )}
-
-                <div className="grid gap-2">
-                  {[sub.link1, sub.link2, sub.link3].filter(Boolean).map((link, idx) => (
-                    <a key={idx} href={withProtocol(link!)} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
-                      Lien {idx + 1}
-                    </a>
-                  ))}
-
-                  {[sub.file1_url, sub.file2_url, sub.file3_url].filter(Boolean).map((file, idx) => (
-                    <button key={idx} onClick={() => downloadFile(file!)} className="text-sm text-primary hover:underline flex items-center gap-2">
-                      <Download className="h-4 w-4" />
-                      Fichier {idx + 1}
-                    </button>
-                  ))}
-                </div>
-
-                {sub.grade !== null && (
-                  <div className="mt-4 pt-4 border-t border-border">
-                    <p className="text-sm font-semibold">Note: {sub.grade}/20</p>
-                    {sub.feedback && <p className="text-sm text-muted-foreground mt-2">{sub.feedback}</p>}
+                ) : (
+                  <div className="relative h-32 w-full bg-gradient-to-br from-primary/10 via-background to-accent/10">
+                    <div className="absolute top-4 left-4">
+                      <Badge variant="outline" className="bg-background/90 backdrop-blur-sm border-border/50">
+                        {sub.project_code}
+                      </Badge>
+                    </div>
+                    <div className="absolute top-4 right-4">
+                      <StatusBadge status={sub.status} />
+                    </div>
                   </div>
                 )}
+
+                {/* Content */}
+                <div className="p-6">
+                  <h3 className="text-xl font-bold mb-3">{sub.project_title}</h3>
+                  
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                    <Calendar className="h-4 w-4" />
+                    <span>
+                      {new Date(sub.submitted_at).toLocaleDateString('fr-FR')} à{' '}
+                      {new Date(sub.submitted_at).toLocaleTimeString('fr-FR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </span>
+                  </div>
+
+                  {sub.description && (
+                    <p className="text-sm text-muted-foreground mb-4 pb-4 border-b border-border">
+                      {sub.description}
+                    </p>
+                  )}
+
+                  <div className="grid gap-2">
+                    {[sub.link1, sub.link2, sub.link3].filter(Boolean).map((link, idx) => (
+                      <a key={idx} href={withProtocol(link!)} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+                        Lien {idx + 1}
+                      </a>
+                    ))}
+
+                    {[sub.file1_url, sub.file2_url, sub.file3_url].filter(Boolean).map((file, idx) => (
+                      <button key={idx} onClick={() => downloadFile(file!)} className="text-sm text-primary hover:underline flex items-center gap-2">
+                        <Download className="h-4 w-4" />
+                        Fichier {idx + 1}
+                      </button>
+                    ))}
+                  </div>
+
+                  {sub.grade !== null && (
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <p className="text-sm font-semibold">Note: {sub.grade}/20</p>
+                      {sub.feedback && <p className="text-sm text-muted-foreground mt-2">{sub.feedback}</p>}
+                    </div>
+                  )}
+                </div>
               </div>
             ))
           )}
