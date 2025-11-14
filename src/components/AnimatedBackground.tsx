@@ -1,6 +1,6 @@
 export const AnimatedBackground = () => {
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden">
+    <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
       {/* Main gradient background - Deep Purple/Blue */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0a0015] via-[#1a0b2e] to-[#000000]"></div>
       
