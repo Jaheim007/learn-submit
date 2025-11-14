@@ -13,6 +13,7 @@ interface CreateProjectRequest {
   max_resubmits?: number;
   is_active?: boolean;
   class_ids: number[];
+  image_url?: string;
 }
 
 Deno.serve(async (req) => {
@@ -111,7 +112,8 @@ Deno.serve(async (req) => {
         deadline_at: deadline_at?.toISOString() || null,
         allow_resubmit: body.allow_resubmit || false,
         max_resubmits: body.max_resubmits || 1,
-        is_active: body.is_active !== false // default true
+        is_active: body.is_active !== false, // default true
+        image_url: body.image_url?.trim() || null
       })
       .select()
       .single();

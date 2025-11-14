@@ -837,6 +837,7 @@ export type Database = {
           description: string | null
           due_at: string | null
           id: number
+          image_url: string | null
           is_active: boolean
           max_resubmits: number | null
           title: string
@@ -849,6 +850,7 @@ export type Database = {
           description?: string | null
           due_at?: string | null
           id?: number
+          image_url?: string | null
           is_active?: boolean
           max_resubmits?: number | null
           title: string
@@ -861,6 +863,7 @@ export type Database = {
           description?: string | null
           due_at?: string | null
           id?: number
+          image_url?: string | null
           is_active?: boolean
           max_resubmits?: number | null
           title?: string

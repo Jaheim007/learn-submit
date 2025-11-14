@@ -8,8 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DeadlineCountdown } from '@/components/DeadlineCountdown';
 import { toast } from 'sonner';
-import { ArrowLeft, Upload } from 'lucide-react';
+import { ArrowLeft, Upload, Plus, X, Link as LinkIcon, FileText } from 'lucide-react';
 
 interface Project {
   id: number;
@@ -17,6 +19,7 @@ interface Project {
   title: string;
   description: string;
   due_at: string | null;
+  image_url: string | null;
 }
 
 export default function SubmitProject() {
@@ -30,13 +33,13 @@ export default function SubmitProject() {
   const [studentId, setStudentId] = useState<string | null>(null);
   const [classId, setClassId] = useState<number | null>(null);
   
-  const [link1, setLink1] = useState('');
-  const [link2, setLink2] = useState('');
-  const [link3, setLink3] = useState('');
+  // Dynamic links
+  const [links, setLinks] = useState<string[]>(['']);
+  
+  // Dynamic files
+  const [files, setFiles] = useState<File[]>([]);
+  
   const [description, setDescription] = useState('');
-  const [file1, setFile1] = useState<File | null>(null);
-  const [file2, setFile2] = useState<File | null>(null);
-  const [file3, setFile3] = useState<File | null>(null);
 
   useEffect(() => {
     if (user && projectId) {
@@ -83,6 +86,29 @@ export default function SubmitProject() {
     }
   };
 
+  const addLink = () => {
+    setLinks([...links, '']);
+  };
+
+  const removeLink = (index: number) => {
+    setLinks(links.filter((_, i) => i !== index));
+  };
+
+  const updateLink = (index: number, value: string) => {
+    const newLinks = [...links];
+    newLinks[index] = value;
+    setLinks(newLinks);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    setFiles([...files, ...selectedFiles]);
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(files.filter((_, i) => i !== index));
+  };
+
   const uploadFile = async (file: File, path: string) => {
     const { data, error } = await supabase.storage
       .from('submissions')
@@ -103,43 +129,44 @@ export default function SubmitProject() {
     setSubmitting(true);
     
     try {
-      let file1Url = null, file2Url = null, file3Url = null;
+      const fileUrls: string[] = [];
 
-      // Upload files if present
-      if (file1) {
-        const path = `${studentId}/${projectId}/${file1.name}`;
-        file1Url = await uploadFile(file1, path);
-      }
-      if (file2) {
-        const path = `${studentId}/${projectId}/${file2.name}`;
-        file2Url = await uploadFile(file2, path);
-      }
-      if (file3) {
-        const path = `${studentId}/${projectId}/${file3.name}`;
-        file3Url = await uploadFile(file3, path);
+      // Upload all files
+      for (const file of files) {
+        const path = `${studentId}/${projectId}/${file.name}`;
+        const fileUrl = await uploadFile(file, path);
+        fileUrls.push(fileUrl);
       }
 
-      // Create submission
+      // Filter out empty links
+      const validLinks = links.filter(link => link.trim() !== '');
+
+      // Create submission with all data
+      const submissionData: any = {
+        student_id: studentId,
+        class_id: classId,
+        project_id: parseInt(projectId!),
+        description: description || null,
+      };
+
+      // Add links (up to 3)
+      if (validLinks[0]) submissionData.link1 = validLinks[0];
+      if (validLinks[1]) submissionData.link2 = validLinks[1];
+      if (validLinks[2]) submissionData.link3 = validLinks[2];
+
+      // Add file URLs (up to 3)
+      if (fileUrls[0]) submissionData.file1_url = fileUrls[0];
+      if (fileUrls[1]) submissionData.file2_url = fileUrls[1];
+      if (fileUrls[2]) submissionData.file3_url = fileUrls[2];
+
       const { error } = await supabase
         .from('submissions')
-        .insert({
-          student_id: studentId,
-          class_id: classId,
-          project_id: parseInt(projectId!),
-          link1: link1 || null,
-          link2: link2 || null,
-          link3: link3 || null,
-          file1_url: file1Url,
-          file2_url: file2Url,
-          file3_url: file3Url,
-          description: description || null,
-          status: 'Reçu'
-        });
+        .insert(submissionData);
 
       if (error) throw error;
 
-      toast.success('Projet soumis avec succès !');
-      navigate('/etudiant/projets');
+      toast.success('Soumission envoyée avec succès!');
+      navigate('/etudiant/soumissions');
     } catch (error: any) {
       toast.error(error.message || 'Erreur lors de la soumission');
     } finally {
@@ -147,132 +174,220 @@ export default function SubmitProject() {
     }
   };
 
-  if (loading) return <LoadingScreen />;
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
-  if (!project) return null;
+  if (!project) {
+    return (
+      <StudentDashboardLayout>
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Projet non trouvé</p>
+        </div>
+      </StudentDashboardLayout>
+    );
+  }
 
   return (
     <StudentDashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-6">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/etudiant/projets')}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Retour
-          </Button>
-        </div>
+      <div className="max-w-5xl mx-auto space-y-6">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/etudiant/projets')}
+          className="gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Retour
+        </Button>
 
-        <div>
-          <h1 className="text-4xl font-bold mb-2">Soumettre un Projet</h1>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">{project.code}</span>
-            <span className="text-muted-foreground">•</span>
-            <span className="text-foreground font-medium">{project.title}</span>
-          </div>
-        </div>
-
-        {project.description && (
-          <div className="premium-card p-4">
-            <p className="text-muted-foreground">{project.description}</p>
+        {/* Project Header with Image */}
+        {project.image_url && (
+          <div className="relative w-full h-64 rounded-xl overflow-hidden shadow-lg">
+            <img
+              src={project.image_url}
+              alt={project.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+            <div className="absolute bottom-0 left-0 p-6">
+              <div className="text-sm text-muted-foreground font-medium mb-2">
+                {project.code}
+              </div>
+              <h1 className="text-3xl font-bold text-foreground">{project.title}</h1>
+            </div>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="premium-card p-8 space-y-6">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Liens (optionnels)</h3>
-            
-            <div className="space-y-2">
-              <Label htmlFor="link1">Lien 1</Label>
-              <Input
-                id="link1"
-                type="url"
-                value={link1}
-                onChange={(e) => setLink1(e.target.value)}
-                placeholder="https://..."
-              />
+        {!project.image_url && (
+          <div>
+            <div className="text-sm text-muted-foreground font-medium mb-2">
+              {project.code}
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="link2">Lien 2</Label>
-              <Input
-                id="link2"
-                type="url"
-                value={link2}
-                onChange={(e) => setLink2(e.target.value)}
-                placeholder="https://..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="link3">Lien 3</Label>
-              <Input
-                id="link3"
-                type="url"
-                value={link3}
-                onChange={(e) => setLink3(e.target.value)}
-                placeholder="https://..."
-              />
-            </div>
+            <h1 className="text-3xl font-bold">{project.title}</h1>
           </div>
+        )}
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Fichiers (optionnels)</h3>
-            
-            <div className="space-y-2">
-              <Label htmlFor="file1">Fichier 1</Label>
-              <Input
-                id="file1"
-                type="file"
-                onChange={(e) => setFile1(e.target.files?.[0] || null)}
-              />
-            </div>
+        {/* Countdown Timer */}
+        {project.due_at && (
+          <DeadlineCountdown deadline={project.due_at} />
+        )}
 
-            <div className="space-y-2">
-              <Label htmlFor="file2">Fichier 2</Label>
-              <Input
-                id="file2"
-                type="file"
-                onChange={(e) => setFile2(e.target.files?.[0] || null)}
-              />
-            </div>
+        {/* Project Description */}
+        {project.description && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Description du projet
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                {project.description}
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
-            <div className="space-y-2">
-              <Label htmlFor="file3">Fichier 3</Label>
-              <Input
-                id="file3"
-                type="file"
-                onChange={(e) => setFile3(e.target.files?.[0] || null)}
+        {/* Submission Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Links Section */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <LinkIcon className="h-5 w-5" />
+                  Liens (optionnels)
+                </CardTitle>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addLink}
+                  className="gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Ajouter un lien
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {links.map((link, index) => (
+                <div key={index} className="flex gap-2">
+                  <div className="flex-1">
+                    <Input
+                      type="url"
+                      value={link}
+                      onChange={(e) => updateLink(index, e.target.value)}
+                      placeholder="https://..."
+                      className="w-full"
+                    />
+                  </div>
+                  {links.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeLink(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Files Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Fichiers (optionnels - Ajouter plusieurs fichiers)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                <input
+                  type="file"
+                  id="file-upload"
+                  multiple
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <Label htmlFor="file-upload" className="cursor-pointer">
+                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Cliquez pour sélectionner des fichiers
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Vous pouvez ajouter plusieurs fichiers
+                  </p>
+                </Label>
+              </div>
+
+              {files.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Fichiers sélectionnés:</Label>
+                  {files.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                    >
+                      <span className="text-sm truncate flex-1">{file.name}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Description Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Description (optionnelle)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Ajoutez des commentaires ou notes sur votre soumission..."
+                rows={6}
+                className="resize-none"
               />
-            </div>
+            </CardContent>
+          </Card>
+
+          {/* Submit Button */}
+          <div className="flex justify-end">
+            <Button
+              type="submit"
+              size="lg"
+              disabled={submitting}
+              className="gap-2"
+            >
+              {submitting ? (
+                <>
+                  <span className="animate-spin">⏳</span>
+                  Envoi en cours...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4" />
+                  Soumettre le projet
+                </>
+              )}
+            </Button>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Description (optionnelle)</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Décrivez votre projet..."
-              rows={5}
-            />
-          </div>
-
-          <Button type="submit" disabled={submitting} className="w-full">
-            {submitting ? (
-              <>
-                <Upload className="h-4 w-4 mr-2 animate-spin" />
-                Soumission en cours...
-              </>
-            ) : (
-              <>
-                <Upload className="h-4 w-4 mr-2" />
-                Soumettre le projet
-              </>
-            )}
-          </Button>
         </form>
       </div>
     </StudentDashboardLayout>
