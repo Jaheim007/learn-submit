@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Layout } from '@/components/Layout';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { LoadingScreen } from '@/components/LoadingScreen';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from '@/components/StatusBadge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { BookOpen, Calendar, Send, Filter, Clock, RefreshCw, AlertTriangle } from 'lucide-react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { BookOpen, Calendar, Send, Filter, Clock, RefreshCw, AlertTriangle, LogOut, Bell, User, FileText, Trophy, Menu } from 'lucide-react';
 import { cleanClassName } from '@/lib/utils';
+import { NotificationBell } from '@/components/NotificationBell';
+import nysLogo from '@/assets/nys-logo.png';
 
 interface StudentClass {
   id: number;
