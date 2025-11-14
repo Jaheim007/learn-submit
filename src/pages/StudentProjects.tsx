@@ -9,6 +9,7 @@ import { Calendar, Send, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Badge } from '@/components/ui/badge';
+import { DeadlineCountdown } from '@/components/DeadlineCountdown';
 
 interface StudentClass {
   id: number;
@@ -22,6 +23,7 @@ interface Project {
   title: string;
   description: string;
   due_at: string | null;
+  deadline_at: string | null;
   latest_submission?: {
     id: number;
     status: 'Reçu' | 'En révision' | 'Validé' | 'Refusé';
@@ -98,7 +100,8 @@ export default function StudentProjects() {
             code,
             title,
             description,
-            due_at
+            due_at,
+            deadline_at
           )
         `)
         .eq('class_id', selectedClassId);
@@ -168,7 +171,13 @@ export default function StudentProjects() {
                 <h3 className="text-xl font-bold mb-2">{project.title}</h3>
                 <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{project.description}</p>
 
-                {project.due_at && (
+                {project.deadline_at && (
+                  <div className="mb-4">
+                    <DeadlineCountdown deadline={project.deadline_at} />
+                  </div>
+                )}
+
+                {project.due_at && !project.deadline_at && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
                     <Calendar className="h-4 w-4" />
                     <span>{new Date(project.due_at).toLocaleDateString('fr-FR')}</span>

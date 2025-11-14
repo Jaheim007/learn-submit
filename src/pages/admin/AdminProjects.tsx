@@ -212,17 +212,23 @@ export default function AdminProjects() {
       // Upload image if selected
       if (selectedImage) {
         const fileExt = selectedImage.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `project-images/${fileName}`;
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = fileName;
 
         const { error: uploadError } = await supabase.storage
-          .from('submissions')
-          .upload(filePath, selectedImage);
+          .from('project-images')
+          .upload(filePath, selectedImage, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw new Error(`Erreur lors de l'upload: ${uploadError.message}`);
+        }
 
         const { data: { publicUrl } } = supabase.storage
-          .from('submissions')
+          .from('project-images')
           .getPublicUrl(filePath);
 
         imageUrl = publicUrl;
