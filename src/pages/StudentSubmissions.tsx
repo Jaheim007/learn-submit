@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from '@/components/StatusBadge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   FileText, 
   Calendar, 
@@ -20,9 +19,15 @@ import {
   AlertTriangle,
   BookOpen,
   Star,
-  MessageSquare
+  MessageSquare,
+  LogOut,
+  Send
 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { LoadingScreen } from '@/components/LoadingScreen';
+import { NotificationBell } from '@/components/NotificationBell';
+import nysLogo from '@/assets/nys-logo.png';
 
 // Status mapping from English DB values to French labels
 const reverseStatusMap: Record<string, "Reçu" | "En révision" | "Validé" | "Refusé"> = {
@@ -292,230 +297,235 @@ export default function StudentSubmissions() {
     return url.split('/').pop() || 'fichier';
   };
 
-  if (authLoading) {
-    return (
-      <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
+
+  const renderContent = () => {
+    if (apiState.loading && apiState.retryCount === 0) {
+      return <LoadingScreen />;
+    }
+
+    if (apiState.error) {
+      return (
+        <div className="bg-red-500/10 backdrop-blur-sm border border-red-500/20 rounded-3xl p-8 text-center">
+          <AlertTriangle className="h-16 w-16 text-red-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-white mb-2">Erreur de chargement</h2>
+          <p className="text-white/60 mb-6">{apiState.error}</p>
+          <Button
+            onClick={() => fetchSubmissions(true)}
+            disabled={apiState.loading}
+            className="bg-white/10 hover:bg-white/20 text-white border border-white/20"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${apiState.loading ? 'animate-spin' : ''}`} />
+            Réessayer{apiState.retryCount > 0 ? ` (${apiState.retryCount})` : ''}
+          </Button>
         </div>
-      </Layout>
+      );
+    }
+
+    if (!apiState.data || apiState.data.length === 0) {
+      return (
+        <div className="bg-background/20 backdrop-blur-sm border border-white/10 rounded-3xl p-16 text-center">
+          <BookOpen className="h-20 w-20 text-white/10 mx-auto mb-6" />
+          <h2 className="text-2xl font-semibold text-white mb-2">Aucune soumission trouvée</h2>
+          <p className="text-white/40 mb-6">
+            Vous n'avez soumis aucun projet pour le moment.
+          </p>
+          <Button
+            onClick={() => navigate('/etudiant/projets')}
+            className="bg-white/10 hover:bg-white/20 text-white border border-white/20"
+          >
+            Voir mes projets
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid gap-6">
+        {apiState.data.map((submission, index) => {
+          const gradients = [
+            'from-blue-600/20 to-cyan-600/20',
+            'from-purple-600/20 to-pink-600/20',
+            'from-indigo-600/20 to-blue-600/20',
+          ];
+          const gradient = gradients[index % gradients.length];
+
+          const links = [submission.link1, submission.link2, submission.link3].filter(Boolean);
+          const files = [submission.file1_url, submission.file2_url, submission.file3_url].filter(Boolean);
+
+          return (
+            <div
+              key={submission.id}
+              className={`bg-gradient-to-br ${gradient} backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all`}
+            >
+              <div className="space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-sm font-semibold">
+                        {submission.class.code}
+                      </span>
+                      <StatusBadge status={submission.status} />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-2">
+                      {submission.project.title}
+                    </h3>
+                    <p className="text-white/60 text-sm">
+                      Code: {submission.project.code}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 text-sm text-white/60">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    {new Date(submission.submitted_at).toLocaleDateString('fr-FR')}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-white/70 border-white/20">
+                      v{submission.version}
+                    </Badge>
+                  </div>
+                </div>
+
+                {submission.description && (
+                  <div className="bg-black/20 border border-white/5 rounded-2xl p-4">
+                    <p className="text-white/70 text-sm whitespace-pre-wrap">{submission.description}</p>
+                  </div>
+                )}
+
+                {links.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-white/80">Liens</h4>
+                    {links.map((link, idx) => (
+                      <a
+                        key={idx}
+                        href={link!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 rounded-2xl bg-black/20 border border-white/5 hover:bg-black/30 transition-colors"
+                      >
+                        <ExternalLink className="h-4 w-4 text-blue-400" />
+                        <span className="text-sm text-white/70 truncate">{link}</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {files.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-white/80">Fichiers</h4>
+                    {files.map((fileUrl, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => downloadFile(fileUrl!, getFileNameFromUrl(fileUrl!))}
+                        className="w-full flex items-center gap-3 p-3 rounded-2xl bg-black/20 border border-white/5 hover:bg-black/30 transition-colors"
+                      >
+                        <FileText className="h-4 w-4 text-blue-400" />
+                        <span className="text-sm text-white/70 flex-1 text-left truncate">
+                          {getFileNameFromUrl(fileUrl!)}
+                        </span>
+                        <Download className="h-4 w-4 text-white/40" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {(submission.grade !== null || submission.feedback) && (
+                  <div className="border-t border-white/10 pt-4 space-y-3">
+                    {submission.grade !== null && (
+                      <div className="flex items-center gap-2">
+                        <Star className="h-5 w-5 text-yellow-400" />
+                        <span className="font-semibold text-white">
+                          Note: {submission.grade}/20
+                        </span>
+                      </div>
+                    )}
+                    {submission.feedback && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <MessageSquare className="h-4 w-4 text-blue-400" />
+                          <span className="text-sm font-medium text-white/80">Commentaires</span>
+                        </div>
+                        <p className="text-sm text-white/70 bg-black/20 p-3 rounded-2xl border border-white/5">
+                          {submission.feedback}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     );
+  };
+
+  if (authLoading) {
+    return <LoadingScreen />;
   }
 
   return (
-    <Layout>
-      <div className="min-h-screen bg-background">
-        {/* Header */}
-        <section className="bg-gradient-card py-12 px-4 border-b border-border">
-          <div className="max-w-content mx-auto">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center">
-                <FileText className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                  Mes Soumissions
-                </h1>
-                <p className="text-muted-foreground">
-                  Gérez vos projets soumis et suivez leur statut
-                </p>
-              </div>
+    <div className="min-h-screen relative">
+      <AnimatedBackground />
+      
+      {/* Premium Header */}
+      <header className="relative z-10 border-b border-white/10 bg-black/20 backdrop-blur-xl">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-3 group">
+            <img src={nysLogo} alt="NYS" className="h-10 w-10 object-contain filter drop-shadow-[0_0_10px_rgba(59,130,246,0.3)] group-hover:drop-shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all" />
+          </Link>
+          
+          <nav className="hidden md:flex items-center gap-6">
+            <Link to="/etudiant/projets" className="text-white/70 hover:text-white transition-colors font-medium">Mes Projets</Link>
+            <Link to="/etudiant/soumissions" className="text-white border-b-2 border-blue-500 transition-colors font-medium">Mes Soumissions</Link>
+            <Link to="/etudiant/cours" className="text-white/70 hover:text-white transition-colors font-medium">Mes Cours</Link>
+            <Link to="/etudiant/profil" className="text-white/70 hover:text-white transition-colors font-medium">Mon Profil</Link>
+          </nav>
+          
+          <div className="flex items-center gap-4">
+            <NotificationBell />
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleSignOut}
+              className="text-white/70 hover:text-white hover:bg-white/10"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Déconnexion
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <div className="relative z-10 container mx-auto p-4 sm:p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-8">
+          <div className="flex items-center gap-3">
+            <Send className="h-8 w-8 text-blue-400" />
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-white">Mes Soumissions</h1>
+              <p className="text-white/60 text-sm">
+                Gérez vos projets soumis et suivez leur statut
+              </p>
             </div>
           </div>
-        </section>
-
-        <div className="max-w-content mx-auto p-4 md:p-6 lg:p-8">
-          {/* Loading State */}
-          {apiState.loading && (
-            <div className="flex items-center justify-center py-12">
-              <div className="flex items-center gap-3">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                <span className="text-muted-foreground">
-                  Chargement de vos soumissions...
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Error State */}
-          {!apiState.loading && apiState.error && (
-            <Card className="border-destructive/50 bg-destructive/5">
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-4">
-                  <AlertTriangle className="w-6 h-6 text-destructive mt-0.5" />
-                  <div className="flex-1">
-                    <h3 className="text-lg font-medium text-destructive mb-2">
-                      Service temporairement indisponible
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Impossible de récupérer vos soumissions. Veuillez réessayer dans quelques instants.
-                    </p>
-                    <div className="flex items-center gap-3">
-                      <Button 
-                        onClick={handleRetry} 
-                        variant="outline" 
-                        size="sm"
-                        className="flex items-center gap-2"
-                      >
-                        <RefreshCw className="w-4 h-4" />
-                        Réessayer {apiState.retryCount > 0 && `(${apiState.retryCount})`}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Empty State */}
-          {!apiState.loading && !apiState.error && apiState.data.length === 0 && (
-            <Card className="text-center py-12">
-              <CardContent>
-                <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-medium text-foreground mb-2">
-                  Aucune soumission trouvée
-                </h3>
-                <p className="text-muted-foreground mb-6">
-                  Vous n'avez soumis aucun projet pour le moment.
-                </p>
-                <Button onClick={() => navigate('/etudiant/mes-projets')}>
-                  Voir mes projets
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Submissions List */}
-          {!apiState.loading && !apiState.error && apiState.data.length > 0 && (
-            <div className="space-y-6">
-              {apiState.data.map((submission) => {
-                const canEdit = submission.status === 'Reçu';
-                const files = [
-                  submission.file1_url,
-                  submission.file2_url,
-                  submission.file3_url
-                ].filter(Boolean);
-                const links = [
-                  submission.link1,
-                  submission.link2,
-                  submission.link3
-                ].filter(Boolean);
-
-                return (
-                  <Card key={submission.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            {submission.project.code} - {submission.project.title}
-                            <Badge variant="outline">v{submission.version}</Badge>
-                          </CardTitle>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <BookOpen className="w-4 h-4" />
-                            {submission.class.code} - {submission.class.title}
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Calendar className="w-4 h-4" />
-                            Soumis le {new Date(submission.submitted_at).toLocaleDateString('fr-FR')}
-                          </div>
-                        </div>
-                        <StatusBadge status={submission.status} />
-                      </div>
-                    </CardHeader>
-
-                    <CardContent className="space-y-4">
-                      {/* Description */}
-                      {submission.description && (
-                        <div>
-                          <h4 className="font-medium text-sm text-foreground mb-2">Description</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {submission.description}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Links */}
-                      {links.length > 0 && (
-                        <div>
-                          <h4 className="font-medium text-sm text-foreground mb-2">Liens</h4>
-                          <div className="space-y-1">
-                            {links.map((link, index) => (
-                              <div key={index} className="flex items-center gap-2">
-                                <ExternalLink className="w-4 h-4 text-muted-foreground" />
-                                <a 
-                                  href={link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-sm text-primary hover:underline truncate"
-                                >
-                                  {link}
-                                </a>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Files */}
-                      {files.length > 0 && (
-                        <div>
-                          <h4 className="font-medium text-sm text-foreground mb-2">Fichiers</h4>
-                          <div className="space-y-1">
-                            {files.map((fileUrl, index) => (
-                              <div key={index} className="flex items-center gap-2">
-                                <FileText className="w-4 h-4 text-muted-foreground" />
-                                <button
-                                  onClick={() => downloadFile(fileUrl, getFileNameFromUrl(fileUrl))}
-                                  className="text-sm text-primary hover:underline truncate text-left"
-                                >
-                                  {getFileNameFromUrl(fileUrl)}
-                                </button>
-                                <Download className="w-4 h-4 text-muted-foreground" />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Grade and Feedback */}
-                      {(submission.grade !== null || submission.feedback) && (
-                        <div className="border-t border-border pt-4">
-                          {submission.grade !== null && (
-                            <div className="flex items-center gap-2 mb-2">
-                              <Star className="w-4 h-4 text-yellow-500" />
-                              <span className="font-medium text-sm">
-                                Note: {submission.grade}/20
-                              </span>
-                            </div>
-                          )}
-                          {submission.feedback && (
-                            <div>
-                              <div className="flex items-center gap-2 mb-2">
-                                <MessageSquare className="w-4 h-4 text-primary" />
-                                <span className="font-medium text-sm">Commentaires du formateur</span>
-                              </div>
-                              <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-                                {submission.feedback}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Locked status badge - submissions are locked after creation */}
-                      <div className="pt-4 border-t border-border">
-                        <Badge variant="outline" className="text-xs">
-                          🔒 Verrouillé après envoi
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
+          
+          <Button
+            onClick={() => fetchSubmissions(true)}
+            disabled={apiState.loading}
+            className="bg-white/10 hover:bg-white/20 text-white border border-white/20"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${apiState.loading ? 'animate-spin' : ''}`} />
+            Actualiser
+          </Button>
         </div>
+
+        {renderContent()}
       </div>
-    </Layout>
+    </div>
   );
 }

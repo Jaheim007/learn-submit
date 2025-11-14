@@ -2,10 +2,14 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, FileText, BookOpen, ArrowLeft } from 'lucide-react';
+import { Download, FileText, BookOpen, LogOut, Bell } from 'lucide-react';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { cleanClassName } from '@/lib/utils';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { LoadingScreen } from '@/components/LoadingScreen';
+import { NotificationBell } from '@/components/NotificationBell';
+import nysLogo from '@/assets/nys-logo.png';
 
 interface CourseMaterial {
   id: string;
@@ -155,100 +159,121 @@ export default function StudentCourses() {
     }
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
+
   if (loading) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <Button
-        variant="ghost"
-        onClick={() => navigate(-1)}
-        className="mb-2"
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Retour
-      </Button>
+    <div className="min-h-screen relative">
+      <AnimatedBackground />
       
-      <div className="flex items-center gap-3">
-        <BookOpen className="h-8 w-8 text-primary" />
-        <div>
-          <h1 className="text-3xl font-bold text-primary">Mes Cours</h1>
-          <p className="text-muted-foreground">Téléchargez les cours de votre formation</p>
+      {/* Premium Header */}
+      <header className="relative z-10 border-b border-white/10 bg-black/20 backdrop-blur-xl">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-3 group">
+            <img src={nysLogo} alt="NYS" className="h-10 w-10 object-contain filter drop-shadow-[0_0_10px_rgba(59,130,246,0.3)] group-hover:drop-shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all" />
+          </Link>
+          
+          <nav className="hidden md:flex items-center gap-6">
+            <Link to="/etudiant/projets" className="text-white/70 hover:text-white transition-colors font-medium">Mes Projets</Link>
+            <Link to="/etudiant/soumissions" className="text-white/70 hover:text-white transition-colors font-medium">Mes Soumissions</Link>
+            <Link to="/etudiant/cours" className="text-white border-b-2 border-blue-500 transition-colors font-medium">Mes Cours</Link>
+            <Link to="/etudiant/profil" className="text-white/70 hover:text-white transition-colors font-medium">Mon Profil</Link>
+          </nav>
+          
+          <div className="flex items-center gap-4">
+            <NotificationBell />
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleSignOut}
+              className="text-white/70 hover:text-white hover:bg-white/10"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Déconnexion
+            </Button>
+          </div>
         </div>
-      </div>
+      </header>
 
-      {groupedCourses.length === 0 ? (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <BookOpen className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">Aucun cours disponible</h3>
-            <p className="text-muted-foreground">
-              Vos formateurs n'ont pas encore uploadé de cours pour votre groupe.
+      {/* Main Content */}
+      <main className="relative z-10 container mx-auto px-6 py-12">
+        {/* Hero Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-3">
+            <BookOpen className="h-8 w-8 text-blue-400" />
+            <h1 className="text-4xl font-bold text-white">Mes Cours</h1>
+          </div>
+          <p className="text-white/60 text-lg">
+            Téléchargez les cours de votre formation
+          </p>
+        </div>
+
+        {groupedCourses.length === 0 ? (
+          <div className="bg-background/20 backdrop-blur-sm border border-white/10 rounded-3xl p-16 text-center">
+            <BookOpen className="h-20 w-20 text-white/10 mx-auto mb-6" />
+            <p className="text-white/40 text-lg">
+              Aucun cours disponible pour le moment
             </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {groupedCourses.map((course) => (
-            <Card key={course.course_group_id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <FileText className="h-8 w-8 text-primary" />
-                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                    {course.class_code}
-                  </span>
-                </div>
-                <CardTitle className="text-lg mt-2">{course.title}</CardTitle>
-                <CardDescription>{cleanClassName(course.class_title)}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {course.description && (
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {course.description}
-                  </p>
-                )}
-                
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {course.files.length} fichier{course.files.length > 1 ? 's' : ''} :
-                  </p>
-                  <ul className="text-sm text-muted-foreground space-y-1">
-                    {course.files.map((file) => (
-                      <li key={file.id} className="flex items-center gap-2">
-                        <FileText className="h-3 w-3" />
-                        <span className="truncate">{file.file_name}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                
-                <div className="text-xs text-muted-foreground">
-                  Ajouté le {new Date(course.created_at).toLocaleDateString('fr-FR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                  })}
-                </div>
-
-                <Button
-                  onClick={() => handleDownloadAll(course.files, course.title)}
-                  className="w-full"
+          </div>
+        ) : (
+          <div className="grid gap-6">
+            {groupedCourses.map((course, index) => {
+              const gradients = [
+                'from-blue-600/20 to-cyan-600/20',
+                'from-purple-600/20 to-pink-600/20',
+                'from-indigo-600/20 to-blue-600/20',
+              ];
+              const gradient = gradients[index % gradients.length];
+              
+              return (
+                <div 
+                  key={course.course_group_id} 
+                  className={`bg-gradient-to-br ${gradient} backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all hover:scale-[1.01]`}
                 >
-                  <Download className="mr-2 h-4 w-4" />
-                  Télécharger tout ({course.files.length})
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-3 flex-1">
+                        <span className="inline-block px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-sm font-semibold">
+                          {course.class_code}
+                        </span>
+                        <h3 className="text-2xl font-bold text-white">{course.title}</h3>
+                        <p className="text-white/60">{course.description}</p>
+                        <p className="text-sm text-white/40">{course.class_title}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3 mt-6">
+                      <p className="text-sm font-medium text-white/80">
+                        {course.files.length} fichier{course.files.length > 1 ? 's' : ''} :
+                      </p>
+                      {course.files.map((file) => (
+                        <div key={file.id} className="flex items-center gap-3 p-3 rounded-2xl bg-black/20 border border-white/5">
+                          <FileText className="h-5 w-5 text-blue-400" />
+                          <span className="text-sm flex-1 truncate text-white/80">{file.file_name}</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <Button 
+                      onClick={() => handleDownloadAll(course.files, course.title)}
+                      className="w-full mt-4 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl py-6"
+                    >
+                      <Download className="h-5 w-5 mr-2" />
+                      Télécharger tout ({course.files.length})
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </main>
     </div>
   );
 }
