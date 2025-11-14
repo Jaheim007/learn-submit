@@ -81,12 +81,38 @@ export default function StudentCourses() {
     }
   };
 
-  const downloadFile = async (url: string, title: string) => {
+  const downloadFile = async (pathOrUrl: string, title: string) => {
     try {
-      window.open(url, '_blank');
+      const fileName = title || 'cours';
+
+      if (/^https?:\/\//i.test(pathOrUrl)) {
+        // Direct external link
+        window.open(pathOrUrl, '_blank');
+        toast.success('Téléchargement lancé');
+        return;
+      }
+
+      // Private storage path -> create signed URL
+      const { data, error } = await supabase.storage
+        .from('course-materials')
+        .createSignedUrl(pathOrUrl, 60);
+
+      if (error || !data?.signedUrl) {
+        console.error('Signed URL error:', error);
+        throw new Error('Accès refusé ou fichier introuvable');
+      }
+
+      // Open signed URL in new tab (let browser handle download)
+      const a = document.createElement('a');
+      a.href = data.signedUrl;
+      a.target = '_blank';
+      a.download = fileName;
+      a.click();
+
       toast.success('Téléchargement lancé');
-    } catch (error) {
-      toast.error('Erreur lors du téléchargement');
+    } catch (error: any) {
+      console.error('Course download error', error);
+      toast.error('Téléchargement impossible: ' + (error.message || 'erreur inconnue'));
     }
   };
 
