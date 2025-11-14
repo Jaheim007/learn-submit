@@ -121,14 +121,17 @@ export default function Profile() {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      const filePath = fileName; // Remove 'avatars/' prefix as bucket is already specified
 
       // Upload to Supabase storage
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, file, { upsert: true });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
@@ -141,11 +144,15 @@ export default function Profile() {
         .update({ avatar_url: publicUrl } as any)
         .eq('user_id', user?.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Update error:', updateError);
+        throw updateError;
+      }
 
       setProfile({ ...profile, avatar_url: publicUrl });
       toast.success('Avatar mis à jour');
     } catch (error: any) {
+      console.error('Avatar upload error:', error);
       toast.error('Erreur: ' + error.message);
     } finally {
       setUploading(false);

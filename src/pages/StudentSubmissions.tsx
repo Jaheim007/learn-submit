@@ -81,10 +81,10 @@ export default function StudentSubmissions() {
     }
   };
 
-  const downloadFile = async (url: string) => {
+  const downloadFile = async (filePath: string) => {
     try {
-      const fileName = url.split('/').pop() || 'file';
-      const { data, error } = await supabase.storage.from('submissions').download(fileName);
+      const fileName = filePath.split('/').pop() || 'file';
+      const { data, error } = await supabase.storage.from('submissions').download(filePath);
       
       if (error) throw error;
       
@@ -95,6 +95,7 @@ export default function StudentSubmissions() {
       link.click();
       toast.success('Téléchargement réussi');
     } catch (error) {
+      console.error('Download error:', error);
       toast.error('Erreur lors du téléchargement');
     }
   };
