@@ -15,7 +15,7 @@ export default function Forbidden() {
       if (isAdmin) {
         navigate('/admin');
       } else {
-        navigate('/etudiant/mes-projets');
+        navigate('/etudiant/projets');
       }
     } else {
       navigate('/');

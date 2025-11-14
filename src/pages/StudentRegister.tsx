@@ -42,7 +42,7 @@ export default function StudentRegister() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/etudiant/mes-projets`
+          redirectTo: `${window.location.origin}/etudiant/projets`
         }
       });
       
@@ -63,7 +63,7 @@ export default function StudentRegister() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: `${window.location.origin}/etudiant/mes-projets`
+          redirectTo: `${window.location.origin}/etudiant/projets`
         }
       });
       
@@ -97,7 +97,7 @@ export default function StudentRegister() {
 
   // Redirect if already authenticated
   if (user) {
-    navigate('/etudiant/mes-projets', { replace: true });
+    navigate('/etudiant/projets', { replace: true });
     return null;
   }
 
@@ -183,7 +183,7 @@ export default function StudentRegister() {
       });
       
       if (!signInError) {
-        navigate('/etudiant/mes-projets', { replace: true });
+        navigate('/etudiant/projets', { replace: true });
       }
     } catch (error) {
       console.error('Registration error:', error);

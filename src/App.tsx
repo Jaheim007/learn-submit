@@ -55,10 +55,10 @@ const App = () => (
               <Route path="/etudiant/register" element={<StudentRegister />} />
               
               {/* Student protected routes */}
-              <Route path="/profil" element={<StudentGuard><Profile /></StudentGuard>} />
-              <Route path="/etudiant/mes-projets" element={<StudentGuard><StudentProjects /></StudentGuard>} />
+              <Route path="/etudiant/profil" element={<StudentGuard><Profile /></StudentGuard>} />
+              <Route path="/etudiant/projets" element={<StudentGuard><StudentProjects /></StudentGuard>} />
               <Route path="/etudiant/soumettre" element={<StudentGuard><SubmitProject /></StudentGuard>} />
-              <Route path="/etudiant/mes-soumissions" element={<StudentGuard><StudentSubmissions /></StudentGuard>} />
+              <Route path="/etudiant/soumissions" element={<StudentGuard><StudentSubmissions /></StudentGuard>} />
               <Route path="/etudiant/leaderboard" element={<StudentGuard><StudentLeaderboard /></StudentGuard>} />
               <Route path="/etudiant/cours" element={<StudentGuard><StudentCourses /></StudentGuard>} />
               
