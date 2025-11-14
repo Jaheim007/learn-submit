@@ -26,6 +26,7 @@ interface Project {
   max_resubmits?: number;
   is_active: boolean;
   created_at: string;
+  image_url?: string;
   classes: { id: number; code: string; title: string }[];
   submissions_count: number;
 }
@@ -44,6 +45,7 @@ interface ProjectFormData {
   allow_resubmit: boolean;
   max_resubmits: string;
   class_ids: number[];
+  image_url: string;
 }
 
 export default function AdminProjects() {
@@ -60,6 +62,7 @@ export default function AdminProjects() {
     allow_resubmit: false,
     max_resubmits: '3',
     class_ids: [],
+    image_url: '',
   });
 
   const loadData = async () => {
@@ -76,6 +79,7 @@ export default function AdminProjects() {
             max_resubmits,
             is_active,
             created_at,
+            image_url,
             class_projects!inner(
               classes!inner(id, code, title)
             )
@@ -112,6 +116,7 @@ export default function AdminProjects() {
           id: project.id,
           title: project.title,
           description: project.description,
+          image_url: project.image_url,
           deadline_at: project.deadline_at,
           allow_resubmit: project.allow_resubmit,
           max_resubmits: project.max_resubmits,
@@ -145,6 +150,7 @@ export default function AdminProjects() {
       allow_resubmit: false,
       max_resubmits: '3',
       class_ids: [],
+      image_url: '',
     });
   };
 
@@ -162,6 +168,7 @@ export default function AdminProjects() {
       allow_resubmit: project.allow_resubmit,
       max_resubmits: project.max_resubmits?.toString() || '3',
       class_ids: project.classes.map(c => c.id),
+      image_url: project.image_url || '',
     });
     setIsEditDialogOpen(true);
   };
@@ -191,6 +198,7 @@ export default function AdminProjects() {
           deadline_at: new Date(formData.deadline_at).toISOString(),
           allow_resubmit: formData.allow_resubmit,
           max_resubmits: formData.allow_resubmit ? parseInt(formData.max_resubmits) || 3 : null,
+          image_url: formData.image_url.trim() || null,
         };
 
         const { data, error } = await supabase
@@ -230,7 +238,8 @@ export default function AdminProjects() {
           allow_resubmit: formData.allow_resubmit,
           max_resubmits: formData.allow_resubmit ? parseInt(formData.max_resubmits) || 1 : 1,
           is_active: true,
-          class_ids: formData.class_ids
+          class_ids: formData.class_ids,
+          image_url: formData.image_url.trim() || null
         };
 
         console.log('Calling create-project with payload:', payload);
@@ -536,6 +545,20 @@ export default function AdminProjects() {
               </div>
             )}
           </div>
+        </div>
+
+        <div>
+          <Label htmlFor="image-url">URL de l'image du projet</Label>
+          <Input
+            id="image-url"
+            type="url"
+            value={formData.image_url}
+            onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
+            placeholder="https://example.com/image.jpg (optionnel)"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Ajouter une image pour rendre le projet plus attrayant
+          </p>
         </div>
 
         <div className="flex items-center space-x-2">
