@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Shield } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import nysLogo from '@/assets/nys-logo.png';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -111,6 +112,11 @@ export default function AdminLogin() {
       
       <Card className="w-full max-w-md relative z-10 bg-card/95 backdrop-blur-sm border-border/50">
         <CardHeader className="text-center">
+          <img 
+            src={nysLogo} 
+            alt="NYS Africa Logo" 
+            className="h-16 w-16 object-contain mx-auto mb-4 filter drop-shadow-[0_0_20px_hsl(217,91%,60%)]"
+          />
           <CardTitle className="text-2xl font-bold">Administration NYS</CardTitle>
           <CardDescription>
             Connectez-vous à votre compte administrateur
