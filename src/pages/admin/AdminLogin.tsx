@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Shield } from 'lucide-react';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -105,8 +106,10 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center relative px-4">
+      <AnimatedBackground />
+      
+      <Card className="w-full max-w-md relative z-10 bg-card/95 backdrop-blur-sm border-border/50">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Administration NYS</CardTitle>
           <CardDescription>
@@ -162,19 +165,6 @@ export default function AdminLogin() {
               {loading ? 'Connexion...' : 'Se connecter'}
             </Button>
           </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
-              Besoin d'un compte administrateur ?{' '}
-              <Button
-                variant="link"
-                className="p-0 h-auto text-primary"
-                onClick={() => navigate('/admin/register')}
-              >
-                Créer un compte
-              </Button>
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>
