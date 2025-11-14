@@ -9,11 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 interface Course {
-  id: number;
+  id: string;
   title: string;
-  course_code: string;
+  file_name: string;
   file_url: string;
   class_code: string;
+  description: string | null;
 }
 
 export default function StudentCourses() {
@@ -44,22 +45,34 @@ export default function StudentCourses() {
 
       const classIds = enrollments.map(e => e.class_id);
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('course_materials')
         .select(`
           id,
           title,
-          course_code,
+          file_name,
           file_url,
+          description,
+          class_id,
           classes (code)
         `)
         .in('class_id', classIds);
 
+      if (error) {
+        console.error('Error fetching courses:', error);
+        toast.error('Erreur: ' + error.message);
+      }
+
       const mapped = data?.map((c: any) => ({
-        ...c,
-        class_code: c.classes?.code
+        id: c.id,
+        title: c.title,
+        file_name: c.file_name,
+        file_url: c.file_url,
+        description: c.description,
+        class_code: c.classes?.code || 'N/A'
       })) || [];
 
+      console.log('Fetched courses:', mapped);
       setCourses(mapped);
     } catch (error) {
       toast.error('Erreur lors du chargement');
@@ -96,15 +109,18 @@ export default function StudentCourses() {
             </div>
           ) : (
             courses.map((course) => (
-              <div key={course.id} className="premium-card p-6">
+              <div key={course.id} className="premium-card p-6 hover:scale-[1.02] transition-transform">
                 <BookOpen className="h-12 w-12 text-primary mb-4" />
-                <Badge variant="outline" className="mb-2">{course.course_code}</Badge>
                 <h3 className="text-xl font-bold mb-2">{course.title}</h3>
-                <p className="text-sm text-muted-foreground mb-4">Classe: {course.class_code}</p>
+                <Badge variant="outline" className="mb-2">{course.file_name}</Badge>
+                <p className="text-sm text-muted-foreground mb-2">Classe: {course.class_code}</p>
+                {course.description && (
+                  <p className="text-xs text-muted-foreground mb-4 line-clamp-2">{course.description}</p>
+                )}
                 
                 <Button
                   onClick={() => downloadFile(course.file_url, course.title)}
-                  className="w-full"
+                  className="w-full mt-4"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Télécharger
