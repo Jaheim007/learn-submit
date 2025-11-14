@@ -147,6 +147,22 @@ export default {
 				'matrix-glow': {
 					'0%, 100%': { textShadow: '0 0 5px currentColor' },
 					'50%': { textShadow: '0 0 20px currentColor, 0 0 30px currentColor' }
+				},
+				'float': {
+					'0%, 100%': {
+						transform: 'translateY(0) translateX(0)',
+						opacity: '0'
+					},
+					'10%': {
+						opacity: '1'
+					},
+					'90%': {
+						opacity: '1'
+					},
+					'100%': {
+						transform: 'translateY(-100vh) translateX(20px)',
+						opacity: '0'
+					}
 				}
 			},
 			animation: {
@@ -155,7 +171,8 @@ export default {
 				'matrix-flow': 'matrix-flow 20s linear infinite',
 				'matrix-scan': 'matrix-scan 3s ease-in-out infinite',
 				'matrix-pulse': 'matrix-pulse 2s ease-in-out infinite',
-				'matrix-glow': 'matrix-glow 2s ease-in-out infinite'
+				'matrix-glow': 'matrix-glow 2s ease-in-out infinite',
+				'float': 'float linear infinite'
 			}
 		}
 	},
