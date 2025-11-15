@@ -13,7 +13,7 @@ export default function StudentGuard({ children }: StudentGuardProps) {
 
   // Ensure student profile exists (handles OAuth auto-provisioning)
   useEffect(() => {
-    if (!user || authLoading) return;
+    if (!user || authLoading || !session) return;
 
     const ensureStudentProfile = async () => {
       try {
@@ -34,7 +34,11 @@ export default function StudentGuard({ children }: StudentGuardProps) {
         if (provider && provider !== 'email') {
           setStudentCheck('loading');
           try {
-            const { error: fnErr } = await supabase.functions.invoke('handle-oauth-signup');
+            const { error: fnErr } = await supabase.functions.invoke('handle-oauth-signup', {
+              headers: {
+                Authorization: `Bearer ${session.access_token}`,
+              },
+            });
             if (fnErr) {
               console.error('handle-oauth-signup error:', fnErr);
             }
