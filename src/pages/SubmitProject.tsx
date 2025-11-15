@@ -110,6 +110,14 @@ export default function SubmitProject() {
     setFiles(files.filter((_, i) => i !== index));
   };
 
+  const sanitizeFilename = (filename: string): string => {
+    // Remove accents and special characters
+    const withoutAccents = filename.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    // Replace spaces and special chars with underscores, keep only alphanumeric, dots, dashes, underscores
+    const sanitized = withoutAccents.replace(/[^a-zA-Z0-9._-]/g, '_');
+    return sanitized;
+  };
+
   const uploadFile = async (file: File, path: string) => {
     const { data, error } = await supabase.storage
       .from('submissions')
@@ -134,7 +142,8 @@ export default function SubmitProject() {
 
       // Upload all files
       for (const file of files) {
-        const path = `${studentId}/${projectId}/${file.name}`;
+        const sanitizedFilename = sanitizeFilename(file.name);
+        const path = `${studentId}/${projectId}/${sanitizedFilename}`;
         const fileUrl = await uploadFile(file, path);
         fileUrls.push(fileUrl);
       }
