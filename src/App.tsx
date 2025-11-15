@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ConditionalClassSelectionProvider } from "@/components/ConditionalClassSelectionProvider";
-import Home from "./pages/Home";
+import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import StudentLogin from "./pages/StudentLogin";
 import StudentRegister from "./pages/StudentRegister";
@@ -48,7 +48,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               
               {/* Student auth routes */}
