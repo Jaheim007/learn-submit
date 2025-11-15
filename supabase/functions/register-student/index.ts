@@ -13,14 +13,14 @@ serve(async (req) => {
   }
 
   try {
-    const { email, password, full_name, class_id } = await req.json();
+    const { email, password, full_name } = await req.json();
 
-    console.log('Registering student:', { email, full_name, class_id });
+    console.log('Registering student (pending approval):', { email, full_name });
 
     // Validate required fields
-    if (!email || !password || !full_name || !class_id) {
+    if (!email || !password || !full_name) {
       return new Response(
-        JSON.stringify({ error: 'Email, password, full_name, and class_id are required' }),
+        JSON.stringify({ error: 'Email, password, and full_name are required' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -28,38 +28,6 @@ serve(async (req) => {
       );
     }
 
-    // Validate that the class is open for signup
-    const supabaseValidation = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    );
-
-    const { data: classData, error: classError } = await supabaseValidation
-      .from('classes')
-      .select('id, code, title, is_open_for_signup')
-      .eq('id', parseInt(class_id))
-      .eq('is_active', true)
-      .single();
-
-    if (classError || !classData) {
-      return new Response(
-        JSON.stringify({ error: 'Classe invalide ou introuvable' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    if (!classData.is_open_for_signup) {
-      return new Response(
-        JSON.stringify({ error: 'Les inscriptions pour ce groupe sont fermées. Veuillez choisir un groupe de la 2ème Session.' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
 
     // Use service role to create user and profile
     const supabaseAdmin = createClient(

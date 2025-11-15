@@ -741,6 +741,48 @@ export type Database = {
         }
         Relationships: []
       }
+      job_postings: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          description: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          job_type: string | null
+          location: string | null
+          posted_by: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          description: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          job_type?: string | null
+          location?: string | null
+          posted_by: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          description?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          job_type?: string | null
+          location?: string | null
+          posted_by?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string
@@ -1118,6 +1160,7 @@ export type Database = {
           is_active: boolean
           phone: string | null
           primary_class_id: number | null
+          status: string
           telegram: string | null
           user_id: string
           whatsapp: string | null
@@ -1132,6 +1175,7 @@ export type Database = {
           is_active?: boolean
           phone?: string | null
           primary_class_id?: number | null
+          status?: string
           telegram?: string | null
           user_id: string
           whatsapp?: string | null
@@ -1146,6 +1190,7 @@ export type Database = {
           is_active?: boolean
           phone?: string | null
           primary_class_id?: number | null
+          status?: string
           telegram?: string | null
           user_id?: string
           whatsapp?: string | null

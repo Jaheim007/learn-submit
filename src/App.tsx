@@ -16,6 +16,7 @@ import StudentProjects from "./pages/StudentProjects";
 import SubmitProject from "./pages/SubmitProject";
 import StudentSubmissions from "./pages/StudentSubmissions";
 import StudentLeaderboard from "./pages/StudentLeaderboard";
+import StudentPending from "./pages/StudentPending";
 import StudentGuard from "./components/StudentGuard";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminGuard from "./components/admin/AdminGuard";
@@ -25,6 +26,7 @@ import AdminSubmissions from "./pages/admin/AdminSubmissions";
 import AdminProjects from "./pages/admin/AdminProjects";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminPendingStudents from "./pages/admin/AdminPendingStudents";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminRegister from "./pages/admin/AdminRegister";
@@ -55,6 +57,7 @@ const App = () => (
               {/* Student auth routes */}
               <Route path="/etudiant/login" element={<StudentLogin />} />
               <Route path="/etudiant/register" element={<StudentRegister />} />
+              <Route path="/etudiant/pending" element={<StudentPending />} />
               
               {/* Student protected routes */}
               <Route path="/etudiant/profil" element={<StudentGuard><Profile /></StudentGuard>} />
@@ -72,6 +75,7 @@ const App = () => (
               {/* Admin dashboard routes */}
               <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
                 <Route index element={<AdminHome />} />
+                <Route path="pending-students" element={<AdminPendingStudents />} />
                 <Route path="students" element={<AdminStudents />} />
                 <Route path="submissions" element={<AdminSubmissions />} />
                 <Route path="projects" element={<AdminProjects />} />

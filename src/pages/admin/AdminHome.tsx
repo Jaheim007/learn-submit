@@ -9,6 +9,7 @@ import { fr } from 'date-fns/locale';
 
 interface Stats {
   totalStudents: number;
+  pendingStudents: number;
   submissionsToday: number;
   pendingReviews: number;
   upcomingDeadlines: number;
@@ -34,6 +35,7 @@ export default function AdminHome() {
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats>({
     totalStudents: 0,
+    pendingStudents: 0,
     submissionsToday: 0,
     pendingReviews: 0,
     upcomingDeadlines: 0,
@@ -54,6 +56,7 @@ export default function AdminHome() {
 
       const [
         studentsCount,
+        pendingCount,
         submissionsToday,
         pendingReviews,
         upcomingDeadlines,
@@ -64,7 +67,14 @@ export default function AdminHome() {
         supabase
           .from('students')
           .select('id', { count: 'exact' })
-          .eq('is_active', true),
+          .eq('is_active', true)
+          .eq('status', 'active'),
+        
+        // Pending students
+        supabase
+          .from('students')
+          .select('id', { count: 'exact' })
+          .eq('status', 'pending'),
         
         // Submissions today
         supabase
@@ -116,6 +126,7 @@ export default function AdminHome() {
 
       setStats({
         totalStudents: studentsCount.count || 0,
+        pendingStudents: pendingCount.count || 0,
         submissionsToday: submissionsToday.count || 0,
         pendingReviews: pendingReviews.count || 0,
         upcomingDeadlines: upcomingDeadlines.count || 0,
@@ -192,13 +203,28 @@ export default function AdminHome() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/students')}>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
               <Users className="h-5 w-5 text-blue-600" />
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Étudiants actifs</p>
                 <p className="text-2xl font-bold text-foreground">{stats.totalStudents}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow border-yellow-200 bg-yellow-50/50" 
+          onClick={() => navigate('/admin/pending-students')}
+        >
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-2">
+              <Clock className="h-5 w-5 text-yellow-600" />
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">En attente d'approbation</p>
+                <p className="text-2xl font-bold text-foreground">{stats.pendingStudents}</p>
               </div>
             </div>
           </CardContent>
