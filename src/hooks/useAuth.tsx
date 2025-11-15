@@ -39,21 +39,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log('OAuth sign-in detected:', provider);
             
             // Call edge function to create student profile if needed
-            setTimeout(async () => {
-              try {
-                const { error } = await supabase.functions.invoke('handle-oauth-signup', {
-                  headers: {
-                    Authorization: `Bearer ${session.access_token}`
-                  }
-                });
-                
-                if (error) {
-                  console.error('Error in OAuth signup handler:', error);
+            try {
+              await supabase.functions.invoke('handle-oauth-signup', {
+                headers: {
+                  Authorization: `Bearer ${session.access_token}`
                 }
-              } catch (err) {
-                console.error('Failed to call OAuth signup handler:', err);
-              }
-            }, 0);
+              });
+            } catch (err) {
+              console.error('Failed to call OAuth signup handler:', err);
+            }
           }
         }
         

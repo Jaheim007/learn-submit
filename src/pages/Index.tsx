@@ -30,7 +30,7 @@ const Index = () => {
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button 
-            onClick={() => navigate('/student/register')}
+            onClick={() => navigate('/etudiant/register')}
             size="lg"
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all"
           >
@@ -38,7 +38,7 @@ const Index = () => {
           </Button>
           
           <Button 
-            onClick={() => navigate('/student/login')}
+            onClick={() => navigate('/etudiant/login')}
             size="lg"
             variant="outline"
             className="border-2 border-foreground/20 hover:border-foreground/40 bg-background/10 backdrop-blur-sm px-8 py-6 text-lg"
