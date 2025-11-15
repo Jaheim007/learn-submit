@@ -5,10 +5,20 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 export const NotificationBell = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { requestPermission, isSupported } = usePushNotifications();
+
+  // Request push notification permission on mount
+  useEffect(() => {
+    if (isSupported && Notification.permission === 'default') {
+      // Auto-request permission when component mounts
+      requestPermission();
+    }
+  }, [isSupported, requestPermission]);
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ['unreadNotifications'],
