@@ -15,16 +15,21 @@ export default function StudentGuard({ children }: StudentGuardProps) {
   useEffect(() => {
     if (!user || authLoading || !session) return;
 
-    const ensureStudentProfile = async () => {
+  const ensureStudentProfile = async () => {
       try {
         // 1) Fast path: does a student profile already exist?
         const { data: studentData, error: studentErr } = await supabase
           .from('students')
-          .select('id')
+          .select('id, status')
           .eq('user_id', user.id)
           .maybeSingle();
 
         if (!studentErr && studentData) {
+          // Check if student is approved (active)
+          if (studentData.status === 'pending') {
+            setStudentCheck('not_found'); // Will redirect to pending page
+            return;
+          }
           setStudentCheck('found');
           return;
         }
@@ -106,9 +111,9 @@ export default function StudentGuard({ children }: StudentGuardProps) {
     return <Navigate to="/etudiant/login" replace />;
   }
 
-  // If authenticated but no student profile, redirect to registration
+  // If authenticated but no student profile or pending approval, redirect
   if (studentCheck === 'not_found') {
-    return <Navigate to="/etudiant/register" replace state={{ message: "Vous devez d'abord créer votre profil étudiant." }} />;
+    return <Navigate to="/etudiant/pending" replace />;
   }
 
   // User is authenticated and has student profile - allow access

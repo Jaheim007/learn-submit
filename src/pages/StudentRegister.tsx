@@ -23,16 +23,11 @@ export default function StudentRegister() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [selectedClassId, setSelectedClassId] = useState<string>('');
-  const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(false);
   
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchClasses();
-  }, []);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -68,21 +63,6 @@ export default function StudentRegister() {
     }
   };
 
-  const fetchClasses = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('classes')
-        .select('id, code, title, session_name')
-        .eq('is_open_for_signup', true)
-        .eq('is_active', true)
-        .order('code');
-
-      if (error) throw error;
-      setClasses(data || []);
-    } catch (error) {
-      console.error('Error fetching classes:', error);
-    }
-  };
 
   // If authenticated, only redirect if a student profile exists
   useEffect(() => {
@@ -108,11 +88,6 @@ export default function StudentRegister() {
       return;
     }
 
-    if (!selectedClassId) {
-      toast.error("Veuillez sélectionner votre groupe de classe");
-      return;
-    }
-
     if (!fullName.trim()) {
       toast.error("Veuillez saisir votre nom complet");
       return;
@@ -121,13 +96,12 @@ export default function StudentRegister() {
     setLoading(true);
 
     try {
-      // Call the register-student edge function
+      // Call the register-student edge function (no class selection - pending approval)
       const { data, error } = await supabase.functions.invoke('register-student', {
         body: {
           email,
           password,
-          full_name: fullName.trim(),
-          class_id: selectedClassId
+          full_name: fullName.trim()
         }
       });
 
@@ -265,26 +239,6 @@ export default function StudentRegister() {
                   className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 h-12 focus:border-blue-500/50 focus:ring-blue-500/20"
                   disabled={loading}
                 />
-              </div>
-
-              <div className="space-y-3">
-                <Label htmlFor="class" className="text-gray-300">Groupe</Label>
-                <Select
-                  value={selectedClassId}
-                  onValueChange={setSelectedClassId}
-                  disabled={loading}
-                >
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white h-12 focus:border-blue-500/50 focus:ring-blue-500/20">
-                    <SelectValue placeholder="Sélectionnez votre groupe" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {classes.map((cls) => (
-                      <SelectItem key={cls.id} value={cls.id.toString()}>
-                        {cls.code} - {cls.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
 
               <div className="space-y-3">
