@@ -25,36 +25,41 @@ export const usePushNotifications = () => {
   }, []);
 
   const requestPermission = async () => {
-    const token = await requestNotificationPermission();
-    if (token) {
-      setFcmToken(token);
-      
-      // Store token in database
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { error } = await supabase
-          .from('fcm_tokens')
-          .upsert({
-            user_id: user.id,
-            token: token,
-            device_info: {
-              user_agent: navigator.userAgent,
-              platform: navigator.platform
-            }
-          }, {
-            onConflict: 'user_id,token'
-          });
+    try {
+      const token = await requestNotificationPermission();
+      if (token) {
+        setFcmToken(token);
+        
+        // Store token in database
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { error } = await supabase
+            .from('fcm_tokens')
+            .upsert({
+              user_id: user.id,
+              token: token,
+              device_info: {
+                user_agent: navigator.userAgent,
+                platform: navigator.platform
+              }
+            }, {
+              onConflict: 'user_id,token'
+            });
 
-        if (error) {
-          console.error('Error storing FCM token:', error);
-          toast.error('Erreur lors de l\'enregistrement du token');
-        } else {
-          console.log('FCM Token stored for user:', user.id);
-          toast.success('Notifications activées');
+          if (error) {
+            console.error('Error storing FCM token:', error);
+          } else {
+            console.log('FCM Token stored for user:', user.id);
+            toast.success('Notifications activées avec succès');
+          }
         }
+      } else {
+        console.log('Notification permission denied by user');
+        // Don't show error toast - user explicitly denied permission
       }
-    } else {
-      toast.error('Permission de notification refusée');
+    } catch (error) {
+      console.error('Error requesting notification permission:', error);
+      // Silent fail - notifications are optional feature
     }
   };
 
@@ -68,7 +73,10 @@ export const usePushNotifications = () => {
             description: payload.notification?.body,
           });
         })
-        .catch((err) => console.error('Failed to listen for messages:', err));
+        .catch((err) => {
+          // Silent fail - don't show errors for notification listener
+          console.log('Notification listener not active:', err.message);
+        });
     }
   }, [isSupported]);
 
