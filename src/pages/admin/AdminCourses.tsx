@@ -158,14 +158,23 @@ export default function AdminCourses() {
       let successCount = 0;
       
       for (const file of formData.files) {
-        // Keep original filename without timestamp
-        const filePath = `${formData.class_id}/${file.name}`;
+        // Use unique filename with timestamp to avoid conflicts
+        const timestamp = Date.now();
+        const fileExt = file.name.split('.').pop();
+        const uniqueFileName = `${file.name.replace(/\.[^/.]+$/, '')}_${timestamp}.${fileExt}`;
+        const filePath = `${formData.class_id}/${uniqueFileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('course-materials')
-          .upload(filePath, file);
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw new Error(`Erreur lors de l'upload de ${file.name}: ${uploadError.message}`);
+        }
 
         const { error: dbError } = await supabase
           .from('course_materials')
@@ -181,7 +190,10 @@ export default function AdminCourses() {
             image_url: imageUrl
           });
 
-        if (dbError) throw dbError;
+        if (dbError) {
+          console.error('Database error:', dbError);
+          throw new Error(`Erreur lors de l'enregistrement de ${file.name}: ${dbError.message}`);
+        }
         successCount++;
       }
 
