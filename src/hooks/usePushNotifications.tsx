@@ -29,12 +29,29 @@ export const usePushNotifications = () => {
     if (token) {
       setFcmToken(token);
       
-      // Store token in user profile or database
+      // Store token in database
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // You might want to create a table to store FCM tokens
-        console.log('FCM Token for user:', user.id, token);
-        toast.success('Notifications activées');
+        const { error } = await supabase
+          .from('fcm_tokens')
+          .upsert({
+            user_id: user.id,
+            token: token,
+            device_info: {
+              user_agent: navigator.userAgent,
+              platform: navigator.platform
+            }
+          }, {
+            onConflict: 'user_id,token'
+          });
+
+        if (error) {
+          console.error('Error storing FCM token:', error);
+          toast.error('Erreur lors de l\'enregistrement du token');
+        } else {
+          console.log('FCM Token stored for user:', user.id);
+          toast.success('Notifications activées');
+        }
       }
     } else {
       toast.error('Permission de notification refusée');
