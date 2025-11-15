@@ -30,6 +30,7 @@ import AdminPendingStudents from "./pages/admin/AdminPendingStudents";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminRegister from "./pages/admin/AdminRegister";
+import AdminAcademyUsers from "./pages/admin/AdminAcademyUsers";
 import AcademyLogin from "./pages/academy/AcademyLogin";
 import AcademyLayout from "./pages/academy/AcademyLayout";
 import AcademyHome from "./pages/academy/AcademyHome";
@@ -85,6 +86,7 @@ const App = () => (
                 <Route path="projects" element={<AdminProjects />} />
                 <Route path="courses" element={<AdminCourses />} />
                 <Route path="users" element={<AdminUsers />} />
+                <Route path="academy-users" element={<AdminAcademyUsers />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
               

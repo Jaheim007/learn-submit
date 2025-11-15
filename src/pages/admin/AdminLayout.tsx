@@ -10,7 +10,8 @@ import {
   BookOpen,
   Clock,
   Briefcase,
-  UserCog
+  UserCog,
+  GraduationCap
 } from 'lucide-react';
 
 const navigation = [
@@ -22,6 +23,7 @@ const navigation = [
   { name: 'Cours', href: '/admin/courses', icon: BookOpen },
   { name: 'Offres d\'emploi', href: '/admin/jobs', icon: Briefcase },
   { name: 'Utilisateurs', href: '/admin/users', icon: UserCog },
+  { name: 'Personnel Académique', href: '/admin/academy-users', icon: GraduationCap },
   { name: 'Paramètres', href: '/admin/settings', icon: Settings },
 ];
 
