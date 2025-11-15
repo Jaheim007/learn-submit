@@ -118,12 +118,29 @@ export default function SubmitProject() {
     return sanitized;
   };
 
+  const buildStoragePath = (file: File): string => {
+    const name = file.name;
+    const dot = name.lastIndexOf('.');
+    const ext = dot > -1 ? name.slice(dot + 1).toLowerCase() : 'bin';
+    const base = dot > -1 ? name.slice(0, dot) : name;
+    const safeBase = sanitizeFilename(base).replace(/\.+$/,'').slice(0, 60) || 'file';
+    const ts = Date.now();
+    const uid = user?.id ?? 'unknown';
+    return `${uid}/${projectId}/${ts}_${safeBase}.${ext}`;
+  };
+
   const uploadFile = async (file: File, path: string) => {
     const { data, error } = await supabase.storage
       .from('submissions')
       .upload(path, file);
 
-    if (error) throw error;
+    if (error) {
+      const msg = String(error.message || '').toLowerCase();
+      if (msg.includes('invalid key')) {
+        throw new Error('Nom de fichier non valide. Renommez-le sans accents, apostrophes ou caractères spéciaux (ex: capture_2025.png).');
+      }
+      throw error;
+    }
     return data.path;
   };
 
@@ -142,8 +159,7 @@ export default function SubmitProject() {
 
       // Upload all files
       for (const file of files) {
-        const sanitizedFilename = sanitizeFilename(file.name);
-        const path = `${studentId}/${projectId}/${sanitizedFilename}`;
+        const path = buildStoragePath(file);
         const fileUrl = await uploadFile(file, path);
         fileUrls.push(fileUrl);
       }

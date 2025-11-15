@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ConditionalClassSelectionProvider } from "@/components/ConditionalClassSelectionProvider";
-import { ChatInterface } from "@/components/messaging/ChatInterface";
+
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import StudentLogin from "./pages/StudentLogin";
@@ -88,7 +88,7 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-            <ChatInterface />
+            
           </ConditionalClassSelectionProvider>
         </TooltipProvider>
       </AuthProvider>
