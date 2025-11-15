@@ -30,6 +30,10 @@ import AdminPendingStudents from "./pages/admin/AdminPendingStudents";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminRegister from "./pages/admin/AdminRegister";
+import AcademyLogin from "./pages/academy/AcademyLogin";
+import AcademyLayout from "./pages/academy/AcademyLayout";
+import AcademyHome from "./pages/academy/AcademyHome";
+import AcademyGuard from "./components/academy/AcademyGuard";
 import StudentCourses from "./pages/StudentCourses";
 import CourseDetail from "./pages/CourseDetail";
 
@@ -81,6 +85,19 @@ const App = () => (
                 <Route path="projects" element={<AdminProjects />} />
                 <Route path="courses" element={<AdminCourses />} />
                 <Route path="users" element={<AdminUsers />} />
+                <Route path="settings" element={<AdminSettings />} />
+              </Route>
+              
+              {/* Academy Routes */}
+              <Route path="/academy/login" element={<AcademyLogin />} />
+              <Route path="/academy" element={<AcademyGuard><AcademyLayout /></AcademyGuard>}>
+                <Route index element={<AcademyHome />} />
+                <Route path="pending-students" element={<AdminPendingStudents />} />
+                <Route path="students" element={<AdminStudents />} />
+                <Route path="submissions" element={<AdminSubmissions />} />
+                <Route path="projects" element={<AdminProjects />} />
+                <Route path="courses" element={<AdminCourses />} />
+                <Route path="teachers" element={<AdminUsers />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
               
