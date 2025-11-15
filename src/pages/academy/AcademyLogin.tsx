@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Eye, EyeOff, GraduationCap } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import academyLogo from '@/assets/academy-logo.png';
+import nysLogo from '@/assets/nys-logo.png';
 
 export default function AcademyLogin() {
   const [email, setEmail] = useState('');
@@ -113,7 +113,7 @@ export default function AcademyLogin() {
       <Card className="w-full max-w-md relative z-10 backdrop-blur-sm bg-card/95">
         <CardHeader className="space-y-4 text-center">
           <div className="flex justify-center">
-            <img src={academyLogo} alt="NYS Academy" className="h-20 w-auto" />
+            <img src={nysLogo} alt="NYS Africa" className="h-16 w-auto" />
           </div>
           <div>
             <CardTitle className="text-2xl">Portail Académique</CardTitle>

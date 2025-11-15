@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { LogOut, BarChart3, Users, FileText, FolderOpen, UserCheck, Settings, BookOpen, Clock } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import academyLogo from '@/assets/academy-logo.png';
+import nysLogo from '@/assets/nys-logo.png';
 
 export default function AcademyLayout() {
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ export default function AcademyLayout() {
         {/* Logo */}
         <div className="p-6 border-b border-border/50">
           <div className="flex items-center gap-3">
-            <img src={academyLogo} alt="NYS Academy" className="h-10 w-auto" />
+            <img src={nysLogo} alt="NYS Africa" className="h-10 w-auto" />
             <div>
               <h2 className="font-bold text-foreground">NYS Academy</h2>
               <p className="text-xs text-muted-foreground">Portail Académique</p>
