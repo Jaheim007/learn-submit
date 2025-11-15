@@ -25,7 +25,17 @@ export default function StudentLogin() {
   // Redirect if already authenticated (deferred)
   useEffect(() => {
     if (user) {
-      navigate('/etudiant/projets', { replace: true });
+      // Check if user has student profile before redirecting
+      supabase
+        .from('students')
+        .select('id')
+        .eq('user_id', user.id)
+        .single()
+        .then(({ data, error }) => {
+          if (!error && data) {
+            navigate('/etudiant/projets', { replace: true });
+          }
+        });
     }
   }, [user, navigate]);
 
