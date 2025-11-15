@@ -34,6 +34,25 @@ export default function StudentGuard({ children }: StudentGuardProps) {
         if (provider && provider !== 'email') {
           setStudentCheck('loading');
           try {
+            // 2a) Try direct insert (works if RLS allows creating own student row)
+            const { data: created, error: insertErr } = await supabase
+              .from('students')
+              .insert({
+                user_id: user.id,
+                email: user.email,
+                full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || null,
+                avatar_url: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || null,
+                is_active: true,
+              })
+              .select('id')
+              .single();
+
+            if (!insertErr && created) {
+              setStudentCheck('found');
+              return;
+            }
+
+            // 2b) Fallback to edge function with user JWT (bypasses RLS via service role)
             const { error: fnErr } = await supabase.functions.invoke('handle-oauth-signup', {
               headers: {
                 Authorization: `Bearer ${session.access_token}`,
@@ -43,10 +62,10 @@ export default function StudentGuard({ children }: StudentGuardProps) {
               console.error('handle-oauth-signup error:', fnErr);
             }
           } catch (e) {
-            console.error('Failed invoking handle-oauth-signup:', e);
+            console.error('Failed creating OAuth student profile:', e);
           }
 
-          // Re-check after invoking
+          // Re-check after attempting creation
           const { data: afterData, error: afterErr } = await supabase
             .from('students')
             .select('id')
