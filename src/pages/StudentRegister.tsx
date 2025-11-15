@@ -84,11 +84,21 @@ export default function StudentRegister() {
     }
   };
 
-  // Redirect if already authenticated
-  if (user) {
-    navigate('/etudiant/projets', { replace: true });
-    return null;
-  }
+  // If authenticated, only redirect if a student profile exists
+  useEffect(() => {
+    if (!user) return;
+    const check = async () => {
+      const { data } = await supabase
+        .from('students')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (data) {
+        navigate('/etudiant/projets', { replace: true });
+      }
+    };
+    check();
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
