@@ -91,7 +91,12 @@ export default function CourseDetail() {
   const downloadFile = async (pathOrUrl: string, fileName: string) => {
     try {
       if (/^https?:\/\//i.test(pathOrUrl)) {
-        window.open(pathOrUrl, '_blank');
+        const link = document.createElement('a');
+        link.href = pathOrUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
         toast.success('Téléchargement lancé');
         return;
       }
@@ -121,7 +126,14 @@ export default function CourseDetail() {
         throw new Error(result.error || 'Erreur de téléchargement');
       }
 
-      window.open(result.url, '_blank');
+      // Trigger actual file download
+      const link = document.createElement('a');
+      link.href = result.signedUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
       toast.success('Téléchargement lancé');
     } catch (error: any) {
       toast.error('Erreur: ' + error.message);
