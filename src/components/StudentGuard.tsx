@@ -8,61 +8,63 @@ interface StudentGuardProps {
 }
 
 export default function StudentGuard({ children }: StudentGuardProps) {
-  const { user, authLoading } = useAuth();
+  const { user, authLoading, session } = useAuth();
   const [studentCheck, setStudentCheck] = useState<'loading' | 'found' | 'not_found'>('loading');
 
-  // Check if user has student role
+  // Ensure student profile exists (handles OAuth auto-provisioning)
   useEffect(() => {
     if (!user || authLoading) return;
 
-    const checkStudentRole = async () => {
+    const ensureStudentProfile = async () => {
       try {
-        // Check if user has student role in user_roles table
-        const { data: roleData, error } = await supabase
-          .from('user_roles')
-          .select('role')
+        // 1) Fast path: does a student profile already exist?
+        const { data: studentData, error: studentErr } = await supabase
+          .from('students')
+          .select('id')
           .eq('user_id', user.id)
-          .eq('role', 'student')
           .maybeSingle();
 
-        if (error) {
-          console.error('Error checking student role:', error);
-          setStudentCheck('not_found');
-        } else if (roleData) {
+        if (!studentErr && studentData) {
           setStudentCheck('found');
-        } else {
-          // If no student role, check if student profile exists
-          const { data: studentData, error: studentError } = await supabase
+          return;
+        }
+
+        // 2) If not found and this is an OAuth user, auto-create via edge function
+        const provider = session?.user?.app_metadata?.provider;
+        if (provider && provider !== 'email') {
+          setStudentCheck('loading');
+          try {
+            const { error: fnErr } = await supabase.functions.invoke('handle-oauth-signup');
+            if (fnErr) {
+              console.error('handle-oauth-signup error:', fnErr);
+            }
+          } catch (e) {
+            console.error('Failed invoking handle-oauth-signup:', e);
+          }
+
+          // Re-check after invoking
+          const { data: afterData, error: afterErr } = await supabase
             .from('students')
             .select('id')
             .eq('user_id', user.id)
             .maybeSingle();
 
-          if (studentError) {
-            console.error('Error checking student profile:', studentError);
-            setStudentCheck('not_found');
-          } else if (studentData) {
-            // Student exists but no role, assign role automatically
-            const { error: roleInsertError } = await supabase
-              .from('user_roles')
-              .insert({ user_id: user.id, role: 'student' });
-              
-            if (roleInsertError) {
-              console.error('Error assigning student role:', roleInsertError);
-            }
+          if (!afterErr && afterData) {
             setStudentCheck('found');
-          } else {
-            setStudentCheck('not_found');
+            return;
           }
         }
+
+        // 3) Still not found -> require registration (email/password path)
+        setStudentCheck('not_found');
       } catch (error) {
-        console.error('Error checking student role:', error);
+        console.error('Error ensuring student profile:', error);
         setStudentCheck('not_found');
       }
     };
 
-    checkStudentRole();
-  }, [user, authLoading]);
+    ensureStudentProfile();
+  }, [user, authLoading, session]);
 
   // Wait for auth to finish loading
   if (authLoading || studentCheck === 'loading') {
