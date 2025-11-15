@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -22,11 +22,13 @@ export default function StudentLogin() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Redirect if already authenticated
-  if (user) {
-    navigate('/etudiant/projets', { replace: true });
-    return null;
-  }
+  // Redirect if already authenticated (deferred)
+  useEffect(() => {
+    if (user) {
+      navigate('/etudiant/projets', { replace: true });
+    }
+  }, [user, navigate]);
+
 
   const handleGoogleSignIn = async () => {
     try {
