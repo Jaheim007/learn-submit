@@ -98,7 +98,7 @@ export default function SupervisorDashboard() {
   }
 
   if (!isSupervisor) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/forbidden" replace />;
   }
 
   return (

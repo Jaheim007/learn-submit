@@ -145,7 +145,7 @@ export default function AdminUsers() {
 
         if (error) throw error;
 
-        toast.success('Superviseur mis à jour avec succès');
+        toast.success('Formateur mis à jour avec succès');
       } else {
         // Create new supervisor
         const { error } = await supabase.functions.invoke('create-supervisor', {
@@ -158,7 +158,7 @@ export default function AdminUsers() {
 
         if (error) throw error;
 
-        toast.success('Superviseur créé avec succès');
+        toast.success('Formateur créé avec succès');
       }
 
       setIsCreateDialogOpen(false);
@@ -193,8 +193,8 @@ export default function AdminUsers() {
 
       toast.success(
         !currentStatus 
-          ? 'Superviseur réactivé avec succès' 
-          : 'Superviseur désactivé avec succès'
+          ? 'Formateur réactivé avec succès' 
+          : 'Formateur désactivé avec succès'
       );
     } catch (error) {
       console.error('Error updating supervisor status:', error);
