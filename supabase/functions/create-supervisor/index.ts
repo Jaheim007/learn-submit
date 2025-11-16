@@ -130,28 +130,38 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create supervisor role in user_roles table
-    const { error: userRoleError } = await supabaseAdmin
+    // Check if supervisor role already exists (shouldn't, but let's be safe)
+    const { data: existingRole } = await supabaseAdmin
       .from('user_roles')
-      .insert({
-        user_id: authUser.user.id,
-        role: 'supervisor'
-      });
+      .select('role')
+      .eq('user_id', authUser.user.id)
+      .eq('role', 'supervisor')
+      .maybeSingle();
 
-    if (userRoleError) {
-      console.error('Error creating supervisor role:', userRoleError);
-      // Cleanup: delete supervisor and auth user if role creation failed
-      await supabaseAdmin.from('supervisors').delete().eq('user_id', authUser.user.id);
-      await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
-      
-      return new Response(JSON.stringify({ error: 'Failed to assign supervisor role' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+    // Only create role if it doesn't exist
+    if (!existingRole) {
+      const { error: userRoleError } = await supabaseAdmin
+        .from('user_roles')
+        .insert({
+          user_id: authUser.user.id,
+          role: 'supervisor'
+        });
+
+      if (userRoleError) {
+        console.error('Error creating supervisor role:', userRoleError);
+        // Cleanup: delete supervisor and auth user if role creation failed
+        await supabaseAdmin.from('supervisors').delete().eq('user_id', authUser.user.id);
+        await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
+        
+        return new Response(JSON.stringify({ error: 'Failed to assign supervisor role' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
     }
 
-    // Create class assignments
-    if (class_ids.length > 0) {
+    // Create class assignments if provided
+    if (class_ids && class_ids.length > 0) {
       const assignments = class_ids.map((class_id: number) => ({
         supervisor_user_id: authUser.user.id,
         class_id
@@ -163,36 +173,30 @@ Deno.serve(async (req) => {
 
       if (assignmentError) {
         console.error('Error creating class assignments:', assignmentError);
-        // Continue anyway - assignments can be added later
+        // Continue anyway - we can assign classes later
       }
     }
 
-    // Send password reset email so supervisor can set their own password
-    const { error: resetError } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'recovery',
-      email,
-    });
+    console.log('Successfully created supervisor:', authUser.user.id);
 
-    if (resetError) {
-      console.error('Error sending password reset:', resetError);
-      // Continue anyway - admin can manually send reset
-    }
-
-    return new Response(JSON.stringify({ 
-      success: true, 
-      supervisor: supervisorData,
-      temporary_password: tempPassword,
-      message: 'Supervisor created successfully. Password reset email sent.'
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    return new Response(
+      JSON.stringify({ 
+        success: true,
+        user_id: authUser.user.id 
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
 
   } catch (error) {
-    console.error('Unexpected error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    console.error('Unexpected error in create-supervisor:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
   }
 });

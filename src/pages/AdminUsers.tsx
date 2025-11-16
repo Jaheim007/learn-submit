@@ -311,7 +311,7 @@ export default function AdminUsers() {
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]" onPointerDownOutside={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-[425px]" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>Modifier les Classes du Superviseur</DialogTitle>
             <DialogDescription>

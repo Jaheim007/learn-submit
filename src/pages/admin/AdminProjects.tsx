@@ -672,7 +672,7 @@ export default function AdminProjects() {
 
       {/* Create Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" onPointerDownOutside={(e) => e.preventDefault()}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>Créer un projet</DialogTitle>
           </DialogHeader>
@@ -684,7 +684,7 @@ export default function AdminProjects() {
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" onPointerDownOutside={(e) => e.preventDefault()}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>Modifier le projet</DialogTitle>
           </DialogHeader>
