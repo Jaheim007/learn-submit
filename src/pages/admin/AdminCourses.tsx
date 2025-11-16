@@ -500,7 +500,7 @@ export default function AdminCourses() {
 
       {/* Edit Course Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="sm:max-w-[525px]">
+        <DialogContent className="sm:max-w-[525px]" onPointerDownOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>Modifier le cours</DialogTitle>
             <DialogDescription>

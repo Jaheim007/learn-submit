@@ -92,7 +92,7 @@ export default function AdminUsers() {
       }
     } catch (error) {
       console.error('Error loading supervisors:', error);
-      toast.error('Erreur lors du chargement des superviseurs');
+      toast.error('Erreur lors du chargement des formateurs');
     } finally {
       setLoading(false);
     }
@@ -226,21 +226,21 @@ export default function AdminUsers() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Gestion des superviseurs</h1>
+          <h1 className="text-3xl font-bold text-foreground">Gestion des formateurs</h1>
           <p className="text-muted-foreground">
-            {supervisors.length} superviseur{supervisors.length > 1 ? 's' : ''}
+            {supervisors.length} formateur{supervisors.length > 1 ? 's' : ''}
           </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openCreateDialog}>
               <Plus className="h-4 w-4 mr-2" />
-              Créer un superviseur
+              Créer un formateur
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl" onPointerDownOutside={(e) => e.preventDefault()}>
             <DialogHeader>
-              <DialogTitle>Créer un nouveau superviseur</DialogTitle>
+              <DialogTitle>Créer un nouveau formateur</DialogTitle>
             </DialogHeader>
             <SupervisorForm />
           </DialogContent>
@@ -339,9 +339,9 @@ export default function AdminUsers() {
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl" onPointerDownOutside={(e) => e.preventDefault()}>
           <DialogHeader>
-            <DialogTitle>Modifier le superviseur</DialogTitle>
+            <DialogTitle>Modifier le formateur</DialogTitle>
           </DialogHeader>
           <SupervisorForm />
         </DialogContent>
