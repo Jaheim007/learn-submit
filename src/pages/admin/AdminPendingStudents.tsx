@@ -226,7 +226,7 @@ export default function AdminPendingStudents() {
 
       {/* Approval Dialog */}
       <Dialog open={approvalDialogOpen} onOpenChange={setApprovalDialogOpen}>
-        <DialogContent>
+        <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>Approuver et assigner aux classes</DialogTitle>
             <DialogDescription>
