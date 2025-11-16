@@ -15,7 +15,6 @@ interface Supervisor {
   user_id: string;
   full_name: string;
   email: string;
-  is_active: boolean;
   created_at: string;
   classes: { id: number; code: string; title: string }[];
 }
@@ -57,11 +56,9 @@ export default function AdminUsers() {
           .select(`
             user_id,
             full_name,
-            email,
-            is_active,
             created_at,
-            supervisor_class_assignments!inner(
-              classes!inner(id, code, title)
+            supervisor_class_assignments(
+              classes(id, code, title)
             )
           `)
           .order('created_at', { ascending: false }),
@@ -78,14 +75,12 @@ export default function AdminUsers() {
       }
 
       if (supervisorsResponse.data) {
-        // Format supervisors data
         const formattedSupervisors = supervisorsResponse.data.map((supervisor: any) => ({
           user_id: supervisor.user_id,
           full_name: supervisor.full_name,
-          email: supervisor.email,
-          is_active: supervisor.is_active,
+          email: supervisor.email ?? '',
           created_at: supervisor.created_at,
-          classes: supervisor.supervisor_class_assignments.map((sca: any) => sca.classes),
+          classes: (supervisor.supervisor_class_assignments || []).map((sca: any) => sca.classes),
         }));
 
         setSupervisors(formattedSupervisors);
@@ -125,6 +120,12 @@ export default function AdminUsers() {
     try {
       if (!formData.email.trim() || !formData.full_name.trim()) {
         toast.error('L\'email et le nom complet sont requis');
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email.trim())) {
+        toast.error('Adresse email invalide');
         return;
       }
 
@@ -256,7 +257,6 @@ export default function AdminUsers() {
                 <TableHead>Nom</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Classes assignées</TableHead>
-                <TableHead>Statut</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -275,11 +275,6 @@ export default function AdminUsers() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={supervisor.is_active ? "default" : "secondary"}>
-                      {supervisor.is_active ? 'Actif' : 'Inactif'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
                     <div className="flex items-center space-x-2">
                       <Button 
                         variant="ghost" 
@@ -288,46 +283,13 @@ export default function AdminUsers() {
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className={supervisor.is_active ? "text-red-600" : "text-green-600"}
-                          >
-                            {supervisor.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              {supervisor.is_active ? 'Désactiver' : 'Réactiver'} le superviseur
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              {supervisor.is_active 
-                                ? 'Désactiver le superviseur ? Il ne pourra plus accéder aux données des étudiants.'
-                                : 'Réactiver le superviseur ? Il pourra à nouveau accéder aux données des étudiants assignés.'
-                              }
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Annuler</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => toggleSupervisorStatus(supervisor.user_id, supervisor.is_active)}
-                            >
-                              {supervisor.is_active ? 'Désactiver' : 'Réactiver'}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
                     </div>
                   </TableCell>
                 </TableRow>
               ))}
               {supervisors.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                     Aucun superviseur trouvé
                   </TableCell>
                 </TableRow>
