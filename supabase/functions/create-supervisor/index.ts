@@ -226,10 +226,6 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    );
 
   } catch (error) {
     console.error('Unexpected error in create-supervisor:', error);
