@@ -239,7 +239,7 @@ export default function AdminUsers() {
               Créer un formateur
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl" onInteractOutside={(e) => e.preventDefault()}>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Créer un nouveau formateur</DialogTitle>
             </DialogHeader>
@@ -301,7 +301,7 @@ export default function AdminUsers() {
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Modifier le formateur</DialogTitle>
           </DialogHeader>
