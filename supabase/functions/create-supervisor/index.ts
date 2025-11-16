@@ -119,12 +119,32 @@ Deno.serve(async (req) => {
       .single();
 
     if (supervisorError) {
-      console.error('Error creating supervisor record:', supervisorError);
+      console.error('Error creating supervisor profile:', supervisorError);
       
       // Cleanup: delete the auth user if supervisor creation failed
       await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
       
       return new Response(JSON.stringify({ error: 'Failed to create supervisor profile' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Create supervisor role in user_roles table
+    const { error: userRoleError } = await supabaseAdmin
+      .from('user_roles')
+      .insert({
+        user_id: authUser.user.id,
+        role: 'supervisor'
+      });
+
+    if (userRoleError) {
+      console.error('Error creating supervisor role:', userRoleError);
+      // Cleanup: delete supervisor and auth user if role creation failed
+      await supabaseAdmin.from('supervisors').delete().eq('user_id', authUser.user.id);
+      await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
+      
+      return new Response(JSON.stringify({ error: 'Failed to assign supervisor role' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
