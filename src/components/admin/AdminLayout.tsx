@@ -2,7 +2,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, BarChart3, Users, FileText, FolderOpen, UserCheck, Settings, BookOpen } from 'lucide-react';
+import { LogOut, BarChart3, Users, FileText, FolderOpen, UserCheck, Settings, BookOpen, GraduationCap } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import nysLogo from '@/assets/nys-logo.png';
 
@@ -23,6 +23,7 @@ export default function AdminLayout() {
     { path: '/admin/projects', label: 'Projets', icon: FolderOpen },
     { path: '/admin/courses', label: 'Cours', icon: BookOpen },
     { path: '/admin/users', label: 'Superviseurs', icon: UserCheck },
+    { path: '/admin/academy-users', label: 'Personnel académique', icon: GraduationCap },
     { path: '/admin/settings', label: 'Paramètres', icon: Settings },
   ];
 

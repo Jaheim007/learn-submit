@@ -178,21 +178,33 @@ Deno.serve(async (req) => {
     }
 
     // Ensure supervisor role
-    const { error: roleUpsertError } = await supabaseAdmin
+    const { data: existingRole, error: checkRoleError } = await supabaseAdmin
       .from('user_roles')
-      .insert({ user_id: userId, role: 'supervisor' }, { returning: 'minimal' })
-      .catch(async () => {
-        // Ignore unique constraint errors by upserting via RPC-like pattern
-        await supabaseAdmin.from('user_roles').upsert({ user_id: userId, role: 'supervisor' }, { onConflict: 'user_id,role' });
-        return { error: null } as any;
-      });
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'supervisor')
+      .maybeSingle();
 
-    if (roleUpsertError) {
-      console.error('Error assigning supervisor role:', roleUpsertError);
-      return new Response(JSON.stringify({ error: 'Failed to assign supervisor role' }), {
+    if (checkRoleError) {
+      console.error('Error checking supervisor role:', checkRoleError);
+      return new Response(JSON.stringify({ error: 'Failed to check supervisor role' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
+    }
+
+    if (!existingRole) {
+      const { error: roleInsertError } = await supabaseAdmin
+        .from('user_roles')
+        .insert({ user_id: userId, role: 'supervisor' });
+
+      if (roleInsertError) {
+        console.error('Error assigning supervisor role:', roleInsertError);
+        return new Response(JSON.stringify({ error: 'Failed to assign supervisor role' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
     }
 
     // Replace class assignments if provided
