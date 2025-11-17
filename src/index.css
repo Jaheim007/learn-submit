@@ -88,6 +88,11 @@
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 250 30% 18%;
     --sidebar-ring: 217 91% 60%;
+    
+    /* Submito Brand Colors */
+    --submito-cyan: 180 100% 50%;
+    --submito-pink: 320 100% 60%;
+    --submito-purple: 280 60% 40%;
   }
 
   .dark {
