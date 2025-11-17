@@ -50,41 +50,65 @@ export default function AdminUsers() {
 
   const loadData = async () => {
     try {
-      const [supervisorsResponse, classesResponse] = await Promise.all([
-        supabase
-          .from('supervisors')
-          .select(`
-            user_id,
-            full_name,
-            created_at,
-            supervisor_class_assignments(
-              classes(id, code, title)
-            )
-          `)
-          .order('created_at', { ascending: false }),
-        
-        supabase
-          .from('classes')
-          .select('id, code, title')
-          .eq('is_active', true)
-          .order('code')
-      ]);
+      // Load classes
+      const { data: classesData } = await supabase
+        .from('classes')
+        .select('id, code, title')
+        .eq('is_active', true)
+        .order('code');
 
-      if (classesResponse.data) {
-        setClasses(classesResponse.data);
+      setClasses(classesData || []);
+
+      // Get supervisors via profiles + user_roles
+      const { data: supervisorRoles } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'supervisor');
+
+      if (!supervisorRoles || supervisorRoles.length === 0) {
+        setSupervisors([]);
+        setLoading(false);
+        return;
       }
 
-      if (supervisorsResponse.data) {
-        const formattedSupervisors = supervisorsResponse.data.map((supervisor: any) => ({
-          user_id: supervisor.user_id,
-          full_name: supervisor.full_name,
-          email: supervisor.email ?? '',
-          created_at: supervisor.created_at,
-          classes: (supervisor.supervisor_class_assignments || []).map((sca: any) => sca.classes),
-        }));
+      const supervisorIds = supervisorRoles.map(r => r.user_id);
 
-        setSupervisors(formattedSupervisors);
-      }
+      // Get profiles for supervisors
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', supervisorIds);
+
+      // Get supervisors table data
+      const { data: supervisorsData } = await supabase
+        .from('supervisors')
+        .select('user_id, created_at')
+        .in('user_id', supervisorIds);
+
+      // Get class assignments
+      const { data: assignments } = await supabase
+        .from('supervisor_class_assignments')
+        .select('supervisor_user_id, class_id')
+        .in('supervisor_user_id', supervisorIds);
+
+      // Combine data
+      const formattedSupervisors = (profiles || []).map(profile => {
+        const supervisorInfo = supervisorsData?.find(s => s.user_id === profile.id);
+        const supervisorAssignments = assignments?.filter(a => a.supervisor_user_id === profile.id) || [];
+        const assignedClasses = supervisorAssignments
+          .map(a => classesData?.find(c => c.id === a.class_id))
+          .filter(Boolean) as { id: number; code: string; title: string }[];
+
+        return {
+          user_id: profile.id,
+          full_name: profile.full_name || '',
+          email: profile.email,
+          created_at: supervisorInfo?.created_at || new Date().toISOString(),
+          classes: assignedClasses,
+        };
+      });
+
+      setSupervisors(formattedSupervisors);
     } catch (error) {
       console.error('Error loading supervisors:', error);
       toast.error('Erreur lors du chargement des formateurs');

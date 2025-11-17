@@ -35,9 +35,21 @@ const DialogContent = React.forwardRef<
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
-      onKeyDown={(e) => {
-        // Prevent global shortcuts or key handlers from interfering with typing inside dialogs
+      onKeyDownCapture={(e) => {
+        // Stop all key propagation to prevent global handlers from interfering
         e.stopPropagation();
+      }}
+      onOpenAutoFocus={(e) => {
+        // Prevent default focus behavior that might cause issues
+        e.preventDefault();
+        // Find first input and focus it
+        const target = e.currentTarget;
+        if (target instanceof HTMLElement) {
+          const firstInput = target.querySelector('input, textarea');
+          if (firstInput instanceof HTMLElement) {
+            setTimeout(() => firstInput.focus(), 0);
+          }
+        }
       }}
       className={cn(
         "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",

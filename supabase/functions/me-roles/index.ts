@@ -74,7 +74,9 @@ Deno.serve(async (req) => {
       JSON.stringify({ 
         roles,
         isAdmin: roles.includes('admin'),
-        isSupervisor: roles.includes('supervisor')
+        isSupervisor: roles.includes('supervisor'),
+        isTeacher: roles.includes('teacher'),
+        isAcademy: roles.includes('academy')
       }),
       { 
         status: 200, 
