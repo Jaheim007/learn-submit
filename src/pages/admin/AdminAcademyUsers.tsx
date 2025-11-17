@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { GraduationCap, Plus } from 'lucide-react';
+import { GraduationCap, Plus, RefreshCw, Copy } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface AcademyUser {
@@ -22,6 +22,38 @@ export default function AdminAcademyUsers() {
   const [loading, setLoading] = useState(false);
   const [academyUsers, setAcademyUsers] = useState<AcademyUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const generatePassword = () => {
+    const length = 12;
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const numbers = '0123456789';
+    const symbols = '!@#$%^&*';
+    const allChars = uppercase + lowercase + numbers + symbols;
+    
+    let password = '';
+    // Ensure at least one of each type
+    password += uppercase[Math.floor(Math.random() * uppercase.length)];
+    password += lowercase[Math.floor(Math.random() * lowercase.length)];
+    password += numbers[Math.floor(Math.random() * numbers.length)];
+    password += symbols[Math.floor(Math.random() * symbols.length)];
+    
+    // Fill the rest randomly
+    for (let i = password.length; i < length; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+    
+    // Shuffle the password
+    password = password.split('').sort(() => Math.random() - 0.5).join('');
+    setPassword(password);
+    setShowPassword(true);
+  };
+
+  const copyPassword = async () => {
+    await navigator.clipboard.writeText(password);
+    toast.success('Mot de passe copié dans le presse-papiers');
+  };
 
   useEffect(() => {
     loadAcademyUsers();
@@ -166,17 +198,42 @@ export default function AdminAcademyUsers() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Mot de passe temporaire</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Minimum 6 caractères"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  disabled={loading}
-                />
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Mot de passe temporaire</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={generatePassword}
+                    disabled={loading}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Générer
+                  </Button>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Minimum 6 caractères"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    disabled={loading}
+                  />
+                  {password && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8"
+                      onClick={copyPassword}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   L'utilisateur pourra changer ce mot de passe après connexion
                 </p>
