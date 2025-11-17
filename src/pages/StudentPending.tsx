@@ -32,6 +32,8 @@ export default function StudentPending() {
         setTimeout(() => {
           navigate('/etudiant/projets', { replace: true });
         }, 1500);
+      } else if (data?.status === 'rejected') {
+        navigate('/etudiant/rejected', { replace: true });
       } else {
         toast.warning('⏳ Votre compte est toujours en attente', {
           description: "L'administration n'a pas encore approuvé votre compte. Vous serez notifié une fois activé."

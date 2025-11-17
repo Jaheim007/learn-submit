@@ -9,7 +9,7 @@ interface StudentGuardProps {
 
 export default function StudentGuard({ children }: StudentGuardProps) {
   const { user, authLoading, session } = useAuth();
-  const [studentCheck, setStudentCheck] = useState<'loading' | 'found' | 'not_found'>('loading');
+  const [studentCheck, setStudentCheck] = useState<'loading' | 'found' | 'not_found' | 'rejected'>('loading');
 
   // Ensure student profile exists (handles OAuth auto-provisioning)
   useEffect(() => {
@@ -25,9 +25,13 @@ export default function StudentGuard({ children }: StudentGuardProps) {
           .maybeSingle();
 
         if (!studentErr && studentData) {
-          // Check if student is approved (active)
+          // Check student status
           if (studentData.status === 'pending') {
             setStudentCheck('not_found'); // Will redirect to pending page
+            return;
+          }
+          if (studentData.status === 'rejected') {
+            setStudentCheck('rejected'); // Will redirect to rejected page
             return;
           }
           setStudentCheck('found');
@@ -114,6 +118,11 @@ export default function StudentGuard({ children }: StudentGuardProps) {
   // If authenticated but no student profile or pending approval, redirect
   if (studentCheck === 'not_found') {
     return <Navigate to="/etudiant/pending" replace />;
+  }
+
+  // If student account is rejected, redirect to rejected page
+  if (studentCheck === 'rejected') {
+    return <Navigate to="/etudiant/rejected" replace />;
   }
 
   // User is authenticated and has student profile - allow access
