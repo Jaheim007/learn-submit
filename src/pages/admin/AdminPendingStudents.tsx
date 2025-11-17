@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { sendNotificationToUsers } from '@/lib/pushNotifications';
@@ -33,6 +34,7 @@ export default function AdminPendingStudents() {
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<PendingStudent | null>(null);
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
 
@@ -142,21 +144,37 @@ export default function AdminPendingStudents() {
     }
   };
 
-  const handleReject = async (student: PendingStudent) => {
-    if (!confirm(`Êtes-vous sûr de vouloir rejeter ${student.full_name}? Le compte sera supprimé définitivement.`)) {
-      return;
-    }
+  const openRejectDialog = (student: PendingStudent) => {
+    setSelectedStudent(student);
+    setRejectDialogOpen(true);
+  };
+
+  const handleReject = async () => {
+    if (!selectedStudent) return;
 
     try {
-      // Delete student record (cascades to delete auth user via RLS)
-      const { error } = await supabase
+      // Update student status to rejected instead of deleting
+      const { error: updateError } = await supabase
         .from('students')
-        .delete()
-        .eq('id', student.id);
+        .update({ 
+          status: 'rejected',
+          is_active: false
+        })
+        .eq('id', selectedStudent.id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
-      toast.success('Étudiant rejeté et compte supprimé');
+      // Send notification to student
+      await sendNotificationToUsers(
+        [selectedStudent.user_id],
+        'Compte non approuvé',
+        `Votre demande d'inscription n'a pas été approuvée. Pour plus d'informations, contactez l'administration.`,
+        { type: 'account_rejected' }
+      );
+
+      toast.success(`${selectedStudent.full_name} a été rejeté et notifié`);
+      setRejectDialogOpen(false);
+      setSelectedStudent(null);
       loadData();
     } catch (error) {
       console.error('Error rejecting student:', error);
@@ -233,7 +251,7 @@ export default function AdminPendingStudents() {
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => handleReject(student)}
+                          onClick={() => openRejectDialog(student)}
                         >
                           <UserX className="h-4 w-4 mr-1" />
                           Rejeter
@@ -303,6 +321,38 @@ export default function AdminPendingStudents() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Reject Confirmation Dialog */}
+      <AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <AlertDialogContent className="bg-destructive/10 border-destructive/20">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-12 w-12 rounded-full bg-destructive/20 flex items-center justify-center">
+                <UserX className="h-6 w-6 text-destructive" />
+              </div>
+              <AlertDialogTitle className="text-xl">Rejeter cet étudiant ?</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-base">
+              Êtes-vous sûr de vouloir rejeter <span className="font-semibold text-foreground">{selectedStudent?.full_name}</span> ?
+              <br /><br />
+              L'étudiant recevra une notification et ne pourra pas accéder à la plateforme.
+              Vous pourrez toujours approuver ce compte plus tard si nécessaire.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setRejectDialogOpen(false)}>
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleReject}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              <UserX className="h-4 w-4 mr-2" />
+              Rejeter
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
