@@ -20,9 +20,9 @@ serve(async (req) => {
     // Validate required fields
     if (!email || !password || !full_name) {
       return new Response(
-        JSON.stringify({ error: 'Email, password, and full_name are required' }),
+        JSON.stringify({ success: false, error: 'Email, password, and full_name are required' }),
         { 
-          status: 400, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
@@ -65,9 +65,9 @@ serve(async (req) => {
       }
       
       return new Response(
-        JSON.stringify({ error: errorMessage }),
+        JSON.stringify({ success: false, error: errorMessage }),
         { 
-          status: statusCode, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
@@ -89,9 +89,9 @@ serve(async (req) => {
       // Cleanup: delete the auth user if profile creation fails
       await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
       return new Response(
-        JSON.stringify({ error: 'Failed to create profile' }),
+        JSON.stringify({ success: false, error: 'Failed to create profile' }),
         { 
-          status: 500, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
@@ -110,9 +110,9 @@ serve(async (req) => {
     if (roleError) {
       console.error('Role creation failed:', roleError);
       return new Response(
-        JSON.stringify({ error: 'Failed to assign student role' }),
+        JSON.stringify({ success: false, error: 'Failed to assign student role' }),
         { 
-          status: 500, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
@@ -134,9 +134,9 @@ serve(async (req) => {
     if (studentError) {
       console.error('Student record creation failed:', studentError);
       return new Response(
-        JSON.stringify({ error: 'Failed to create student profile' }),
+        JSON.stringify({ success: false, error: 'Failed to create student profile' }),
         { 
-          status: 500, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
@@ -158,9 +158,9 @@ serve(async (req) => {
   } catch (error) {
     console.error('Unexpected error:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ success: false, error: 'Internal server error' }),
       { 
-        status: 500, 
+        status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
