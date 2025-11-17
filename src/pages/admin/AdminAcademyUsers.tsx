@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,12 +6,61 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { GraduationCap, Plus } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
+interface AcademyUser {
+  user_id: string;
+  full_name: string;
+  email: string;
+  created_at: string;
+}
 
 export default function AdminAcademyUsers() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [academyUsers, setAcademyUsers] = useState<AcademyUser[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+
+  useEffect(() => {
+    loadAcademyUsers();
+  }, []);
+
+  const loadAcademyUsers = async () => {
+    try {
+      const { data: academyRoles } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'academy');
+
+      if (!academyRoles || academyRoles.length === 0) {
+        setAcademyUsers([]);
+        setLoadingUsers(false);
+        return;
+      }
+
+      const userIds = academyRoles.map(r => r.user_id);
+
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, created_at')
+        .in('id', userIds)
+        .order('created_at', { ascending: false });
+
+      setAcademyUsers((profiles || []).map(p => ({
+        user_id: p.id,
+        full_name: p.full_name || '',
+        email: p.email,
+        created_at: p.created_at,
+      })));
+    } catch (error) {
+      console.error('Error loading academy users:', error);
+      toast.error('Erreur lors du chargement des utilisateurs académiques');
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
 
   const handleCreateAcademyUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,10 +89,11 @@ export default function AdminAcademyUsers() {
 
       toast.success('Compte académique créé avec succès');
       
-      // Reset form
+      // Reset form and reload list
       setEmail('');
       setPassword('');
       setFullName('');
+      loadAcademyUsers();
       
     } catch (error) {
       console.error('Unexpected error:', error);
@@ -55,11 +105,16 @@ export default function AdminAcademyUsers() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Gestion du Personnel Académique</h1>
-        <p className="text-muted-foreground mt-2">
-          Créer et gérer les comptes du personnel académique
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Gestion du Personnel Académique</h1>
+          <p className="text-muted-foreground mt-2">
+            Créer et gérer les comptes du personnel académique
+          </p>
+        </div>
+        <div className="text-sm text-muted-foreground">
+          {academyUsers.length} {academyUsers.length > 1 ? 'comptes' : 'compte'}
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -161,6 +216,51 @@ export default function AdminAcademyUsers() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Academy Users List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Personnel académique existant</CardTitle>
+          <CardDescription>Liste de tous les comptes académiques créés</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loadingUsers ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-2 text-sm text-muted-foreground">Chargement...</p>
+            </div>
+          ) : academyUsers.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Aucun compte académique créé
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nom complet</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Créé le</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {academyUsers.map((user) => (
+                  <TableRow key={user.user_id}>
+                    <TableCell className="font-medium">{user.full_name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      {new Date(user.created_at).toLocaleDateString('fr-FR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
