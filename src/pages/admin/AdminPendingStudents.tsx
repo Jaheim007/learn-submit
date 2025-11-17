@@ -92,12 +92,13 @@ export default function AdminPendingStudents() {
         throw new Error('Impossible de trouver l\'étudiant');
       }
 
-      // Update student status to active
+      // Update student status to active AND set primary class to first selected class
       const { error: updateError } = await supabase
         .from('students')
         .update({ 
           status: 'active',
-          is_active: true 
+          is_active: true,
+          primary_class_id: parseInt(selectedClassIds[0]) // Set first class as primary
         })
         .eq('id', studentData.id);
 
