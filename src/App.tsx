@@ -17,6 +17,7 @@ import SubmitProject from "./pages/SubmitProject";
 import StudentSubmissions from "./pages/StudentSubmissions";
 import StudentLeaderboard from "./pages/StudentLeaderboard";
 import StudentPending from "./pages/StudentPending";
+import StudentRejected from "./pages/StudentRejected";
 import StudentGuard from "./components/StudentGuard";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminGuard from "./components/admin/AdminGuard";
@@ -66,6 +67,7 @@ const App = () => (
               <Route path="/etudiant/login" element={<StudentLogin />} />
               <Route path="/etudiant/register" element={<StudentRegister />} />
               <Route path="/etudiant/pending" element={<StudentPending />} />
+              <Route path="/etudiant/rejected" element={<StudentRejected />} />
               
               {/* Student protected routes */}
               <Route path="/etudiant/profil" element={<StudentGuard><Profile /></StudentGuard>} />
