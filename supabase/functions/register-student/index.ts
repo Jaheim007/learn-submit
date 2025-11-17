@@ -120,18 +120,21 @@ serve(async (req) => {
 
     console.log('Student role assigned to user:', authUser.user.id);
 
-    // Add class enrollment
-    const { error: enrollmentError } = await supabaseAdmin
-      .from('class_enrollments')
+    // Create student record with "pending" status (no class assignment yet)
+    const { error: studentError } = await supabaseAdmin
+      .from('students')
       .insert({
         user_id: authUser.user.id,
-        class_id: parseInt(class_id)
+        email,
+        full_name,
+        status: 'pending',  // Awaiting admin approval
+        is_active: false
       });
 
-    if (enrollmentError) {
-      console.error('Enrollment creation failed:', enrollmentError);
+    if (studentError) {
+      console.error('Student record creation failed:', studentError);
       return new Response(
-        JSON.stringify({ error: 'Failed to enroll in class' }),
+        JSON.stringify({ error: 'Failed to create student profile' }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -139,41 +142,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Student enrolled in class:', class_id);
-
-    // Create legacy student record for compatibility
-    const { error: legacyError } = await supabaseAdmin
-      .from('students')
-      .insert({
-        user_id: authUser.user.id,
-        email,
-        full_name,
-        primary_class_id: parseInt(class_id)
-      });
-
-    if (legacyError) {
-      console.error('Legacy student creation failed (non-critical):', legacyError);
-    }
-
-    // Create legacy enrollment record for compatibility
-    if (!legacyError) {
-      const { data: studentRecord } = await supabaseAdmin
-        .from('students')
-        .select('id')
-        .eq('user_id', authUser.user.id)
-        .single();
-
-      if (studentRecord) {
-        await supabaseAdmin
-          .from('enrollments')
-          .insert({
-            student_id: studentRecord.id,
-            class_id: parseInt(class_id)
-          });
-      }
-    }
-
-    console.log('Student registration completed successfully');
+    console.log('Student registration completed successfully (pending approval)');
 
     return new Response(
       JSON.stringify({ 
