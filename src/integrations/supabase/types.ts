@@ -1745,6 +1745,7 @@ export type Database = {
         Args: { access_reason: string; date_from?: string; date_to?: string }
         Returns: Json
       }
+      is_academy: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       is_admin_user: { Args: { uid?: string }; Returns: boolean }
       is_supervisor: { Args: never; Returns: boolean }

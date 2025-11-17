@@ -35,6 +35,13 @@ import AdminAcademyUsers from "./pages/admin/AdminAcademyUsers";
 import AcademyLogin from "./pages/academy/AcademyLogin";
 import AcademyLayout from "./pages/academy/AcademyLayout";
 import AcademyHome from "./pages/academy/AcademyHome";
+import AcademyStudents from "./pages/academy/AcademyStudents";
+import AcademyPendingStudents from "./pages/academy/AcademyPendingStudents";
+import AcademySubmissions from "./pages/academy/AcademySubmissions";
+import AcademyProjects from "./pages/academy/AcademyProjects";
+import AcademyCourses from "./pages/academy/AcademyCourses";
+import AcademyTeachers from "./pages/academy/AcademyTeachers";
+import AcademySettings from "./pages/academy/AcademySettings";
 import AcademyGuard from "./components/academy/AcademyGuard";
 import TeacherLogin from "./pages/teacher/TeacherLogin";
 import TeacherLayout from "./pages/teacher/TeacherLayout";
@@ -99,13 +106,13 @@ const App = () => (
               <Route path="/academy/login" element={<AcademyLogin />} />
               <Route path="/academy" element={<AcademyGuard><AcademyLayout /></AcademyGuard>}>
                 <Route index element={<AcademyHome />} />
-                <Route path="pending-students" element={<AdminPendingStudents />} />
-                <Route path="students" element={<AdminStudents />} />
-                <Route path="submissions" element={<AdminSubmissions />} />
-                <Route path="projects" element={<AdminProjects />} />
-                <Route path="courses" element={<AdminCourses />} />
-                <Route path="teachers" element={<AdminUsers />} />
-                <Route path="settings" element={<AdminSettings />} />
+                <Route path="pending-students" element={<AcademyPendingStudents />} />
+                <Route path="students" element={<AcademyStudents />} />
+                <Route path="submissions" element={<AcademySubmissions />} />
+                <Route path="projects" element={<AcademyProjects />} />
+                <Route path="courses" element={<AcademyCourses />} />
+                <Route path="teachers" element={<AcademyTeachers />} />
+                <Route path="settings" element={<AcademySettings />} />
               </Route>
               
               {/* Teacher Routes */}
