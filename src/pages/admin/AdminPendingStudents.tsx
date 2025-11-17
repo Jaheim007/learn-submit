@@ -80,6 +80,18 @@ export default function AdminPendingStudents() {
     }
 
     try {
+      // First, get the student to ensure we have the right ID
+      const { data: studentData, error: fetchError } = await supabase
+        .from('students')
+        .select('id, user_id')
+        .eq('id', selectedStudent.id)
+        .single();
+
+      if (fetchError || !studentData) {
+        console.error('Fetch error:', fetchError);
+        throw new Error('Impossible de trouver l\'étudiant');
+      }
+
       // Update student status to active
       const { error: updateError } = await supabase
         .from('students')
@@ -87,7 +99,7 @@ export default function AdminPendingStudents() {
           status: 'active',
           is_active: true 
         })
-        .eq('id', selectedStudent.id);
+        .eq('id', studentData.id);
 
       if (updateError) {
         console.error('Update error:', updateError);
@@ -96,7 +108,7 @@ export default function AdminPendingStudents() {
 
       // Enroll student in selected classes
       const enrollments = selectedClassIds.map(classId => ({
-        student_id: selectedStudent.id,
+        student_id: studentData.id,
         class_id: parseInt(classId)
       }));
 
@@ -104,23 +116,28 @@ export default function AdminPendingStudents() {
         .from('enrollments')
         .insert(enrollments);
 
-      if (enrollError) throw enrollError;
+      if (enrollError) {
+        console.error('Enrollment error:', enrollError);
+        throw enrollError;
+      }
 
       // Send push notification
       await sendNotificationToUsers(
-        [selectedStudent.user_id],
+        [studentData.user_id],
         'Compte approuvé ✅',
         `Bienvenue ${selectedStudent.full_name}! Votre compte a été approuvé. Vous pouvez maintenant accéder aux cours.`,
         { type: 'account_approved' }
       );
 
-      toast.success('Étudiant approuvé et inscrit aux classes sélectionnées');
+      toast.success(`${selectedStudent.full_name} a été approuvé et inscrit à ${selectedClassIds.length} classe(s)`);
       setApprovalDialogOpen(false);
       setSelectedStudent(null);
+      setSelectedClassIds([]);
       loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error approving student:', error);
-      toast.error("Erreur lors de l'approbation");
+      const errorMessage = error?.message || "Erreur lors de l'approbation";
+      toast.error(errorMessage);
     }
   };
 
