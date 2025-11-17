@@ -7,12 +7,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { UserCheck, Plus, RefreshCw, Copy } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Teacher {
   user_id: string;
   full_name: string;
   email: string;
   created_at: string;
+  assigned_classes: { id: number; code: string; title: string }[];
+}
+
+interface Class {
+  id: number;
+  code: string;
+  title: string;
 }
 
 export default function AcademyTeachers() {
@@ -23,6 +31,8 @@ export default function AcademyTeachers() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loadingTeachers, setLoadingTeachers] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [classes, setClasses] = useState<Class[]>([]);
+  const [selectedClasses, setSelectedClasses] = useState<number[]>([]);
 
   const generatePassword = () => {
     const length = 12;
@@ -54,7 +64,32 @@ export default function AcademyTeachers() {
 
   useEffect(() => {
     loadTeachers();
+    loadClasses();
   }, []);
+
+  const loadClasses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('classes')
+        .select('id, code, title')
+        .eq('is_active', true)
+        .order('code');
+
+      if (error) throw error;
+      setClasses(data || []);
+    } catch (error) {
+      console.error('Error loading classes:', error);
+      toast.error('Erreur lors du chargement des classes');
+    }
+  };
+
+  const handleClassToggle = (classId: number) => {
+    setSelectedClasses(prev =>
+      prev.includes(classId)
+        ? prev.filter(id => id !== classId)
+        : [...prev, classId]
+    );
+  };
 
   const loadTeachers = async () => {
     try {
@@ -77,11 +112,31 @@ export default function AcademyTeachers() {
         .in('id', userIds)
         .order('created_at', { ascending: false });
 
+      // Get class assignments for each teacher
+      const { data: classAssignments } = await supabase
+        .from('supervisor_class_assignments')
+        .select(`
+          supervisor_user_id,
+          class:classes(id, code, title)
+        `)
+        .in('supervisor_user_id', userIds);
+
+      // Group classes by teacher
+      const classesMap = new Map<string, any[]>();
+      classAssignments?.forEach(assignment => {
+        const classes = classesMap.get(assignment.supervisor_user_id) || [];
+        if (assignment.class) {
+          classes.push(assignment.class);
+        }
+        classesMap.set(assignment.supervisor_user_id, classes);
+      });
+
       setTeachers((profiles || []).map(p => ({
         user_id: p.id,
         full_name: p.full_name || '',
         email: p.email,
         created_at: p.created_at,
+        assigned_classes: classesMap.get(p.id) || [],
       })));
     } catch (error) {
       console.error('Error loading teachers:', error);
@@ -102,6 +157,7 @@ export default function AcademyTeachers() {
           password,
           full_name: fullName.trim(),
           role: 'teacher',
+          class_ids: selectedClasses,
         },
       });
 
@@ -126,6 +182,8 @@ export default function AcademyTeachers() {
       setEmail('');
       setPassword('');
       setFullName('');
+      setSelectedClasses([]);
+      setShowPassword(false);
       loadTeachers();
       
     } catch (error) {
@@ -232,6 +290,35 @@ export default function AcademyTeachers() {
                 </p>
               </div>
 
+              <div className="space-y-2">
+                <Label>Classes assignées (optionnel)</Label>
+                <div className="border rounded-lg p-4 max-h-48 overflow-y-auto space-y-2">
+                  {classes.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Aucune classe disponible</p>
+                  ) : (
+                    classes.map(cls => (
+                      <div key={cls.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`class-${cls.id}`}
+                          checked={selectedClasses.includes(cls.id)}
+                          onCheckedChange={() => handleClassToggle(cls.id)}
+                          disabled={loading}
+                        />
+                        <label
+                          htmlFor={`class-${cls.id}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        >
+                          {cls.code} - {cls.title}
+                        </label>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Sélectionnez les classes que ce formateur pourra gérer
+                </p>
+              </div>
+
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Création en cours...' : 'Créer le formateur'}
               </Button>
@@ -297,6 +384,7 @@ export default function AcademyTeachers() {
                 <TableRow>
                   <TableHead>Nom complet</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Classes assignées</TableHead>
                   <TableHead>Créé le</TableHead>
                 </TableRow>
               </TableHeader>
@@ -305,6 +393,19 @@ export default function AcademyTeachers() {
                   <TableRow key={teacher.user_id}>
                     <TableCell className="font-medium">{teacher.full_name}</TableCell>
                     <TableCell>{teacher.email}</TableCell>
+                    <TableCell>
+                      {teacher.assigned_classes.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {teacher.assigned_classes.map(cls => (
+                            <span key={cls.id} className="inline-flex items-center px-2 py-1 rounded-md bg-primary/10 text-primary text-xs">
+                              {cls.code}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">Aucune</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       {new Date(teacher.created_at).toLocaleDateString('fr-FR', {
                         year: 'numeric',

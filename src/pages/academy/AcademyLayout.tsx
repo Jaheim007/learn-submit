@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, BarChart3, Users, FileText, FolderOpen, UserCheck, Settings, BookOpen, Clock } from 'lucide-react';
+import { LogOut, BarChart3, Users, FileText, FolderOpen, UserCheck, Settings, BookOpen, Clock, Folder } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import nysLogo from '@/assets/nys-logo.png';
 
@@ -22,6 +22,7 @@ export default function AcademyLayout() {
     { path: '/academy/submissions', label: 'Soumissions', icon: FileText },
     { path: '/academy/projects', label: 'Projets', icon: FolderOpen },
     { path: '/academy/courses', label: 'Cours', icon: BookOpen },
+    { path: '/academy/classes', label: 'Classes', icon: Folder },
     { path: '/academy/teachers', label: 'Formateurs', icon: UserCheck },
     { path: '/academy/settings', label: 'Paramètres', icon: Settings },
   ];

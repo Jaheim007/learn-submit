@@ -42,6 +42,7 @@ import AcademyProjects from "./pages/academy/AcademyProjects";
 import AcademyCourses from "./pages/academy/AcademyCourses";
 import AcademyTeachers from "./pages/academy/AcademyTeachers";
 import AcademySettings from "./pages/academy/AcademySettings";
+import AcademyClasses from './pages/academy/AcademyClasses';
 import AcademyGuard from "./components/academy/AcademyGuard";
 import TeacherLogin from "./pages/teacher/TeacherLogin";
 import TeacherLayout from "./pages/teacher/TeacherLayout";
@@ -56,6 +57,8 @@ import TestDashboard from "./pages/TestDashboard";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 import Forbidden from "./pages/Forbidden";
+
+
 
 const queryClient = new QueryClient();
 
@@ -110,9 +113,10 @@ const App = () => (
                 <Route path="students" element={<AcademyStudents />} />
                 <Route path="submissions" element={<AcademySubmissions />} />
                 <Route path="projects" element={<AcademyProjects />} />
-                <Route path="courses" element={<AcademyCourses />} />
-                <Route path="teachers" element={<AcademyTeachers />} />
-                <Route path="settings" element={<AcademySettings />} />
+              <Route path="courses" element={<AcademyCourses />} />
+              <Route path="classes" element={<AcademyClasses />} />
+              <Route path="teachers" element={<AcademyTeachers />} />
+              <Route path="settings" element={<AcademySettings />} />
               </Route>
               
               {/* Teacher Routes */}

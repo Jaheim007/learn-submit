@@ -71,16 +71,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check if user is admin
-    const { data: adminRole, error: roleError } = await supabaseAdmin
+    // Check if user is admin or academy
+    const { data: userRoles, error: roleError } = await supabaseAdmin
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
-      .eq('role', 'admin')
-      .maybeSingle();
+      .in('role', ['admin', 'academy']);
 
-    if (roleError || !adminRole) {
-      return new Response(JSON.stringify({ error: 'Unauthorized - admin access required' }), {
+    if (roleError || !userRoles || userRoles.length === 0) {
+      return new Response(JSON.stringify({ error: 'Unauthorized - admin or academy access required' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
