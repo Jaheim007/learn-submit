@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Clock, LogOut, RefreshCw } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import nysLogo from '@/assets/nys-logo.png';
+import { toast } from 'sonner';
 
 export default function StudentPending() {
   const { user } = useAuth();
@@ -25,10 +26,20 @@ export default function StudentPending() {
         .single();
 
       if (data?.status === 'active') {
-        navigate('/etudiant/projets', { replace: true });
+        toast.success('🎉 Votre compte est prêt!', {
+          description: 'Vous pouvez maintenant accéder à vos cours.'
+        });
+        setTimeout(() => {
+          navigate('/etudiant/projets', { replace: true });
+        }, 1500);
+      } else {
+        toast.warning('⏳ Votre compte est toujours en attente', {
+          description: "L'administration n'a pas encore approuvé votre compte. Vous serez notifié une fois activé."
+        });
       }
     } catch (error) {
       console.error('Error checking status:', error);
+      toast.error('Erreur lors de la vérification du statut');
     } finally {
       setChecking(false);
     }
