@@ -153,6 +153,18 @@ export default function AdminPendingStudents() {
     if (!selectedStudent) return;
 
     try {
+      // First, get the student to ensure we have the right user_id
+      const { data: studentData, error: fetchError } = await supabase
+        .from('students')
+        .select('id, user_id')
+        .eq('id', selectedStudent.id)
+        .single();
+
+      if (fetchError || !studentData) {
+        console.error('Fetch error:', fetchError);
+        throw new Error('Impossible de trouver l\'étudiant');
+      }
+
       // Update student status to rejected instead of deleting
       const { error: updateError } = await supabase
         .from('students')
@@ -160,25 +172,34 @@ export default function AdminPendingStudents() {
           status: 'rejected',
           is_active: false
         })
-        .eq('id', selectedStudent.id);
+        .eq('id', studentData.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Update error:', updateError);
+        throw updateError;
+      }
 
-      // Send notification to student
-      await sendNotificationToUsers(
-        [selectedStudent.user_id],
-        'Compte non approuvé',
-        `Votre demande d'inscription n'a pas été approuvée. Pour plus d'informations, contactez l'administration.`,
-        { type: 'account_rejected' }
-      );
+      // Send notification to student (don't fail if this errors)
+      try {
+        await sendNotificationToUsers(
+          [studentData.user_id],
+          'Compte non approuvé',
+          `Votre demande d'inscription n'a pas été approuvée. Pour plus d'informations, contactez l'administration.`,
+          { type: 'account_rejected' }
+        );
+      } catch (notifError) {
+        console.warn('Failed to send notification:', notifError);
+        // Don't throw - rejection succeeded even if notification failed
+      }
 
-      toast.success(`${selectedStudent.full_name} a été rejeté et notifié`);
+      toast.success(`${selectedStudent.full_name} a été rejeté`);
       setRejectDialogOpen(false);
       setSelectedStudent(null);
       loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error rejecting student:', error);
-      toast.error('Erreur lors du rejet');
+      const errorMessage = error?.message || "Erreur lors du rejet";
+      toast.error(errorMessage);
     }
   };
 
