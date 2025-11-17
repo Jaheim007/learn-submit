@@ -75,15 +75,23 @@ export default function AdminAcademyUsers() {
         },
       });
 
+      // Handle edge function errors
       if (error) {
         console.error('Error creating academy user:', error);
         toast.error(error.message || 'Erreur lors de la création du compte académique');
         return;
       }
 
+      // Handle application-level errors from the edge function
       if (data?.error) {
         console.error('Server error:', data.error);
         toast.error(data.error);
+        return;
+      }
+
+      // Check for success response
+      if (!data?.success) {
+        toast.error('Erreur lors de la création du compte académique');
         return;
       }
 

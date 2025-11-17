@@ -62,8 +62,15 @@ serve(async (req) => {
 
     if (createError) {
       console.error('Error creating user:', createError);
+      
+      // Handle specific error cases with user-friendly messages
+      let errorMessage = createError.message;
+      if (createError.message.includes('already been registered')) {
+        errorMessage = 'Un utilisateur avec cette adresse e-mail existe déjà';
+      }
+      
       return new Response(
-        JSON.stringify({ error: createError.message }),
+        JSON.stringify({ error: errorMessage }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
