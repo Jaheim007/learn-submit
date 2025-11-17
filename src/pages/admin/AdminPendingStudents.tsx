@@ -83,10 +83,16 @@ export default function AdminPendingStudents() {
       // Update student status to active
       const { error: updateError } = await supabase
         .from('students')
-        .update({ status: 'active' })
+        .update({ 
+          status: 'active',
+          is_active: true 
+        })
         .eq('id', selectedStudent.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Update error:', updateError);
+        throw updateError;
+      }
 
       // Enroll student in selected classes
       const enrollments = selectedClassIds.map(classId => ({
