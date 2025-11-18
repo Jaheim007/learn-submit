@@ -19,6 +19,7 @@ const OrganizationOnboarding = () => {
   const [formData, setFormData] = useState({
     organizationName: '',
     industry: '',
+    otherIndustry: '',
     description: '',
     staffSize: '',
     website: '',
@@ -30,16 +31,31 @@ const OrganizationOnboarding = () => {
   const totalSteps = 4;
 
   const industries = [
-    'Education & Training',
-    'Technology & IT',
-    'Healthcare',
-    'Finance & Banking',
-    'Manufacturing',
-    'Retail & E-commerce',
+    'Agriculture & Farming',
+    'Automotive',
+    'Banking & Financial Services',
+    'Biotechnology',
+    'Construction',
     'Consulting',
-    'Marketing & Advertising',
-    'Real Estate',
+    'Education & Training',
+    'Energy & Utilities',
+    'Entertainment & Media',
+    'Food & Beverage',
+    'Government & Public Sector',
+    'Healthcare',
     'Hospitality & Tourism',
+    'Insurance',
+    'Legal Services',
+    'Logistics & Transportation',
+    'Manufacturing',
+    'Marketing & Advertising',
+    'Non-Profit & NGO',
+    'Pharmaceuticals',
+    'Real Estate',
+    'Retail & E-commerce',
+    'Technology & IT',
+    'Telecommunications',
+    'Trade & Commerce',
     'Other'
   ];
 
@@ -53,17 +69,32 @@ const OrganizationOnboarding = () => {
   ];
 
   const countries = [
-    'United States',
-    'Canada',
-    'United Kingdom',
-    'France',
-    'Germany',
-    'Australia',
-    'Japan',
-    'China',
-    'India',
-    'Brazil',
-    'Other'
+    'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Argentina', 'Armenia', 'Australia', 
+    'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 
+    'Belize', 'Benin', 'Bhutan', 'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 
+    'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 
+    'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo', 
+    'Costa Rica', 'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 
+    'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 
+    'Estonia', 'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon', 'Gambia', 'Georgia', 'Germany', 
+    'Ghana', 'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 
+    'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 
+    'Italy', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Korea (North)', 
+    'Korea (South)', 'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 
+    'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Madagascar', 'Malawi', 'Malaysia', 
+    'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius', 'Mexico', 
+    'Micronesia', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar', 
+    'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 
+    'Norway', 'Oman', 'Pakistan', 'Palau', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 
+    'Philippines', 'Poland', 'Portugal', 'Qatar', 'Romania', 'Russia', 'Rwanda', 'Saint Kitts and Nevis', 
+    'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 
+    'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia', 
+    'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Sudan', 'Spain', 'Sri Lanka', 
+    'Sudan', 'Suriname', 'Sweden', 'Switzerland', 'Syria', 'Taiwan', 'Tajikistan', 'Tanzania', 
+    'Thailand', 'Timor-Leste', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 
+    'Turkmenistan', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 
+    'United States', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Vatican City', 'Venezuela', 'Vietnam', 
+    'Yemen', 'Zambia', 'Zimbabwe'
   ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -131,7 +162,7 @@ const OrganizationOnboarding = () => {
         .insert({
           name: formData.organizationName,
           slug: slug,
-          industry: formData.industry,
+          industry: formData.industry === 'Other' ? formData.otherIndustry : formData.industry,
           description: formData.description,
           staff_size: formData.staffSize,
           website: formData.website,
@@ -196,6 +227,9 @@ const OrganizationOnboarding = () => {
       case 1:
         return formData.organizationName.trim().length > 0;
       case 2:
+        if (formData.industry === 'Other') {
+          return formData.industry.length > 0 && formData.otherIndustry.trim().length > 0;
+        }
         return formData.industry.length > 0;
       case 3:
         return formData.staffSize.length > 0;
@@ -246,7 +280,7 @@ const OrganizationOnboarding = () => {
                   <SelectTrigger className="h-12">
                     <SelectValue placeholder="Select your industry" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[300px]">
                     {industries.map((industry) => (
                       <SelectItem key={industry} value={industry}>
                         {industry}
@@ -255,13 +289,27 @@ const OrganizationOnboarding = () => {
                   </SelectContent>
                 </Select>
               </div>
+              {formData.industry === 'Other' && (
+                <div className="space-y-2">
+                  <Label htmlFor="otherIndustry">Specify Industry *</Label>
+                  <Input
+                    id="otherIndustry"
+                    name="otherIndustry"
+                    value={formData.otherIndustry}
+                    onChange={handleChange}
+                    placeholder="Please specify your industry"
+                    className="h-12"
+                    required
+                  />
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="country">Country</Label>
                 <Select value={formData.country} onValueChange={(value) => handleSelectChange('country', value)}>
                   <SelectTrigger className="h-12">
                     <SelectValue placeholder="Select your country" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[300px]">
                     {countries.map((country) => (
                       <SelectItem key={country} value={country}>
                         {country}
