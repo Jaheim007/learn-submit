@@ -14,6 +14,7 @@ import OrganizationSignin from "./pages/OrganizationSignin";
 import OrganizationOnboarding from "./pages/OrganizationOnboarding";
 import OrganizationDashboard from "./pages/organization/OrganizationDashboard";
 import OrganizationSettings from "./pages/organization/OrganizationSettings";
+import AcceptInvitation from "./pages/organization/AcceptInvitation";
 import Auth from "./pages/Auth";
 import AuthRedirect from "./pages/AuthRedirect";
 import StudentLogin from "./pages/StudentLogin";
@@ -85,6 +86,7 @@ const App = () => (
         <Route path="/organization/signin" element={<OrganizationSignin />} />
         <Route path="/auth-redirect" element={<AuthRedirect />} />
         <Route path="/onboarding" element={<OrganizationOnboarding />} />
+        <Route path="/accept-invitation" element={<AcceptInvitation />} />
         <Route path="/organization/dashboard" element={<OrganizationDashboard />} />
         <Route path="/organization/settings" element={<OrganizationSettings />} />
               

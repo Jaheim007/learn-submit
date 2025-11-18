@@ -13,7 +13,8 @@ import {
   BarChart3,
   GraduationCap,
   BookOpen,
-  UserCheck
+  UserCheck,
+  LogOut
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -148,7 +149,7 @@ export default function OrganizationDashboard() {
               <h2 className="text-xl font-bold text-foreground">{userName}</h2>
             </div>
 
-            <nav className="space-y-2">
+            <nav className="space-y-2 flex-1">
               <p className="text-xs font-medium text-muted-foreground mb-3">MAIN MENU</p>
               {navItems.map((item) => (
                 <button
@@ -165,6 +166,20 @@ export default function OrganizationDashboard() {
                 </button>
               ))}
             </nav>
+
+            {/* Logout Button */}
+            <div className="mt-auto pt-4 border-t border-border/50">
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  navigate('/organization/signin');
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all"
+              >
+                <LogOut className="h-5 w-5" />
+                <span className="font-medium">Logout</span>
+              </button>
+            </div>
           </div>
         </aside>
 

@@ -30,8 +30,8 @@ const handler = async (req: Request): Promise<Response> => {
     // Get auth token from request
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      // Redirect to sign-in page with token
-      const redirectUrl = `${Deno.env.get('SUPABASE_URL')}/organization/signin?invitation_token=${token}`;
+      // Redirect to invitation acceptance page with token
+      const redirectUrl = `${Deno.env.get('SUPABASE_URL')?.replace('/functions/v1/accept-organization-invitation', '')}/accept-invitation?token=${token}`;
       return Response.redirect(redirectUrl, 302);
     }
 
