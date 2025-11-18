@@ -9,6 +9,7 @@ import { ConditionalClassSelectionProvider } from "@/components/ConditionalClass
 
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
+import OrganizationSignup from "./pages/OrganizationSignup";
 import Auth from "./pages/Auth";
 import StudentLogin from "./pages/StudentLogin";
 import StudentRegister from "./pages/StudentRegister";
@@ -72,8 +73,9 @@ const App = () => (
             <Toaster />
             <Sonner />
         <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/old-home" element={<Index />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/old-home" element={<Index />} />
+        <Route path="/signup" element={<OrganizationSignup />} />
               
               {/* Student auth routes */}
               <Route path="/etudiant/login" element={<StudentLogin />} />
