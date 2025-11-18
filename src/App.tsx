@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import OrganizationSignup from "./pages/OrganizationSignup";
 import OrganizationSignin from "./pages/OrganizationSignin";
+import OrganizationOnboarding from "./pages/OrganizationOnboarding";
 import Auth from "./pages/Auth";
 import StudentLogin from "./pages/StudentLogin";
 import StudentRegister from "./pages/StudentRegister";
@@ -78,6 +79,7 @@ const App = () => (
         <Route path="/old-home" element={<Index />} />
         <Route path="/signup" element={<OrganizationSignup />} />
         <Route path="/signin" element={<OrganizationSignin />} />
+        <Route path="/onboarding" element={<OrganizationOnboarding />} />
               
               {/* Student auth routes */}
               <Route path="/etudiant/login" element={<StudentLogin />} />
