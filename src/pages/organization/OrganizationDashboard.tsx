@@ -1,0 +1,332 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { 
+  LayoutDashboard, 
+  Users, 
+  FileText, 
+  Settings, 
+  Bell, 
+  Search,
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  GraduationCap,
+  BookOpen,
+  UserCheck
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
+
+interface Organization {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  industry: string | null;
+}
+
+interface StatsData {
+  totalStudents: number;
+  activeStudents: number;
+  totalCourses: number;
+  completionRate: number;
+  studentsChange: number;
+  coursesChange: number;
+}
+
+const navItems = [
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/organization/dashboard' },
+  { icon: Users, label: 'Students', path: '/organization/students' },
+  { icon: BookOpen, label: 'Courses', path: '/organization/courses' },
+  { icon: FileText, label: 'Submissions', path: '/organization/submissions' },
+  { icon: BarChart3, label: 'Analytics', path: '/organization/analytics' },
+  { icon: Settings, label: 'Settings', path: '/organization/settings' },
+];
+
+export default function OrganizationDashboard() {
+  const navigate = useNavigate();
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [userName, setUserName] = useState('Organization');
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<StatsData>({
+    totalStudents: 0,
+    activeStudents: 0,
+    totalCourses: 0,
+    completionRate: 0,
+    studentsChange: 0,
+    coursesChange: 0,
+  });
+
+  useEffect(() => {
+    loadOrganizationData();
+  }, []);
+
+  const loadOrganizationData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate('/signin');
+        return;
+      }
+
+      // Get organization membership
+      const { data: membership } = await supabase
+        .from('submito_organization_users')
+        .select('organization_id, full_name')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!membership) {
+        navigate('/onboarding');
+        return;
+      }
+
+      setUserName(membership.full_name || 'User');
+
+      // Get organization details
+      const { data: org } = await supabase
+        .from('submito_organizations')
+        .select('*')
+        .eq('id', membership.organization_id)
+        .single();
+
+      if (org) {
+        setOrganization(org);
+      }
+
+      // Mock stats for now - will be replaced with real data
+      setStats({
+        totalStudents: 247,
+        activeStudents: 189,
+        totalCourses: 12,
+        completionRate: 76.5,
+        studentsChange: 12.5,
+        coursesChange: 8.2,
+      });
+
+    } catch (error) {
+      console.error('Error loading organization:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <AnimatedBackground />
+      
+      <div className="flex relative z-10">
+        {/* Sidebar */}
+        <aside className="w-64 min-h-screen bg-card/40 backdrop-blur-xl border-r border-border/50">
+          <div className="p-6">
+            <div className="flex items-center gap-3 mb-8">
+              {organization?.logo_url ? (
+                <img src={organization.logo_url} alt={organization.name} className="h-8 w-8 rounded-lg" />
+              ) : (
+                <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                  <GraduationCap className="h-5 w-5 text-primary" />
+                </div>
+              )}
+              <span className="font-bold text-xl bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                Submito
+              </span>
+            </div>
+
+            <div className="mb-8">
+              <p className="text-sm text-muted-foreground mb-1">Welcome,</p>
+              <h2 className="text-xl font-bold text-foreground">{userName}</h2>
+            </div>
+
+            <nav className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground mb-3">MAIN MENU</p>
+              {navItems.map((item) => (
+                <button
+                  key={item.path}
+                  onClick={() => navigate(item.path)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                    item.path === '/organization/dashboard'
+                      ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                      : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                  }`}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1">
+          {/* Top Bar */}
+          <header className="h-20 border-b border-border/50 bg-card/40 backdrop-blur-xl flex items-center justify-between px-8">
+            <div className="flex-1 max-w-xl">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search anything..."
+                  className="pl-10 bg-background/50 border-border/50"
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full" />
+              </Button>
+              
+              <Button variant="ghost" size="icon">
+                <Settings className="h-5 w-5" />
+              </Button>
+
+              <Avatar className="h-10 w-10 border-2 border-primary/20">
+                <AvatarImage src={organization?.logo_url || undefined} />
+                <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                  {userName.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+          </header>
+
+          {/* Dashboard Content */}
+          <div className="p-8 space-y-8">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="bg-card/40 backdrop-blur-xl border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Total Students
+                  </CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-foreground">{stats.totalStudents}</div>
+                  <div className="flex items-center gap-1 mt-2">
+                    <TrendingUp className="h-3 w-3 text-success" />
+                    <span className="text-xs text-success font-medium">+{stats.studentsChange}%</span>
+                    <span className="text-xs text-muted-foreground">from last month</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/40 backdrop-blur-xl border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Active Students
+                  </CardTitle>
+                  <UserCheck className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-foreground">{stats.activeStudents}</div>
+                  <div className="flex items-center gap-1 mt-2">
+                    <span className="text-xs text-muted-foreground">
+                      {((stats.activeStudents / stats.totalStudents) * 100).toFixed(1)}% engagement
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/40 backdrop-blur-xl border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Total Courses
+                  </CardTitle>
+                  <BookOpen className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-foreground">{stats.totalCourses}</div>
+                  <div className="flex items-center gap-1 mt-2">
+                    <TrendingUp className="h-3 w-3 text-success" />
+                    <span className="text-xs text-success font-medium">+{stats.coursesChange}%</span>
+                    <span className="text-xs text-muted-foreground">from last month</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/40 backdrop-blur-xl border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Completion Rate
+                  </CardTitle>
+                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-foreground">{stats.completionRate}%</div>
+                  <div className="flex items-center gap-1 mt-2">
+                    <span className="text-xs text-muted-foreground">
+                      Average across all courses
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Charts and Additional Content */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="lg:col-span-2 bg-card/40 backdrop-blur-xl border-border/50">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Student Performance</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-center justify-center text-muted-foreground">
+                    <BarChart3 className="h-12 w-12 opacity-20" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/40 backdrop-blur-xl border-border/50">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Recent Activity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Users className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">15 new students enrolled</p>
+                        <p className="text-xs text-muted-foreground">2 hours ago</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
+                        <FileText className="h-4 w-4 text-secondary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">48 submissions received</p>
+                        <p className="text-xs text-muted-foreground">5 hours ago</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+                        <BookOpen className="h-4 w-4 text-accent" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">New course published</p>
+                        <p className="text-xs text-muted-foreground">1 day ago</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
