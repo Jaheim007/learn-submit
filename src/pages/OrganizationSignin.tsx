@@ -29,7 +29,7 @@ const OrganizationSignin = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`
+          redirectTo: `${window.location.origin}/onboarding`
         }
       });
       
@@ -48,7 +48,7 @@ const OrganizationSignin = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: `${window.location.origin}/`
+          redirectTo: `${window.location.origin}/onboarding`
         }
       });
       

@@ -1450,34 +1450,55 @@ export type Database = {
       }
       submito_organizations: {
         Row: {
+          banner_url: string | null
+          country: string | null
           created_at: string | null
+          description: string | null
           id: string
+          industry: string | null
           is_active: boolean | null
           logo_url: string | null
           name: string
+          onboarding_completed: boolean | null
           slug: string
+          staff_size: string | null
           subdomain: string | null
           updated_at: string | null
+          website: string | null
         }
         Insert: {
+          banner_url?: string | null
+          country?: string | null
           created_at?: string | null
+          description?: string | null
           id?: string
+          industry?: string | null
           is_active?: boolean | null
           logo_url?: string | null
           name: string
+          onboarding_completed?: boolean | null
           slug: string
+          staff_size?: string | null
           subdomain?: string | null
           updated_at?: string | null
+          website?: string | null
         }
         Update: {
+          banner_url?: string | null
+          country?: string | null
           created_at?: string | null
+          description?: string | null
           id?: string
+          industry?: string | null
           is_active?: boolean | null
           logo_url?: string | null
           name?: string
+          onboarding_completed?: boolean | null
           slug?: string
+          staff_size?: string | null
           subdomain?: string | null
           updated_at?: string | null
+          website?: string | null
         }
         Relationships: []
       }
