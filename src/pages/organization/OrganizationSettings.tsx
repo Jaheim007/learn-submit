@@ -20,6 +20,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { MembersSection } from '@/components/organization/MembersSection';
 import { toast } from 'sonner';
 
 interface Organization {
@@ -35,6 +36,7 @@ interface Organization {
 
 const settingsSections = [
   { icon: User, label: 'Profile', value: 'profile' },
+  { icon: User, label: 'Members', value: 'members' },
   { icon: SettingsIcon, label: 'Settings', value: 'settings' },
   { icon: CreditCard, label: 'Payments', value: 'payments' },
 ];
@@ -275,6 +277,10 @@ export default function OrganizationSettings() {
               <h1 className="text-4xl font-bold text-foreground mb-2">Settings</h1>
               <p className="text-muted-foreground">Manage your organization settings and preferences</p>
             </div>
+
+            {activeSection === 'members' && organization && (
+              <MembersSection organizationId={organization.id} />
+            )}
 
             {activeSection === 'profile' && (
               <>
