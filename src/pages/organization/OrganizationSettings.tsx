@@ -196,7 +196,10 @@ export default function OrganizationSettings() {
         {/* Sidebar */}
         <aside className="w-64 min-h-screen bg-card/40 backdrop-blur-xl border-r border-border/50">
           <div className="p-6">
-            <div className="flex items-center gap-3 mb-8">
+            <button 
+              onClick={() => navigate('/organization/dashboard')}
+              className="flex items-center gap-3 mb-8 hover:opacity-80 transition-opacity w-full"
+            >
               {organization?.logo_url ? (
                 <img src={organization.logo_url} alt={organization.name} className="w-10 h-10 rounded-lg" />
               ) : (
@@ -207,7 +210,7 @@ export default function OrganizationSettings() {
                 </div>
               )}
               <h1 className="text-xl font-bold text-foreground">{organization?.name || 'Submito'}</h1>
-            </div>
+            </button>
 
             <nav className="space-y-8">
               <div>
