@@ -29,10 +29,9 @@ const OrganizationSignin = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/onboarding`
+          redirectTo: `${window.location.origin}/auth-redirect`
         }
       });
-      
       if (error) throw error;
     } catch (error: any) {
       toast({
@@ -48,10 +47,9 @@ const OrganizationSignin = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: `${window.location.origin}/onboarding`
+          redirectTo: `${window.location.origin}/auth-redirect`
         }
       });
-      
       if (error) throw error;
     } catch (error: any) {
       toast({
@@ -80,7 +78,7 @@ const OrganizationSignin = () => {
           description: "You have signed in successfully."
         });
 
-        navigate('/');
+        navigate('/auth-redirect');
       }
     } catch (error: any) {
       console.error('Signin error:', error);
