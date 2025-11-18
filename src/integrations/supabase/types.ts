@@ -1846,6 +1846,10 @@ export type Database = {
       is_academy: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       is_admin_user: { Args: { uid?: string }; Returns: boolean }
+      is_organization_owner: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_supervisor: { Args: never; Returns: boolean }
       log_sensitive_data_access: {
         Args: {

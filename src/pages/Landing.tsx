@@ -82,7 +82,7 @@ const Landing = () => {
           <div className="flex items-center gap-4">
             <Button 
               variant="ghost" 
-              onClick={() => navigate('/etudiant/login')}
+              onClick={() => navigate('/organization/signin')}
               className="hover:text-cyan-400 transition-colors text-base"
             >
               Sign In
