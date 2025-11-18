@@ -102,24 +102,53 @@ export function MembersSection({ organizationId }: MembersSectionProps) {
 
   const handleResendInvitation = async (invitationId: string, email: string) => {
     try {
+      const invitation = invitations.find(inv => inv.id === invitationId);
+      if (!invitation) {
+        toast.error('Invitation not found');
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('You must be logged in');
+        return;
+      }
+
       toast.info(`Resending invitation to ${email}...`);
-      // TODO: Implement resend functionality via edge function
-      toast.success('Invitation resent');
+
+      const { error } = await supabase.functions.invoke('send-organization-invitation', {
+        body: {
+          email: invitation.email,
+          role: invitation.role,
+          organization_id: organizationId,
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success('Invitation resent successfully');
+      loadData();
     } catch (error: any) {
+      console.error('Error resending invitation:', error);
       toast.error('Failed to resend invitation');
     }
   };
 
   const handleCancelInvitation = async (invitationId: string) => {
+    if (!confirm('Are you sure you want to cancel this invitation?')) {
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('submito_organization_invitations')
         .delete()
-        .eq('id', invitationId);
+        .eq('id', invitationId)
+        .eq('organization_id', organizationId);
 
       if (error) throw error;
       
-      toast.success('Invitation cancelled');
+      toast.success('Invitation cancelled successfully');
       loadData();
     } catch (error: any) {
       console.error('Error cancelling invitation:', error);
