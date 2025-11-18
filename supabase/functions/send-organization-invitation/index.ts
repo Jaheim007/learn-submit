@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -110,18 +111,59 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Send invitation email via Supabase Auth
+    // Send invitation email via Resend
     const invitationUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/accept-organization-invitation?token=${invitation.invitation_token}`;
     
-    // Note: This requires custom email templates to be configured in Supabase Auth settings
-    // The email template should use these variables:
-    // - {{ .Data.org_name }}
-    // - {{ .Data.invited_by }}
-    // - {{ .Data.invitation_url }}
-    // - {{ .Data.role }}
+    const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+    
+    try {
+      const emailResponse = await resend.emails.send({
+        from: 'Submito <onboarding@resend.dev>',
+        to: [email.toLowerCase()],
+        subject: "You've been invited to join an organization on Submito 🎉",
+        html: `
+          <h2>You've been invited to join an organization on Submito 🎉</h2>
+          
+          <p>Hello,</p>
+          
+          <p>You have been invited to join the <strong>${organization.name}</strong> organization on <strong>Submito</strong>, our collaborative workspace for managing classes, teachers, students, and school operations.</p>
+          
+          <p>This invite was sent by <strong>${invitedBy}</strong>. To access your dashboard and activate your account, simply click the button below:</p>
+          
+          <p>
+            <a href="${invitationUrl}" style="
+              display:inline-block;
+              padding:12px 20px;
+              background:#4F46E5;
+              color:white;
+              text-decoration:none;
+              border-radius:6px;
+              font-weight:bold;
+            ">
+              Accept Invitation
+            </a>
+          </p>
+          
+          <p>If the button does not work, you can also copy and paste this link into your browser:</p>
+          
+          <p>${invitationUrl}</p>
+          
+          <hr>
+          
+          <p>
+          Submito helps organizations manage staff, teachers, and students in one simple platform.  
+          If you received this message by mistake, you can simply ignore it.
+          </p>
+          
+          <p>— The Submito Team</p>
+        `,
+      });
 
-    // For now, we'll just return success - actual email sending will be configured in Supabase Auth
-    // Or you can integrate with Resend/SendGrid here
+      console.log('Email sent successfully:', emailResponse);
+    } catch (emailError: any) {
+      console.error('Error sending email:', emailError);
+      // Continue even if email fails - invitation is still created
+    }
     
     console.log('Invitation created successfully:', invitation.id);
     console.log('Invitation URL:', invitationUrl);
@@ -129,8 +171,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(JSON.stringify({ 
       success: true, 
       invitation_id: invitation.id,
-      invitation_url: invitationUrl,
-      message: 'Invitation created. Email will be sent via Supabase Auth email templates.'
+      message: 'Invitation sent successfully via email.'
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
