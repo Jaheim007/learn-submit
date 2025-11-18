@@ -1453,6 +1453,7 @@ export type Database = {
           banner_url: string | null
           country: string | null
           created_at: string | null
+          created_by: string | null
           description: string | null
           id: string
           industry: string | null
@@ -1470,6 +1471,7 @@ export type Database = {
           banner_url?: string | null
           country?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           id?: string
           industry?: string | null
@@ -1487,6 +1489,7 @@ export type Database = {
           banner_url?: string | null
           country?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           id?: string
           industry?: string | null
