@@ -70,6 +70,25 @@ const OrganizationOnboarding = () => {
     }));
   }, [formData, currentStep]);
 
+  // Early check: if user already has a completed organization, skip onboarding
+  useEffect(() => {
+    const checkExistingOrg = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
+      if (!user) return;
+      const { data: memberships } = await supabase
+        .from('submito_organization_users')
+        .select('organization_id, submito_organizations ( onboarding_completed )')
+        .eq('user_id', user.id)
+        .limit(1);
+      const onboardingCompleted = memberships?.[0]?.submito_organizations?.onboarding_completed;
+      if (onboardingCompleted) {
+        navigate('/organization/dashboard', { replace: true });
+      }
+    };
+    checkExistingOrg();
+  }, [navigate]);
+
   const totalSteps = 4;
 
   const industries = [

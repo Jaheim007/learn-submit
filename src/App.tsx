@@ -14,6 +14,7 @@ import OrganizationSignin from "./pages/OrganizationSignin";
 import OrganizationOnboarding from "./pages/OrganizationOnboarding";
 import OrganizationDashboard from "./pages/organization/OrganizationDashboard";
 import Auth from "./pages/Auth";
+import AuthRedirect from "./pages/AuthRedirect";
 import StudentLogin from "./pages/StudentLogin";
 import StudentRegister from "./pages/StudentRegister";
 import Profile from "./pages/Profile";
@@ -81,6 +82,7 @@ const App = () => (
         <Route path="/signup" element={<OrganizationSignup />} />
         <Route path="/signin" element={<OrganizationSignin />} />
         <Route path="/organization/signin" element={<OrganizationSignin />} />
+        <Route path="/auth-redirect" element={<AuthRedirect />} />
         <Route path="/onboarding" element={<OrganizationOnboarding />} />
         <Route path="/organization/dashboard" element={<OrganizationDashboard />} />
               
