@@ -327,7 +327,7 @@ const OrganizationSignup = () => {
           <p className="text-center text-sm text-muted-foreground">
             Already have an account?{' '}
             <button
-              onClick={() => navigate('/signin')}
+              onClick={() => navigate('/organization/signin')}
               className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors"
             >
               Sign In

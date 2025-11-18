@@ -79,6 +79,7 @@ const App = () => (
         <Route path="/old-home" element={<Index />} />
         <Route path="/signup" element={<OrganizationSignup />} />
         <Route path="/signin" element={<OrganizationSignin />} />
+        <Route path="/organization/signin" element={<OrganizationSignin />} />
         <Route path="/onboarding" element={<OrganizationOnboarding />} />
               
               {/* Student auth routes */}
