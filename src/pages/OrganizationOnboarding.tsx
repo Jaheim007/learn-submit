@@ -199,7 +199,7 @@ const OrganizationOnboarding = () => {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '');
 
-      // Create the organization
+      // Create the organization (trigger will auto-add user as owner)
       const { data: org, error: orgError } = await supabase
         .from('submito_organizations')
         .insert({
@@ -219,20 +219,6 @@ const OrganizationOnboarding = () => {
         .single();
 
       if (orgError) throw orgError;
-
-      // Add user as organization owner
-      const { error: userError } = await supabase
-        .from('submito_organization_users')
-        .insert({
-          user_id: user.id,
-          organization_id: org.id,
-          email: user.email || '',
-          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-          role: 'owner',
-          is_owner: true
-        });
-
-      if (userError) throw userError;
 
       // Clear the draft from localStorage
       localStorage.removeItem(FORM_STORAGE_KEY);
