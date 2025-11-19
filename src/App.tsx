@@ -91,12 +91,7 @@ const App = () => (
         <Route path="/auth-redirect" element={<AuthRedirect />} />
         <Route path="/onboarding" element={<OrganizationOnboarding />} />
         <Route path="/accept-invitation" element={<AcceptInvitation />} />
-        <Route path="/organization/dashboard" element={<OrganizationDashboard />} />
-        <Route path="/organization/students" element={<OrganizationStudents />} />
-        <Route path="/organization/courses" element={<OrganizationCourses />} />
-        <Route path="/organization/submissions" element={<OrganizationSubmissions />} />
-        <Route path="/organization/analytics" element={<OrganizationAnalytics />} />
-        <Route path="/organization/settings" element={<OrganizationSettings />} />
+          <Route path="/organization/dashboard" element={<OrganizationDashboard />} />
               
               {/* Student auth routes */}
               <Route path="/etudiant/login" element={<StudentLogin />} />

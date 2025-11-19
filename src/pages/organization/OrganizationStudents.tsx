@@ -17,11 +17,8 @@ interface Student {
   created_at: string;
 }
 
-interface OrganizationStudentsProps {
-  embedded?: boolean;
-}
 
-export default function OrganizationStudents({ embedded = false }: OrganizationStudentsProps) {
+export default function OrganizationStudents() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -160,8 +157,6 @@ export default function OrganizationStudents({ embedded = false }: OrganizationS
               )}
             </div>
           </CardContent>
-        </Card>
-      </div>
-    </div>
+    </Card>
   );
 }
