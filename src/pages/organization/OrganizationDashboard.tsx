@@ -22,7 +22,6 @@ import { Input } from '@/components/ui/input';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import OrganizationStudents from './OrganizationStudents';
 import OrganizationCourses from './OrganizationCourses';
-import OrganizationSubmissions from './OrganizationSubmissions';
 import OrganizationAnalytics from './OrganizationAnalytics';
 import OrganizationSettings from './OrganizationSettings';
 
@@ -42,13 +41,12 @@ interface StatsData {
   coursesChange: number;
 }
 
-type ViewType = 'dashboard' | 'students' | 'courses' | 'submissions' | 'analytics' | 'settings';
+type ViewType = 'dashboard' | 'students' | 'courses' | 'analytics' | 'settings';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', view: 'dashboard' as ViewType },
   { icon: Users, label: 'Students', view: 'students' as ViewType },
   { icon: BookOpen, label: 'Courses', view: 'courses' as ViewType },
-  { icon: FileText, label: 'Submissions', view: 'submissions' as ViewType },
   { icon: BarChart3, label: 'Analytics', view: 'analytics' as ViewType },
   { icon: Settings, label: 'Settings', view: 'settings' as ViewType },
 ];
@@ -404,7 +402,6 @@ export default function OrganizationDashboard() {
 
             {currentView === 'students' && <OrganizationStudents />}
             {currentView === 'courses' && <OrganizationCourses />}
-            {currentView === 'submissions' && <OrganizationSubmissions />}
             {currentView === 'analytics' && <OrganizationAnalytics />}
             {currentView === 'settings' && <OrganizationSettings />}
           </div>
