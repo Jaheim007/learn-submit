@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +17,11 @@ interface Student {
   created_at: string;
 }
 
-export default function OrganizationStudents() {
+interface OrganizationStudentsProps {
+  embedded?: boolean;
+}
+
+export default function OrganizationStudents({ embedded = false }: OrganizationStudentsProps) {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -71,25 +75,27 @@ export default function OrganizationStudents() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className={`flex items-center justify-center ${embedded ? 'p-8' : 'min-h-screen'}`}>
         <div className="animate-pulse text-muted-foreground">Loading students...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className={embedded ? 'p-6' : 'min-h-screen bg-background p-8'}>
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Students</h1>
-            <p className="text-muted-foreground mt-1">Manage your organization's students</p>
+        {!embedded && (
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Students</h1>
+              <p className="text-muted-foreground mt-1">Manage your organization's students</p>
+            </div>
+            <Button className="bg-primary hover:bg-primary/90">
+              <UserPlus className="h-4 w-4 mr-2" />
+              Add Student
+            </Button>
           </div>
-          <Button className="bg-primary hover:bg-primary/90">
-            <UserPlus className="h-4 w-4 mr-2" />
-            Add Student
-          </Button>
-        </div>
+        )}
 
         <Card className="bg-card/40 backdrop-blur-xl border-border/50">
           <CardHeader>
