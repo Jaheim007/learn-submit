@@ -9,7 +9,6 @@ import {
   Bell, 
   Search,
   TrendingUp,
-  TrendingDown,
   BarChart3,
   GraduationCap,
   BookOpen,
@@ -20,7 +19,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import OrganizationStudents from './OrganizationStudents';
 
 interface Organization {
   id: string;
@@ -40,7 +41,7 @@ interface StatsData {
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/organization/dashboard' },
-  { icon: Users, label: 'Students', path: '/organization/students' },
+  { icon: Users, label: 'Students', path: 'students' },
   { icon: BookOpen, label: 'Courses', path: '/organization/courses' },
   { icon: FileText, label: 'Submissions', path: '/organization/submissions' },
   { icon: BarChart3, label: 'Analytics', path: '/organization/analytics' },
@@ -52,6 +53,7 @@ export default function OrganizationDashboard() {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [userName, setUserName] = useState('Organization');
   const [loading, setLoading] = useState(true);
+  const [showStudentsSheet, setShowStudentsSheet] = useState(false);
   const [stats, setStats] = useState<StatsData>({
     totalStudents: 0,
     activeStudents: 0,
@@ -85,7 +87,7 @@ export default function OrganizationDashboard() {
         return;
       }
 
-      setUserName(membership.full_name || 'User');
+      setUserName(membership.full_name || user.email || 'User');
 
       // Get organization details
       const { data: org } = await supabase
@@ -98,20 +100,67 @@ export default function OrganizationDashboard() {
         setOrganization(org);
       }
 
-      // Mock stats for now - will be replaced with real data
-      setStats({
-        totalStudents: 247,
-        activeStudents: 189,
-        totalCourses: 12,
-        completionRate: 76.5,
-        studentsChange: 12.5,
-        coursesChange: 8.2,
-      });
+      // Load real stats
+      await loadStats(membership.organization_id);
 
     } catch (error) {
       console.error('Error loading organization:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadStats = async (organizationId: string) => {
+    try {
+      // Get total students count
+      const { count: totalStudents } = await supabase
+        .from('submito_organization_students')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', organizationId);
+
+      // Get active students count
+      const { count: activeStudents } = await supabase
+        .from('submito_organization_students')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', organizationId)
+        .eq('status', 'active');
+
+      // Get total courses count
+      const { count: totalCourses } = await supabase
+        .from('submito_organization_courses')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', organizationId)
+        .eq('is_active', true);
+
+      // Get submissions for completion rate
+      const { data: submissions } = await supabase
+        .from('submito_organization_submissions')
+        .select('status')
+        .eq('organization_id', organizationId);
+
+      const approvedCount = submissions?.filter(s => s.status === 'approved').length || 0;
+      const totalSubmissions = submissions?.length || 0;
+      const completionRate = totalSubmissions > 0 ? (approvedCount / totalSubmissions) * 100 : 0;
+
+      setStats({
+        totalStudents: totalStudents || 0,
+        activeStudents: activeStudents || 0,
+        totalCourses: totalCourses || 0,
+        completionRate: Math.round(completionRate * 10) / 10,
+        studentsChange: 0,
+        coursesChange: 0,
+      });
+
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  };
+
+  const handleNavClick = (path: string) => {
+    if (path === 'students') {
+      setShowStudentsSheet(true);
+    } else {
+      navigate(path);
     }
   };
 
@@ -154,7 +203,7 @@ export default function OrganizationDashboard() {
               {navItems.map((item) => (
                 <button
                   key={item.path}
-                  onClick={() => navigate(item.path)}
+                  onClick={() => handleNavClick(item.path)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                     item.path === '/organization/dashboard'
                       ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
@@ -230,9 +279,13 @@ export default function OrganizationDashboard() {
                 <CardContent>
                   <div className="text-3xl font-bold text-foreground">{stats.totalStudents}</div>
                   <div className="flex items-center gap-1 mt-2">
-                    <TrendingUp className="h-3 w-3 text-success" />
-                    <span className="text-xs text-success font-medium">+{stats.studentsChange}%</span>
-                    <span className="text-xs text-muted-foreground">from last month</span>
+                    {stats.studentsChange > 0 && <TrendingUp className="h-3 w-3 text-success" />}
+                    {stats.studentsChange > 0 && (
+                      <span className="text-xs text-success font-medium">+{stats.studentsChange}%</span>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {stats.studentsChange > 0 ? 'from last month' : 'registered'}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -264,9 +317,13 @@ export default function OrganizationDashboard() {
                 <CardContent>
                   <div className="text-3xl font-bold text-foreground">{stats.totalCourses}</div>
                   <div className="flex items-center gap-1 mt-2">
-                    <TrendingUp className="h-3 w-3 text-success" />
-                    <span className="text-xs text-success font-medium">+{stats.coursesChange}%</span>
-                    <span className="text-xs text-muted-foreground">from last month</span>
+                    {stats.coursesChange > 0 && <TrendingUp className="h-3 w-3 text-success" />}
+                    {stats.coursesChange > 0 && (
+                      <span className="text-xs text-success font-medium">+{stats.coursesChange}%</span>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {stats.coursesChange > 0 ? 'from last month' : 'available'}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -342,6 +399,18 @@ export default function OrganizationDashboard() {
           </div>
         </main>
       </div>
+
+      {/* Students Side Sheet */}
+      <Sheet open={showStudentsSheet} onOpenChange={setShowStudentsSheet}>
+        <SheetContent side="right" className="w-full sm:max-w-2xl p-0 bg-background">
+          <SheetHeader className="px-6 py-4 border-b border-border/50">
+            <SheetTitle className="text-foreground">Students Management</SheetTitle>
+          </SheetHeader>
+          <div className="h-[calc(100vh-80px)] overflow-y-auto">
+            <OrganizationStudents embedded />
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
