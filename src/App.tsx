@@ -15,7 +15,6 @@ import OrganizationOnboarding from "./pages/OrganizationOnboarding";
 import OrganizationDashboard from "./pages/organization/OrganizationDashboard";
 import OrganizationStudents from "./pages/organization/OrganizationStudents";
 import OrganizationCourses from "./pages/organization/OrganizationCourses";
-import OrganizationSubmissions from "./pages/organization/OrganizationSubmissions";
 import OrganizationAnalytics from "./pages/organization/OrganizationAnalytics";
 import OrganizationSettings from "./pages/organization/OrganizationSettings";
 import AcceptInvitation from "./pages/organization/AcceptInvitation";
