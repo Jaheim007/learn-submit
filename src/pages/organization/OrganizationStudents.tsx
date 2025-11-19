@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +16,6 @@ interface Student {
   enrolled_at: string | null;
   created_at: string;
 }
-
 
 export default function OrganizationStudents() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -72,91 +71,79 @@ export default function OrganizationStudents() {
 
   if (loading) {
     return (
-      <div className={`flex items-center justify-center ${embedded ? 'p-8' : 'min-h-screen'}`}>
+      <div className="flex items-center justify-center p-8">
         <div className="animate-pulse text-muted-foreground">Loading students...</div>
       </div>
     );
   }
 
   return (
-    <div className={embedded ? 'p-6' : 'min-h-screen bg-background p-8'}>
-      <div className="max-w-7xl mx-auto space-y-6">
-        {!embedded && (
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Students</h1>
-              <p className="text-muted-foreground mt-1">Manage your organization's students</p>
-            </div>
-            <Button className="bg-primary hover:bg-primary/90">
-              <UserPlus className="h-4 w-4 mr-2" />
-              Add Student
-            </Button>
+    <Card className="bg-card/40 backdrop-blur-xl border-border/50">
+      <CardHeader>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <CardTitle className="text-2xl font-bold text-foreground">Students Management</CardTitle>
+            <p className="text-muted-foreground mt-1">Manage and monitor your organization's students</p>
           </div>
-        )}
-
-        <Card className="bg-card/40 backdrop-blur-xl border-border/50">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search students..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-background/50"
-                />
-              </div>
+          <Button className="bg-primary hover:bg-primary/90">
+            <UserPlus className="h-4 w-4 mr-2" />
+            Add Student
+          </Button>
+        </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search students..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 bg-background/50"
+          />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {filteredStudents.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              No students found
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {filteredStudents.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  No students found
-                </div>
-              ) : (
-                filteredStudents.map((student) => (
-                  <div
-                    key={student.id}
-                    className="flex items-center justify-between p-4 rounded-lg border border-border/50 bg-background/30 hover:bg-background/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="text-primary font-bold text-lg">
-                          {student.full_name?.charAt(0).toUpperCase() || student.email.charAt(0).toUpperCase()}
+          ) : (
+            filteredStudents.map((student) => (
+              <div
+                key={student.id}
+                className="flex items-center justify-between p-4 rounded-lg border border-border/50 bg-background/50 hover:bg-accent/10 transition-colors"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-bold text-primary">
+                      {student.full_name?.charAt(0) || student.email.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">
+                      {student.full_name || 'No name'}
+                    </p>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="text-sm text-muted-foreground flex items-center gap-1">
+                        <Mail className="h-3 w-3" />
+                        {student.email}
+                      </span>
+                      {student.phone && (
+                        <span className="text-sm text-muted-foreground flex items-center gap-1">
+                          <Phone className="h-3 w-3" />
+                          {student.phone}
                         </span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">
-                          {student.full_name || 'Unnamed Student'}
-                        </h3>
-                        <div className="flex items-center gap-4 mt-1">
-                          <span className="text-sm text-muted-foreground flex items-center gap-1">
-                            <Mail className="h-3 w-3" />
-                            {student.email}
-                          </span>
-                          {student.phone && (
-                            <span className="text-sm text-muted-foreground flex items-center gap-1">
-                              <Phone className="h-3 w-3" />
-                              {student.phone}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Badge className={getStatusColor(student.status)}>
-                        {student.status}
-                      </Badge>
-                      <Button variant="ghost" size="sm">
-                        View Details
-                      </Button>
+                      )}
                     </div>
                   </div>
-                ))
-              )}
-            </div>
-          </CardContent>
+                </div>
+                <Badge className={getStatusColor(student.status)}>
+                  {student.status}
+                </Badge>
+              </div>
+            ))
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 }
