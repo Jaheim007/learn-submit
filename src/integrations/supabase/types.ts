@@ -1404,6 +1404,53 @@ export type Database = {
           },
         ]
       }
+      submito_organization_courses: {
+        Row: {
+          code: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          organization_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          organization_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          organization_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submito_organization_courses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "submito_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       submito_organization_invitations: {
         Row: {
           accepted_at: string | null
@@ -1447,6 +1494,129 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "submito_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submito_organization_students: {
+        Row: {
+          created_at: string | null
+          email: string
+          enrolled_at: string | null
+          full_name: string | null
+          id: string
+          organization_id: string
+          phone: string | null
+          status: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          enrolled_at?: string | null
+          full_name?: string | null
+          id?: string
+          organization_id: string
+          phone?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          enrolled_at?: string | null
+          full_name?: string | null
+          id?: string
+          organization_id?: string
+          phone?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submito_organization_students_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "submito_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submito_organization_submissions: {
+        Row: {
+          course_id: string
+          created_at: string | null
+          description: string | null
+          feedback: string | null
+          file_url: string | null
+          grade: number | null
+          id: string
+          organization_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          student_id: string
+          submitted_at: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string | null
+          description?: string | null
+          feedback?: string | null
+          file_url?: string | null
+          grade?: number | null
+          id?: string
+          organization_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          student_id: string
+          submitted_at?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string | null
+          description?: string | null
+          feedback?: string | null
+          file_url?: string | null
+          grade?: number | null
+          id?: string
+          organization_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          student_id?: string
+          submitted_at?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submito_organization_submissions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "submito_organization_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submito_organization_submissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "submito_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submito_organization_submissions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "submito_organization_students"
             referencedColumns: ["id"]
           },
         ]
