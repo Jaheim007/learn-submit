@@ -19,9 +19,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import OrganizationStudents from './OrganizationStudents';
+import OrganizationCourses from './OrganizationCourses';
+import OrganizationSubmissions from './OrganizationSubmissions';
+import OrganizationAnalytics from './OrganizationAnalytics';
+import OrganizationSettings from './OrganizationSettings';
 
 interface Organization {
   id: string;
@@ -39,13 +42,15 @@ interface StatsData {
   coursesChange: number;
 }
 
+type ViewType = 'dashboard' | 'students' | 'courses' | 'submissions' | 'analytics' | 'settings';
+
 const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/organization/dashboard' },
-  { icon: Users, label: 'Students', path: 'students' },
-  { icon: BookOpen, label: 'Courses', path: '/organization/courses' },
-  { icon: FileText, label: 'Submissions', path: '/organization/submissions' },
-  { icon: BarChart3, label: 'Analytics', path: '/organization/analytics' },
-  { icon: Settings, label: 'Settings', path: '/organization/settings' },
+  { icon: LayoutDashboard, label: 'Dashboard', view: 'dashboard' as ViewType },
+  { icon: Users, label: 'Students', view: 'students' as ViewType },
+  { icon: BookOpen, label: 'Courses', view: 'courses' as ViewType },
+  { icon: FileText, label: 'Submissions', view: 'submissions' as ViewType },
+  { icon: BarChart3, label: 'Analytics', view: 'analytics' as ViewType },
+  { icon: Settings, label: 'Settings', view: 'settings' as ViewType },
 ];
 
 export default function OrganizationDashboard() {
@@ -53,7 +58,7 @@ export default function OrganizationDashboard() {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [userName, setUserName] = useState('Organization');
   const [loading, setLoading] = useState(true);
-  const [showStudentsSheet, setShowStudentsSheet] = useState(false);
+  const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [stats, setStats] = useState<StatsData>({
     totalStudents: 0,
     activeStudents: 0,
@@ -156,12 +161,8 @@ export default function OrganizationDashboard() {
     }
   };
 
-  const handleNavClick = (path: string) => {
-    if (path === 'students') {
-      setShowStudentsSheet(true);
-    } else {
-      navigate(path);
-    }
+  const handleNavClick = (view: ViewType) => {
+    setCurrentView(view);
   };
 
   if (loading) {
@@ -202,10 +203,10 @@ export default function OrganizationDashboard() {
               <p className="text-xs font-medium text-muted-foreground mb-3">MAIN MENU</p>
               {navItems.map((item) => (
                 <button
-                  key={item.path}
-                  onClick={() => handleNavClick(item.path)}
+                  key={item.view}
+                  onClick={() => handleNavClick(item.view)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                    item.path === '/organization/dashboard'
+                    currentView === item.view
                       ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
                       : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
                   }`}
@@ -265,152 +266,150 @@ export default function OrganizationDashboard() {
             </div>
           </header>
 
-          {/* Dashboard Content */}
+          {/* Main Content Area */}
           <div className="p-8 space-y-8">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-card/40 backdrop-blur-xl border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Total Students
-                  </CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-foreground">{stats.totalStudents}</div>
-                  <div className="flex items-center gap-1 mt-2">
-                    {stats.studentsChange > 0 && <TrendingUp className="h-3 w-3 text-success" />}
-                    {stats.studentsChange > 0 && (
-                      <span className="text-xs text-success font-medium">+{stats.studentsChange}%</span>
-                    )}
-                    <span className="text-xs text-muted-foreground">
-                      {stats.studentsChange > 0 ? 'from last month' : 'registered'}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
+            {currentView === 'dashboard' && (
+              <>
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <Card className="bg-card/40 backdrop-blur-xl border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Total Students
+                      </CardTitle>
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold text-foreground">{stats.totalStudents}</div>
+                      <div className="flex items-center gap-1 mt-2">
+                        {stats.studentsChange > 0 && <TrendingUp className="h-3 w-3 text-success" />}
+                        {stats.studentsChange > 0 && (
+                          <span className="text-xs text-success font-medium">+{stats.studentsChange}%</span>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          {stats.studentsChange > 0 ? 'from last month' : 'registered'}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-              <Card className="bg-card/40 backdrop-blur-xl border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Active Students
-                  </CardTitle>
-                  <UserCheck className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-foreground">{stats.activeStudents}</div>
-                  <div className="flex items-center gap-1 mt-2">
-                    <span className="text-xs text-muted-foreground">
-                      {((stats.activeStudents / stats.totalStudents) * 100).toFixed(1)}% engagement
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
+                  <Card className="bg-card/40 backdrop-blur-xl border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Active Students
+                      </CardTitle>
+                      <UserCheck className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold text-foreground">{stats.activeStudents}</div>
+                      <div className="flex items-center gap-1 mt-2">
+                        <span className="text-xs text-muted-foreground">
+                          {((stats.activeStudents / stats.totalStudents) * 100).toFixed(1)}% engagement
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-              <Card className="bg-card/40 backdrop-blur-xl border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Total Courses
-                  </CardTitle>
-                  <BookOpen className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-foreground">{stats.totalCourses}</div>
-                  <div className="flex items-center gap-1 mt-2">
-                    {stats.coursesChange > 0 && <TrendingUp className="h-3 w-3 text-success" />}
-                    {stats.coursesChange > 0 && (
-                      <span className="text-xs text-success font-medium">+{stats.coursesChange}%</span>
-                    )}
-                    <span className="text-xs text-muted-foreground">
-                      {stats.coursesChange > 0 ? 'from last month' : 'available'}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
+                  <Card className="bg-card/40 backdrop-blur-xl border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Total Courses
+                      </CardTitle>
+                      <BookOpen className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold text-foreground">{stats.totalCourses}</div>
+                      <div className="flex items-center gap-1 mt-2">
+                        {stats.coursesChange > 0 && <TrendingUp className="h-3 w-3 text-success" />}
+                        {stats.coursesChange > 0 && (
+                          <span className="text-xs text-success font-medium">+{stats.coursesChange}%</span>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          {stats.coursesChange > 0 ? 'from last month' : 'available'}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-              <Card className="bg-card/40 backdrop-blur-xl border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Completion Rate
-                  </CardTitle>
-                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-foreground">{stats.completionRate}%</div>
-                  <div className="flex items-center gap-1 mt-2">
-                    <span className="text-xs text-muted-foreground">
-                      Average across all courses
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <Card className="bg-card/40 backdrop-blur-xl border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Completion Rate
+                      </CardTitle>
+                      <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold text-foreground">{stats.completionRate}%</div>
+                      <div className="flex items-center gap-1 mt-2">
+                        <span className="text-xs text-muted-foreground">
+                          Average across all courses
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
 
-            {/* Charts and Additional Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-2 bg-card/40 backdrop-blur-xl border-border/50">
-                <CardHeader>
-                  <CardTitle className="text-foreground">Student Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64 flex items-center justify-center text-muted-foreground">
-                    <BarChart3 className="h-12 w-12 opacity-20" />
-                  </div>
-                </CardContent>
-              </Card>
+                {/* Charts and Additional Content */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <Card className="lg:col-span-2 bg-card/40 backdrop-blur-xl border-border/50">
+                    <CardHeader>
+                      <CardTitle className="text-foreground">Student Performance</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-64 flex items-center justify-center text-muted-foreground">
+                        <BarChart3 className="h-12 w-12 opacity-20" />
+                      </div>
+                    </CardContent>
+                  </Card>
 
-              <Card className="bg-card/40 backdrop-blur-xl border-border/50">
-                <CardHeader>
-                  <CardTitle className="text-foreground">Recent Activity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Users className="h-4 w-4 text-primary" />
+                  <Card className="bg-card/40 backdrop-blur-xl border-border/50">
+                    <CardHeader>
+                      <CardTitle className="text-foreground">Recent Activity</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-start gap-3">
+                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <Users className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">15 new students enrolled</p>
+                            <p className="text-xs text-muted-foreground">2 hours ago</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
+                            <FileText className="h-4 w-4 text-secondary" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">48 submissions received</p>
+                            <p className="text-xs text-muted-foreground">5 hours ago</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+                            <BookOpen className="h-4 w-4 text-accent" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">New course published</p>
+                            <p className="text-xs text-muted-foreground">1 day ago</p>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">15 new students enrolled</p>
-                        <p className="text-xs text-muted-foreground">2 hours ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
-                        <FileText className="h-4 w-4 text-secondary" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">48 submissions received</p>
-                        <p className="text-xs text-muted-foreground">5 hours ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
-                        <BookOpen className="h-4 w-4 text-accent" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">New course published</p>
-                        <p className="text-xs text-muted-foreground">1 day ago</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            )}
+
+            {currentView === 'students' && <OrganizationStudents />}
+            {currentView === 'courses' && <OrganizationCourses />}
+            {currentView === 'submissions' && <OrganizationSubmissions />}
+            {currentView === 'analytics' && <OrganizationAnalytics />}
+            {currentView === 'settings' && <OrganizationSettings />}
           </div>
         </main>
       </div>
-
-      {/* Students Side Sheet */}
-      <Sheet open={showStudentsSheet} onOpenChange={setShowStudentsSheet}>
-        <SheetContent side="right" className="w-full sm:max-w-2xl p-0 bg-background">
-          <SheetHeader className="px-6 py-4 border-b border-border/50">
-            <SheetTitle className="text-foreground">Students Management</SheetTitle>
-          </SheetHeader>
-          <div className="h-[calc(100vh-80px)] overflow-y-auto">
-            <OrganizationStudents embedded />
-          </div>
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }
