@@ -41,13 +41,12 @@ interface StatsData {
   coursesChange: number;
 }
 
-type ViewType = 'dashboard' | 'students' | 'courses' | 'submissions' | 'analytics' | 'settings';
+type ViewType = 'dashboard' | 'students' | 'activities' | 'analytics' | 'settings';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', view: 'dashboard' as ViewType },
   { icon: Users, label: 'Students', view: 'students' as ViewType },
-  { icon: BookOpen, label: 'Courses', view: 'courses' as ViewType },
-  { icon: FileText, label: 'Submissions', view: 'submissions' as ViewType },
+  { icon: BookOpen, label: 'Activities', view: 'activities' as ViewType },
   { icon: BarChart3, label: 'Analytics', view: 'analytics' as ViewType },
   { icon: Settings, label: 'Settings', view: 'settings' as ViewType },
 ];
@@ -402,8 +401,7 @@ export default function OrganizationDashboard() {
             )}
 
             {currentView === 'students' && <OrganizationStudents />}
-            {currentView === 'courses' && <OrganizationCourses />}
-            {currentView === 'submissions' && <OrganizationCourses />}
+            {currentView === 'activities' && <OrganizationCourses />}
             {currentView === 'analytics' && <OrganizationAnalytics />}
             {currentView === 'settings' && <OrganizationSettings />}
           </div>
