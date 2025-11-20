@@ -45,7 +45,7 @@ type ViewType = 'dashboard' | 'students' | 'activities' | 'analytics' | 'setting
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', view: 'dashboard' as ViewType },
-  { icon: Users, label: 'Students', view: 'students' as ViewType },
+  { icon: Users, label: 'People', view: 'students' as ViewType },
   { icon: BookOpen, label: 'Activities', view: 'activities' as ViewType },
   { icon: BarChart3, label: 'Analytics', view: 'analytics' as ViewType },
   { icon: Settings, label: 'Settings', view: 'settings' as ViewType },
