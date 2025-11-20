@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, UserPlus, Mail, Phone, Shield, GraduationCap } from 'lucide-react';
 import { toast } from 'sonner';
+import { InviteStudentDialog } from '@/components/organization/InviteStudentDialog';
+import { InviteMemberDialog } from '@/components/organization/InviteMemberDialog';
 
 interface Student {
   id: string;
@@ -35,6 +37,8 @@ export default function OrganizationStudents() {
   const [searchQuery, setSearchQuery] = useState('');
   const [staffSearchQuery, setStaffSearchQuery] = useState('');
   const [teacherSearchQuery, setTeacherSearchQuery] = useState('');
+  const [organizationId, setOrganizationId] = useState<string>('');
+  const [organizationSlug, setOrganizationSlug] = useState<string>('');
 
   useEffect(() => {
     loadData();
@@ -52,6 +56,18 @@ export default function OrganizationStudents() {
         .single();
 
       if (!membership) return;
+
+      // Get organization details
+      const { data: org } = await supabase
+        .from('submito_organizations')
+        .select('id, slug')
+        .eq('id', membership.organization_id)
+        .single();
+
+      if (org) {
+        setOrganizationId(org.id);
+        setOrganizationSlug(org.slug);
+      }
 
       // Load students
       const { data: studentsData, error: studentsError } = await supabase
@@ -139,10 +155,11 @@ export default function OrganizationStudents() {
             <CardHeader>
               <div className="flex items-center justify-between mb-4">
                 <CardTitle className="text-xl font-semibold text-foreground">Students</CardTitle>
-                <Button className="bg-primary hover:bg-primary/90">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Add Student
-                </Button>
+                <InviteStudentDialog 
+                  organizationId={organizationId}
+                  organizationSlug={organizationSlug}
+                  onInviteSent={loadData}
+                />
               </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -206,6 +223,10 @@ export default function OrganizationStudents() {
             <CardHeader>
               <div className="flex items-center justify-between mb-4">
                 <CardTitle className="text-xl font-semibold text-foreground">Staff Members</CardTitle>
+                <InviteMemberDialog 
+                  organizationId={organizationId}
+                  onInviteSent={loadData}
+                />
               </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
