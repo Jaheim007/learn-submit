@@ -43,6 +43,7 @@ export default function OrganizationCourses() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [submissionSearchQuery, setSubmissionSearchQuery] = useState('');
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
 
   useEffect(() => {
     loadCourses();
