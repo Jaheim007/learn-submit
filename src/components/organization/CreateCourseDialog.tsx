@@ -85,6 +85,29 @@ export function CreateCourseDialog({ open, onOpenChange, organizationId, onCours
 
       if (error) throw error;
 
+      // Create notification for all students
+      const { data: students } = await supabase
+        .from('submito_organization_students')
+        .select('user_id')
+        .eq('organization_id', organizationId)
+        .eq('status', 'active');
+
+      if (students && students.length > 0) {
+        const notifications = students.map(student => ({
+          user_id: student.user_id,
+          type: 'course_created',
+          title: 'New Course Available',
+          body: `A new course "${formData.title}" has been published`,
+          metadata: {
+            course_title: formData.title,
+            course_code: generatedCode,
+            organization_id: organizationId
+          }
+        }));
+
+        await supabase.from('notifications').insert(notifications);
+      }
+
       toast.success(`Course created with code: ${generatedCode}`);
       setFormData({ title: '', description: '' });
       setImageUrl(null);

@@ -90,6 +90,30 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
         // Copy to clipboard
         navigator.clipboard.writeText(data.registration_url);
         toast.success('Invitation created! Registration URL copied to clipboard.');
+
+        // Create notification for organization members about new student invitation
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        const { data: orgMembers } = await supabase
+          .from('submito_organization_users')
+          .select('user_id')
+          .eq('organization_id', organizationId)
+          .neq('user_id', currentUser?.id || '');
+
+        if (orgMembers && orgMembers.length > 0) {
+          const notifications = orgMembers.map(member => ({
+            user_id: member.user_id,
+            type: 'student_invited',
+            title: 'Student Invitation Sent',
+            body: `A new student invitation was sent to ${fullName}`,
+            metadata: {
+              student_email: email,
+              student_name: fullName,
+              organization_id: organizationId
+            }
+          }));
+
+          await supabase.from('notifications').insert(notifications);
+        }
       } else {
         toast.success(`Invitation sent to ${email}`);
         setEmail('');
