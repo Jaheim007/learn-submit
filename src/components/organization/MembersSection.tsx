@@ -35,6 +35,7 @@ interface Invitation {
 
 interface MembersSectionProps {
   organizationId: string;
+  showOnlyStaff?: boolean; // If true, only show staff members (exclude students)
 }
 
 const getRoleIcon = (role: string, isOwner: boolean) => {
@@ -53,7 +54,7 @@ const getRoleLabel = (role: string, isOwner: boolean) => {
   return 'Member';
 };
 
-export function MembersSection({ organizationId }: MembersSectionProps) {
+export function MembersSection({ organizationId, showOnlyStaff = false }: MembersSectionProps) {
   const [members, setMembers] = useState<Member[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);

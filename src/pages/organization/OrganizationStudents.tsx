@@ -5,10 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, UserPlus, Mail, Phone, Shield, GraduationCap } from 'lucide-react';
+import { Search, Mail, Phone, Shield, GraduationCap } from 'lucide-react';
 import { toast } from 'sonner';
-import { InviteStudentDialog } from '@/components/organization/InviteStudentDialog';
-import { InviteMemberDialog } from '@/components/organization/InviteMemberDialog';
 
 interface Student {
   id: string;
@@ -136,11 +134,11 @@ export default function OrganizationStudents() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">People Management</h1>
-          <p className="text-muted-foreground mt-1">Manage students, staff members, and teachers</p>
-        </div>
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold text-foreground">People Management</h1>
+        <p className="text-muted-foreground">
+          View and manage all users - students, staff members, and teachers
+        </p>
       </div>
 
       <Tabs defaultValue="students" className="space-y-6">
@@ -153,14 +151,7 @@ export default function OrganizationStudents() {
         <TabsContent value="students" className="space-y-4">
           <Card className="bg-card/40 backdrop-blur-xl border-border/50">
             <CardHeader>
-              <div className="flex items-center justify-between mb-4">
-                <CardTitle className="text-xl font-semibold text-foreground">Students</CardTitle>
-                <InviteStudentDialog 
-                  organizationId={organizationId}
-                  organizationSlug={organizationSlug}
-                  onInviteSent={loadData}
-                />
-              </div>
+              <CardTitle className="text-xl font-semibold text-foreground mb-4">Students</CardTitle>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -221,13 +212,7 @@ export default function OrganizationStudents() {
         <TabsContent value="staff" className="space-y-4">
           <Card className="bg-card/40 backdrop-blur-xl border-border/50">
             <CardHeader>
-              <div className="flex items-center justify-between mb-4">
-                <CardTitle className="text-xl font-semibold text-foreground">Staff Members</CardTitle>
-                <InviteMemberDialog 
-                  organizationId={organizationId}
-                  onInviteSent={loadData}
-                />
-              </div>
+              <CardTitle className="text-xl font-semibold text-foreground mb-4">Staff Members</CardTitle>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -287,9 +272,7 @@ export default function OrganizationStudents() {
         <TabsContent value="teachers" className="space-y-4">
           <Card className="bg-card/40 backdrop-blur-xl border-border/50">
             <CardHeader>
-              <div className="flex items-center justify-between mb-4">
-                <CardTitle className="text-xl font-semibold text-foreground">Teachers</CardTitle>
-              </div>
+              <CardTitle className="text-xl font-semibold text-foreground mb-4">Teachers</CardTitle>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input

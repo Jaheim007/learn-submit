@@ -279,7 +279,7 @@ export default function OrganizationSettings() {
         </TabsContent>
 
         <TabsContent value="members">
-          {organization && <MembersSection organizationId={organization.id} />}
+          {organization && <MembersSection organizationId={organization.id} showOnlyStaff={true} />}
         </TabsContent>
 
         <TabsContent value="billing">
