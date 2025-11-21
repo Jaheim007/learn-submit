@@ -84,12 +84,19 @@ export function MembersSection({ organizationId, showOnlyStaff = false }: Member
       setMembers(membersData || []);
 
       // Load pending invitations
-      const { data: invitesData, error: invitesError } = await supabase
+      let invitesQuery = supabase
         .from('submito_organization_invitations')
         .select('*')
         .eq('organization_id', organizationId)
         .is('accepted_at', null)
         .order('created_at', { ascending: false });
+
+      // Filter by role if showOnlyStaff is true (exclude student invitations)
+      if (showOnlyStaff) {
+        invitesQuery = invitesQuery.neq('role', 'student');
+      }
+
+      const { data: invitesData, error: invitesError } = await invitesQuery;
 
       if (invitesError) throw invitesError;
       setInvitations(invitesData || []);
