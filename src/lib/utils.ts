@@ -9,3 +9,19 @@ export function cleanClassName(title: string): string {
   // Remove " - Groupe X" or similar patterns from class titles
   return title.split(' - ')[0].trim();
 }
+
+export function generateUniqueCode(name: string): string {
+  // Remove special characters and spaces, convert to uppercase
+  const cleaned = name
+    .replace(/[^a-zA-Z0-9\s]/g, '')
+    .replace(/\s+/g, '')
+    .toUpperCase();
+  
+  // Take first 6 characters or less
+  const prefix = cleaned.substring(0, 6);
+  
+  // Generate random 3-digit number
+  const suffix = Math.floor(100 + Math.random() * 900);
+  
+  return `${prefix}${suffix}`;
+}

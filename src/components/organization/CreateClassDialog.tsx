@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { generateUniqueCode } from "@/lib/utils";
 
 interface CreateClassDialogProps {
   open: boolean;
@@ -21,40 +22,41 @@ export function CreateClassDialog({
   onClassCreated,
 }: CreateClassDialogProps) {
   const [name, setName] = useState("");
-  const [code, setCode] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name.trim() || !code.trim()) {
-      toast.error("Please enter class name and code");
+    if (!name.trim()) {
+      toast.error("Please enter class name");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
+      // Generate unique code from name
+      const generatedCode = generateUniqueCode(name);
+
       const { error } = await supabase
         .from('submito_organization_classes')
         .insert({
           organization_id: organizationId,
           name,
-          code: code.toUpperCase(),
+          code: generatedCode,
           description: description.trim() || null,
           is_active: true,
         });
 
       if (error) throw error;
 
-      toast.success("Class created successfully");
+      toast.success(`Class created with code: ${generatedCode}`);
       onClassCreated();
       onOpenChange(false);
       
       // Reset form
       setName("");
-      setCode("");
       setDescription("");
     } catch (error: any) {
       console.error("Error creating class:", error);
@@ -88,17 +90,7 @@ export function CreateClassDialog({
               placeholder="e.g., Web Development Bootcamp 2025"
               required
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="code">Class Code *</Label>
-            <Input
-              id="code"
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="e.g., WEBDEV2025"
-              required
-            />
+            <p className="text-xs text-muted-foreground">A unique code will be generated automatically</p>
           </div>
 
           <div className="space-y-2">

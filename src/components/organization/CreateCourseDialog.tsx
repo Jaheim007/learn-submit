@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Upload, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { generateUniqueCode } from '@/lib/utils';
 
 interface CreateCourseDialogProps {
   open: boolean;
@@ -22,7 +23,6 @@ export function CreateCourseDialog({ open, onOpenChange, organizationId, onCours
   
   const [formData, setFormData] = useState({
     title: '',
-    code: '',
     description: '',
   });
 
@@ -58,7 +58,7 @@ export function CreateCourseDialog({ open, onOpenChange, organizationId, onCours
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.code) {
+    if (!formData.title) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -68,12 +68,15 @@ export function CreateCourseDialog({ open, onOpenChange, organizationId, onCours
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // Generate unique code from title
+      const generatedCode = generateUniqueCode(formData.title);
+
       const { error } = await supabase
         .from('submito_organization_courses')
         .insert({
           organization_id: organizationId,
           title: formData.title,
-          code: formData.code,
+          code: generatedCode,
           description: formData.description || null,
           image_url: imageUrl,
           created_by: user.id,
@@ -82,8 +85,8 @@ export function CreateCourseDialog({ open, onOpenChange, organizationId, onCours
 
       if (error) throw error;
 
-      toast.success('Course created successfully!');
-      setFormData({ title: '', code: '', description: '' });
+      toast.success(`Course created with code: ${generatedCode}`);
+      setFormData({ title: '', description: '' });
       setImageUrl(null);
       onOpenChange(false);
       onCourseCreated();
@@ -115,18 +118,7 @@ export function CreateCourseDialog({ open, onOpenChange, organizationId, onCours
               className="bg-background/50"
               required
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="code" className="text-foreground">Course Code *</Label>
-            <Input
-              id="code"
-              value={formData.code}
-              onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-              placeholder="e.g., WEB101"
-              className="bg-background/50"
-              required
-            />
+            <p className="text-xs text-muted-foreground">A unique code will be generated automatically</p>
           </div>
 
           <div className="space-y-2">
