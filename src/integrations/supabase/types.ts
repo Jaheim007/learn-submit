@@ -1404,6 +1404,83 @@ export type Database = {
           },
         ]
       }
+      submito_organization_class_courses: {
+        Row: {
+          class_id: string
+          course_id: string
+          created_at: string | null
+          id: string
+        }
+        Insert: {
+          class_id: string
+          course_id: string
+          created_at?: string | null
+          id?: string
+        }
+        Update: {
+          class_id?: string
+          course_id?: string
+          created_at?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submito_organization_class_courses_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "submito_organization_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submito_organization_class_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "submito_organization_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submito_organization_classes: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          organization_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          organization_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          organization_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submito_organization_classes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "submito_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       submito_organization_courses: {
         Row: {
           code: string
@@ -1500,6 +1577,7 @@ export type Database = {
       }
       submito_organization_students: {
         Row: {
+          class_id: string | null
           created_at: string | null
           email: string
           enrolled_at: string | null
@@ -1512,6 +1590,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          class_id?: string | null
           created_at?: string | null
           email: string
           enrolled_at?: string | null
@@ -1524,6 +1603,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          class_id?: string | null
           created_at?: string | null
           email?: string
           enrolled_at?: string | null
@@ -1536,6 +1616,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "submito_organization_students_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "submito_organization_classes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "submito_organization_students_organization_id_fkey"
             columns: ["organization_id"]
