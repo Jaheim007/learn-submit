@@ -13,7 +13,8 @@ import {
   GraduationCap,
   BookOpen,
   UserCheck,
-  LogOut
+  LogOut,
+  School
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -24,6 +25,7 @@ import OrganizationStudents from './OrganizationStudents';
 import OrganizationCourses from './OrganizationCourses';
 import OrganizationAnalytics from './OrganizationAnalytics';
 import OrganizationSettings from './OrganizationSettings';
+import OrganizationClasses from './OrganizationClasses';
 
 interface Organization {
   id: string;
@@ -41,11 +43,12 @@ interface StatsData {
   coursesChange: number;
 }
 
-type ViewType = 'dashboard' | 'students' | 'activities' | 'analytics' | 'settings';
+type ViewType = 'dashboard' | 'students' | 'activities' | 'analytics' | 'settings' | 'classes';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', view: 'dashboard' as ViewType },
   { icon: Users, label: 'People', view: 'students' as ViewType },
+  { icon: School, label: 'Classes', view: 'classes' as ViewType },
   { icon: BookOpen, label: 'Activities', view: 'activities' as ViewType },
   { icon: BarChart3, label: 'Analytics', view: 'analytics' as ViewType },
   { icon: Settings, label: 'Settings', view: 'settings' as ViewType },
@@ -401,6 +404,7 @@ export default function OrganizationDashboard() {
             )}
 
             {currentView === 'students' && <OrganizationStudents />}
+            {currentView === 'classes' && <OrganizationClasses />}
             {currentView === 'activities' && <OrganizationCourses />}
             {currentView === 'analytics' && <OrganizationAnalytics />}
             {currentView === 'settings' && <OrganizationSettings />}
