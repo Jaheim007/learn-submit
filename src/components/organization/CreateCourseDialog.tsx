@@ -9,12 +9,13 @@ import { Plus, Upload, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CreateCourseDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   organizationId: string;
-  onSuccess: () => void;
+  onCourseCreated: () => void;
 }
 
-export function CreateCourseDialog({ organizationId, onSuccess }: CreateCourseDialogProps) {
-  const [open, setOpen] = useState(false);
+export function CreateCourseDialog({ open, onOpenChange, organizationId, onCourseCreated }: CreateCourseDialogProps) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -84,8 +85,8 @@ export function CreateCourseDialog({ organizationId, onSuccess }: CreateCourseDi
       toast.success('Course created successfully!');
       setFormData({ title: '', code: '', description: '' });
       setImageUrl(null);
-      setOpen(false);
-      onSuccess();
+      onOpenChange(false);
+      onCourseCreated();
     } catch (error) {
       console.error('Error creating course:', error);
       toast.error('Failed to create course');
@@ -95,13 +96,7 @@ export function CreateCourseDialog({ organizationId, onSuccess }: CreateCourseDi
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-primary hover:bg-primary/90">
-          <Plus className="h-4 w-4 mr-2" />
-          Create Course
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card border-border/50 max-w-md">
         <DialogHeader>
           <DialogTitle className="text-foreground">Create New Course</DialogTitle>
@@ -167,7 +162,7 @@ export function CreateCourseDialog({ organizationId, onSuccess }: CreateCourseDi
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={() => onOpenChange(false)}
               disabled={loading}
             >
               Cancel

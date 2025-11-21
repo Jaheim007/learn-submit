@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Plus, BookOpen, FileText } from 'lucide-react';
+import { Search, Plus, BookOpen, FileText, Eye } from 'lucide-react';
 import { toast } from 'sonner';
+import { CreateCourseDialog } from '@/components/organization/CreateCourseDialog';
+import { SubmissionReviewDialog } from '@/components/organization/SubmissionReviewDialog';
 
 interface Course {
   id: string;
@@ -27,14 +29,16 @@ interface Submission {
   course_id: string;
   submitted_at: string | null;
   grade: number | null;
+  feedback: string | null;
+  file_url: string | null;
   submito_organization_students?: {
     full_name: string | null;
     email: string;
-  };
+  } | null;
   submito_organization_courses?: {
     title: string;
     code: string;
-  };
+  } | null;
 }
 
 export default function OrganizationCourses() {
@@ -44,6 +48,9 @@ export default function OrganizationCourses() {
   const [searchQuery, setSearchQuery] = useState('');
   const [submissionSearchQuery, setSubmissionSearchQuery] = useState('');
   const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
 
   useEffect(() => {
     loadCourses();
@@ -62,6 +69,8 @@ export default function OrganizationCourses() {
         .single();
 
       if (!membership) return;
+
+      setOrganizationId(membership.organization_id);
 
       const { data, error } = await supabase
         .from('submito_organization_courses')
@@ -169,7 +178,10 @@ export default function OrganizationCourses() {
                   className="pl-10 bg-card/40 backdrop-blur-xl border-border/50"
                 />
               </div>
-              <Button className="bg-primary hover:bg-primary/90">
+              <Button 
+                className="bg-primary hover:bg-primary/90"
+                onClick={() => setIsCreateDialogOpen(true)}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Course
               </Button>
@@ -236,7 +248,7 @@ export default function OrganizationCourses() {
                     {filteredSubmissions.map((submission) => (
                       <Card
                         key={submission.id}
-                        className="bg-background/30 border-border/50 hover:border-primary/50 transition-all cursor-pointer"
+                        className="bg-background/30 border-border/50 hover:border-primary/50 transition-all"
                       >
                         <CardHeader>
                           <div className="flex items-start justify-between">
@@ -265,6 +277,17 @@ export default function OrganizationCourses() {
                               {submission.grade !== null && (
                                 <Badge variant="outline">{submission.grade}%</Badge>
                               )}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  setSelectedSubmission(submission);
+                                  setIsReviewDialogOpen(true);
+                                }}
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                Review
+                              </Button>
                             </div>
                           </div>
                         </CardHeader>
@@ -283,6 +306,23 @@ export default function OrganizationCourses() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <CreateCourseDialog
+          open={isCreateDialogOpen}
+          onOpenChange={setIsCreateDialogOpen}
+          organizationId={organizationId || ''}
+          onCourseCreated={loadCourses}
+        />
+
+        <SubmissionReviewDialog
+          open={isReviewDialogOpen}
+          onOpenChange={setIsReviewDialogOpen}
+          submission={selectedSubmission}
+          onReviewCompleted={() => {
+            loadSubmissions();
+            setIsReviewDialogOpen(false);
+          }}
+        />
       </div>
     </div>
   );
