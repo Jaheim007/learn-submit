@@ -27,6 +27,7 @@ import OrganizationCourses from './OrganizationCourses';
 import OrganizationAnalytics from './OrganizationAnalytics';
 import OrganizationSettings from './OrganizationSettings';
 import OrganizationClasses from './OrganizationClasses';
+import OrganizationProjects from './OrganizationProjects';
 
 interface Organization {
   id: string;
@@ -44,12 +45,13 @@ interface StatsData {
   coursesChange: number;
 }
 
-type ViewType = 'dashboard' | 'students' | 'activities' | 'analytics' | 'settings' | 'classes';
+type ViewType = 'dashboard' | 'students' | 'activities' | 'analytics' | 'settings' | 'classes' | 'projects';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', view: 'dashboard' as ViewType },
   { icon: Users, label: 'People', view: 'students' as ViewType },
   { icon: School, label: 'Classes', view: 'classes' as ViewType },
+  { icon: FileText, label: 'Projects', view: 'projects' as ViewType },
   { icon: BookOpen, label: 'Activities', view: 'activities' as ViewType },
   { icon: BarChart3, label: 'Analytics', view: 'analytics' as ViewType },
   { icon: Settings, label: 'Settings', view: 'settings' as ViewType },
@@ -400,6 +402,7 @@ export default function OrganizationDashboard() {
 
             {currentView === 'students' && <OrganizationStudents />}
             {currentView === 'classes' && <OrganizationClasses />}
+            {currentView === 'projects' && <OrganizationProjects />}
             {currentView === 'activities' && <OrganizationCourses />}
             {currentView === 'analytics' && <OrganizationAnalytics />}
             {currentView === 'settings' && <OrganizationSettings />}

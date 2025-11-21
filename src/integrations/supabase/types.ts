@@ -1578,6 +1578,56 @@ export type Database = {
           },
         ]
       }
+      submito_organization_projects: {
+        Row: {
+          code: string
+          created_at: string | null
+          created_by: string | null
+          deadline_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          organization_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          created_by?: string | null
+          deadline_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          organization_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          created_by?: string | null
+          deadline_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          organization_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submito_organization_projects_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "submito_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       submito_organization_students: {
         Row: {
           class_id: string | null
@@ -1811,6 +1861,83 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      submito_project_class_assignments: {
+        Row: {
+          class_id: string
+          created_at: string | null
+          id: string
+          project_id: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string | null
+          id?: string
+          project_id: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string | null
+          id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submito_project_class_assignments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "submito_organization_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submito_project_class_assignments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "submito_organization_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submito_project_resources: {
+        Row: {
+          created_at: string | null
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          project_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          project_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          project_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submito_project_resources_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "submito_organization_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subsidy_applications: {
         Row: {
