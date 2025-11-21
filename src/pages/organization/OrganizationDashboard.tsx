@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useRecentActivity } from '@/hooks/useRecentActivity';
 import { 
   LayoutDashboard, 
   Users, 
@@ -68,6 +69,8 @@ export default function OrganizationDashboard() {
     studentsChange: 0,
     coursesChange: 0,
   });
+  
+  const { activities, loading: activitiesLoading } = useRecentActivity(organization?.id || null);
 
   useEffect(() => {
     loadOrganizationData();
@@ -253,10 +256,6 @@ export default function OrganizationDashboard() {
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full" />
               </Button>
-              
-              <Button variant="ghost" size="icon">
-                <Settings className="h-5 w-5" />
-              </Button>
 
               <Avatar className="h-10 w-10 border-2 border-primary/20">
                 <AvatarImage src={organization?.logo_url || undefined} />
@@ -368,35 +367,31 @@ export default function OrganizationDashboard() {
                       <CardTitle className="text-foreground">Recent Activity</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
-                        <div className="flex items-start gap-3">
-                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <Users className="h-4 w-4 text-primary" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-foreground">15 new students enrolled</p>
-                            <p className="text-xs text-muted-foreground">2 hours ago</p>
-                          </div>
+                      {activitiesLoading ? (
+                        <div className="text-sm text-muted-foreground">Loading activities...</div>
+                      ) : activities.length === 0 ? (
+                        <div className="text-sm text-muted-foreground">No recent activity</div>
+                      ) : (
+                        <div className="space-y-4">
+                          {activities.map((activity) => (
+                            <div key={activity.id} className="flex items-start gap-3">
+                              <div className={`h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                activity.type === 'student' ? 'bg-primary/10' :
+                                activity.type === 'submission' ? 'bg-secondary/10' :
+                                'bg-accent/10'
+                              }`}>
+                                {activity.type === 'student' && <Users className="h-4 w-4 text-primary" />}
+                                {activity.type === 'submission' && <FileText className="h-4 w-4 text-secondary" />}
+                                {activity.type === 'course' && <BookOpen className="h-4 w-4 text-accent" />}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-foreground">{activity.message}</p>
+                                <p className="text-xs text-muted-foreground">{activity.timeAgo}</p>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                        <div className="flex items-start gap-3">
-                          <div className="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
-                            <FileText className="h-4 w-4 text-secondary" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-foreground">48 submissions received</p>
-                            <p className="text-xs text-muted-foreground">5 hours ago</p>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
-                            <BookOpen className="h-4 w-4 text-accent" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-foreground">New course published</p>
-                            <p className="text-xs text-muted-foreground">1 day ago</p>
-                          </div>
-                        </div>
-                      </div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
