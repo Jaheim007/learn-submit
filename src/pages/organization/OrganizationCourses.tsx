@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Plus, BookOpen, FileText, Eye } from 'lucide-react';
+import { Search, Plus, BookOpen, FileText, Eye, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { CreateCourseDialog } from '@/components/organization/CreateCourseDialog';
+import { EditCourseDialog } from '@/components/organization/EditCourseDialog';
 import { SubmissionReviewDialog } from '@/components/organization/SubmissionReviewDialog';
 
 interface Course {
@@ -51,6 +52,8 @@ export default function OrganizationCourses() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [isEditCourseDialogOpen, setIsEditCourseDialogOpen] = useState(false);
 
   useEffect(() => {
     loadCourses();
@@ -137,6 +140,11 @@ export default function OrganizationCourses() {
     );
   });
 
+  const handleCourseClick = (course: Course) => {
+    setSelectedCourse(course);
+    setIsEditCourseDialogOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -200,20 +208,36 @@ export default function OrganizationCourses() {
                       <Card
                         key={course.id}
                         className="bg-background/30 border-border/50 hover:border-primary/50 transition-all cursor-pointer group"
+                        onClick={() => handleCourseClick(course)}
                       >
-                        <CardHeader>
+                        <CardHeader className="pb-3">
+                          {course.image_url ? (
+                            <div className="w-full h-40 mb-3 rounded-lg overflow-hidden">
+                              <img 
+                                src={course.image_url} 
+                                alt={course.title}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-full h-40 mb-3 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                              <ImageIcon className="h-16 w-16 text-muted-foreground/30" />
+                            </div>
+                          )}
                           <div className="flex items-start justify-between">
-                            <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                              {course.title}
-                            </CardTitle>
+                            <div className="flex-1">
+                              <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                                {course.title}
+                              </CardTitle>
+                              <p className="text-sm text-muted-foreground font-mono mt-1">{course.code}</p>
+                            </div>
                             <Badge variant={course.is_active ? "default" : "secondary"}>
                               {course.is_active ? 'Active' : 'Inactive'}
                             </Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground">{course.code}</p>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-muted-foreground line-clamp-2">
+                          <p className="text-sm text-muted-foreground line-clamp-3">
                             {course.description || 'No description available'}
                           </p>
                         </CardContent>
@@ -313,6 +337,15 @@ export default function OrganizationCourses() {
           organizationId={organizationId || ''}
           onCourseCreated={loadCourses}
         />
+
+        {selectedCourse && (
+          <EditCourseDialog
+            open={isEditCourseDialogOpen}
+            onOpenChange={setIsEditCourseDialogOpen}
+            courseData={selectedCourse}
+            onCourseUpdated={loadCourses}
+          />
+        )}
 
         <SubmissionReviewDialog
           open={isReviewDialogOpen}

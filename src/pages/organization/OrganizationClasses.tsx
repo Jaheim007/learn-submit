@@ -5,14 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Users, BookOpen } from "lucide-react";
+import { Plus, Search, Users, BookOpen, Image as ImageIcon } from "lucide-react";
 import { CreateClassDialog } from "@/components/organization/CreateClassDialog";
+import { EditClassDialog } from "@/components/organization/EditClassDialog";
 
 interface Class {
   id: string;
   name: string;
   code: string;
   description: string | null;
+  image_url: string | null;
   is_active: boolean;
   created_at: string;
 }
@@ -23,6 +25,8 @@ export default function OrganizationClasses() {
   const [searchQuery, setSearchQuery] = useState("");
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [selectedClass, setSelectedClass] = useState<Class | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   useEffect(() => {
     loadClasses();
@@ -63,6 +67,11 @@ export default function OrganizationClasses() {
     cls.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     cls.code.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleClassClick = (cls: Class) => {
+    setSelectedClass(cls);
+    setIsEditDialogOpen(true);
+  };
 
   if (loading) {
     return (
@@ -121,8 +130,22 @@ export default function OrganizationClasses() {
                   <Card
                     key={cls.id}
                     className="bg-background/30 border-border/50 hover:border-primary/50 transition-all cursor-pointer group"
+                    onClick={() => handleClassClick(cls)}
                   >
-                    <CardHeader>
+                    <CardHeader className="pb-3">
+                      {cls.image_url ? (
+                        <div className="w-full h-40 mb-3 rounded-lg overflow-hidden">
+                          <img 
+                            src={cls.image_url} 
+                            alt={cls.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-full h-40 mb-3 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                          <ImageIcon className="h-16 w-16 text-muted-foreground/30" />
+                        </div>
+                      )}
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <CardTitle className="text-lg group-hover:text-primary transition-colors">
@@ -138,10 +161,10 @@ export default function OrganizationClasses() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                         {cls.description || 'No description available'}
                       </p>
-                      <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Users className="h-3 w-3" />
                           <span>0 Students</span>
@@ -165,6 +188,15 @@ export default function OrganizationClasses() {
           organizationId={organizationId || ''}
           onClassCreated={loadClasses}
         />
+
+        {selectedClass && (
+          <EditClassDialog
+            open={isEditDialogOpen}
+            onOpenChange={setIsEditDialogOpen}
+            classData={selectedClass}
+            onClassUpdated={loadClasses}
+          />
+        )}
       </div>
     </div>
   );
