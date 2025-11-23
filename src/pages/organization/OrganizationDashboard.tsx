@@ -16,7 +16,10 @@ import {
   UserCheck,
   LogOut,
   School,
-  Sparkles
+  Sparkles,
+  MessageSquare,
+  HelpCircle,
+  BookText
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -30,6 +33,7 @@ import OrganizationSettings from './OrganizationSettings';
 import OrganizationClasses from './OrganizationClasses';
 import OrganizationProjects from './OrganizationProjects';
 import OrganizationInsightAI from './OrganizationInsightAI';
+import { FeedbackDialog } from '@/components/organization/FeedbackDialog';
 
 interface Organization {
   id: string;
@@ -245,26 +249,53 @@ export default function OrganizationDashboard() {
         {/* Main Content */}
         <main className="flex-1">
           {/* Top Bar */}
-          <header className="h-20 border-b border-border/50 bg-card/40 backdrop-blur-xl flex items-center justify-between px-8">
-            <div className="flex-1 max-w-xl">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search anything..."
-                  className="pl-10 bg-background/50 border-border/50"
-                />
-              </div>
+          <header className="h-16 border-b border-border/50 bg-card/40 backdrop-blur-xl flex items-center justify-between px-6">
+            <div className="flex items-center gap-4 flex-1">
+              <h1 className="text-lg font-semibold text-foreground">
+                {organization?.name || 'Organization Dashboard'}
+              </h1>
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <FeedbackDialog 
+                trigger={
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Feedback
+                  </Button>
+                }
+              />
+              
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
+                onClick={() => window.open('https://docs.submito.com', '_blank')}
+              >
+                <HelpCircle className="h-4 w-4 mr-2" />
+                Help
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
+                onClick={() => window.open('https://docs.submito.com', '_blank')}
+              >
+                <BookText className="h-4 w-4 mr-2" />
+                Docs
+              </Button>
+
+              <div className="h-6 w-px bg-border mx-2" />
+
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full" />
               </Button>
 
-              <Avatar className="h-10 w-10 border-2 border-primary/20">
+              <Avatar className="h-9 w-9 border-2 border-border/50">
                 <AvatarImage src={organization?.logo_url || undefined} />
-                <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                <AvatarFallback className="bg-primary/10 text-primary font-medium text-sm">
                   {userName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
