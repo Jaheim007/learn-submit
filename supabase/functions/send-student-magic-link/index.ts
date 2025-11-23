@@ -49,11 +49,14 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // Parse request body first
+    const { email, full_name, organization_id, organization_slug, class_id }: StudentInvitationRequest = await req.json();
+
     // Verify user has permission to invite students
     const { data: orgMember } = await supabaseClient
       .from("submito_organization_users")
       .select("role, is_owner")
-      .eq("organization_id", req.body?.organization_id)
+      .eq("organization_id", organization_id)
       .eq("user_id", user.id)
       .single();
 
@@ -63,8 +66,6 @@ const handler = async (req: Request): Promise<Response> => {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
-
-    const { email, full_name, organization_id, organization_slug, class_id }: StudentInvitationRequest = await req.json();
 
     // Check if student already exists
     const { data: existingStudent } = await supabaseClient
