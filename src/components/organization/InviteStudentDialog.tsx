@@ -62,6 +62,11 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
       return;
     }
 
+    if (!classId) {
+      toast.error('Please select a class for the student');
+      return;
+    }
+
     setLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -76,7 +81,7 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
           full_name: fullName.trim(),
           organization_id: organizationId,
           organization_slug: organizationSlug,
-          class_id: classId || null
+          class_id: classId
         },
         headers: {
           Authorization: `Bearer ${session.access_token}`
@@ -86,30 +91,6 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
       if (error) throw error;
 
       toast.success(`Magic link sent to ${email}! The student will receive an email to set up their account.`);
-
-      // Create notification for organization members about new student invitation
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      const { data: orgMembers } = await supabase
-        .from('submito_organization_users')
-        .select('user_id')
-        .eq('organization_id', organizationId)
-        .neq('user_id', currentUser?.id || '');
-
-      if (orgMembers && orgMembers.length > 0) {
-        const notifications = orgMembers.map(member => ({
-          user_id: member.user_id,
-          type: 'student_invited',
-          title: 'Student Invitation Sent',
-          body: `A magic link invitation was sent to ${fullName} (${email})`,
-          metadata: {
-            student_email: email,
-            student_name: fullName,
-            organization_id: organizationId
-          }
-        }));
-
-        await supabase.from('notifications').insert(notifications);
-      }
 
       setEmail('');
       setFullName('');
@@ -143,80 +124,79 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
           Invite Student
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-background border-border">
         <DialogHeader>
           <DialogTitle>Invite Student</DialogTitle>
           <DialogDescription>
-            Create a student invitation and get a registration link
+            Send a magic link invitation to a new student
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <Label htmlFor="student-name">Full Name</Label>
-              <Input
-                id="student-name"
-                type="text"
-                placeholder="John Doe"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                disabled={loading}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="student-email">Email Address</Label>
-              <Input
-                id="student-email"
-                type="email"
-                placeholder="student@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="class">Assign to Class (Optional)</Label>
-              <Select value={classId} onValueChange={setClassId} disabled={loading}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a class" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">No class assigned</SelectItem>
-                  {classes.map((cls) => (
-                    <SelectItem key={cls.id} value={cls.id}>
-                      {cls.name} ({cls.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {classes.length === 0 && (
-                <p className="text-xs text-muted-foreground">
-                  No active classes available. Create a class first.
-                </p>
-              )}
-            </div>
-
-            <div className="flex gap-2 pt-4">
-              <Button
-                variant="outline"
-                onClick={handleClose}
-                disabled={loading}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleInvite}
-                disabled={loading || !email || !fullName}
-                className="flex-1 gap-2"
-              >
-                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                Send Invitation
-              </Button>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="student-name">Full Name</Label>
+            <Input
+              id="student-name"
+              type="text"
+              placeholder="John Doe"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              disabled={loading}
+            />
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="student-email">Email Address</Label>
+            <Input
+              id="student-email"
+              type="email"
+              placeholder="student@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="class">Assign to Class *</Label>
+            <Select value={classId} onValueChange={setClassId} disabled={loading}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a class" />
+              </SelectTrigger>
+              <SelectContent>
+                {classes.map((cls) => (
+                  <SelectItem key={cls.id} value={cls.id}>
+                    {cls.name} ({cls.code})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {classes.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                No active classes available. Create a class first.
+              </p>
+            )}
+          </div>
+
+          <div className="flex gap-2 pt-4">
+            <Button
+              variant="outline"
+              onClick={handleClose}
+              disabled={loading}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleInvite}
+              disabled={loading || !email || !fullName || !classId}
+              className="flex-1 gap-2"
+            >
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              Send Invitation
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
