@@ -15,7 +15,8 @@ import {
   BookOpen,
   UserCheck,
   LogOut,
-  School
+  School,
+  Sparkles
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,6 +29,7 @@ import OrganizationAnalytics from './OrganizationAnalytics';
 import OrganizationSettings from './OrganizationSettings';
 import OrganizationClasses from './OrganizationClasses';
 import OrganizationProjects from './OrganizationProjects';
+import OrganizationInsightAI from './OrganizationInsightAI';
 
 interface Organization {
   id: string;
@@ -45,7 +47,7 @@ interface StatsData {
   coursesChange: number;
 }
 
-type ViewType = 'dashboard' | 'students' | 'activities' | 'analytics' | 'settings' | 'classes' | 'projects';
+type ViewType = 'dashboard' | 'students' | 'activities' | 'analytics' | 'settings' | 'classes' | 'projects' | 'insight-ai';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', view: 'dashboard' as ViewType },
@@ -54,6 +56,7 @@ const navItems = [
   { icon: FileText, label: 'Projects', view: 'projects' as ViewType },
   { icon: BookOpen, label: 'Activities', view: 'activities' as ViewType },
   { icon: BarChart3, label: 'Analytics', view: 'analytics' as ViewType },
+  { icon: Sparkles, label: 'Insight AI', view: 'insight-ai' as ViewType },
   { icon: Settings, label: 'Settings', view: 'settings' as ViewType },
 ];
 
@@ -405,6 +408,7 @@ export default function OrganizationDashboard() {
             {currentView === 'projects' && <OrganizationProjects />}
             {currentView === 'activities' && <OrganizationCourses />}
             {currentView === 'analytics' && <OrganizationAnalytics />}
+            {currentView === 'insight-ai' && <OrganizationInsightAI />}
             {currentView === 'settings' && <OrganizationSettings />}
           </div>
         </main>
