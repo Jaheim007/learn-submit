@@ -39,8 +39,11 @@ export default function OrganizationInsightAI() {
         setLoading(false);
         return;
       }
-
+ 
       const { data, error } = await supabase.functions.invoke('organization-insight-ai', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: { 
           messages: [...messages, userMessage],
         },
