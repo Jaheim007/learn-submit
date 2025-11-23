@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Upload, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { generateUniqueCode } from '@/lib/utils';
@@ -20,11 +21,40 @@ export function CreateCourseDialog({ open, onOpenChange, organizationId, onCours
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [classes, setClasses] = useState<Array<{ id: string; name: string; code: string }>>([]);
+  const [loadingClasses, setLoadingClasses] = useState(true);
   
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    classId: '',
   });
+
+  useEffect(() => {
+    if (open) {
+      loadClasses();
+    }
+  }, [open, organizationId]);
+
+  const loadClasses = async () => {
+    setLoadingClasses(true);
+    try {
+      const { data, error } = await supabase
+        .from('submito_organization_classes')
+        .select('id, name, code')
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) throw error;
+      setClasses(data || []);
+    } catch (error) {
+      console.error('Error loading classes:', error);
+      toast.error('Failed to load classes');
+    } finally {
+      setLoadingClasses(false);
+    }
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -58,7 +88,7 @@ export function CreateCourseDialog({ open, onOpenChange, organizationId, onCours
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title) {
+    if (!formData.title || !formData.classId) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -71,7 +101,7 @@ export function CreateCourseDialog({ open, onOpenChange, organizationId, onCours
       // Generate unique code from title
       const generatedCode = generateUniqueCode(formData.title);
 
-      const { error } = await supabase
+      const { data: courseData, error: courseError } = await supabase
         .from('submito_organization_courses')
         .insert({
           organization_id: organizationId,
@@ -81,9 +111,21 @@ export function CreateCourseDialog({ open, onOpenChange, organizationId, onCours
           image_url: imageUrl,
           created_by: user.id,
           is_active: true,
+        })
+        .select()
+        .single();
+
+      if (courseError) throw courseError;
+
+      // Link course to class
+      const { error: linkError } = await supabase
+        .from('submito_organization_class_courses')
+        .insert({
+          class_id: formData.classId,
+          course_id: courseData.id,
         });
 
-      if (error) throw error;
+      if (linkError) throw linkError;
 
       // Create notification for all students
       const { data: students } = await supabase
@@ -109,7 +151,7 @@ export function CreateCourseDialog({ open, onOpenChange, organizationId, onCours
       }
 
       toast.success(`Course created with code: ${generatedCode}`);
-      setFormData({ title: '', description: '' });
+      setFormData({ title: '', description: '', classId: '' });
       setImageUrl(null);
       onOpenChange(false);
       onCourseCreated();
@@ -131,18 +173,50 @@ export function CreateCourseDialog({ open, onOpenChange, organizationId, onCours
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title" className="text-foreground">Course Title *</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="e.g., Web Development Fundamentals"
-              className="bg-background/50"
-              required
-            />
-            <p className="text-xs text-muted-foreground">A unique code will be generated automatically</p>
-          </div>
+          {loadingClasses ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : classes.length === 0 ? (
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+              <p className="text-sm text-destructive">
+                No classes available. Please create a class before creating a course.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="classId" className="text-foreground">Assign to Class *</Label>
+                <Select
+                  value={formData.classId}
+                  onValueChange={(value) => setFormData({ ...formData, classId: value })}
+                  required
+                >
+                  <SelectTrigger className="bg-background/50">
+                    <SelectValue placeholder="Select a class" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {classes.map((cls) => (
+                      <SelectItem key={cls.id} value={cls.id}>
+                        {cls.name} ({cls.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="title" className="text-foreground">Course Title *</Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="e.g., Web Development Fundamentals"
+                  className="bg-background/50"
+                  required
+                />
+                <p className="text-xs text-muted-foreground">A unique code will be generated automatically</p>
+              </div>
 
           <div className="space-y-2">
             <Label htmlFor="description" className="text-foreground">Description</Label>
@@ -173,26 +247,28 @@ export function CreateCourseDialog({ open, onOpenChange, organizationId, onCours
             )}
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                'Create Course'
-              )}
-            </Button>
-          </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={loading}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={loading || classes.length === 0}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    'Create Course'
+                  )}
+                </Button>
+              </div>
+            </>
+          )}
         </form>
       </DialogContent>
     </Dialog>
