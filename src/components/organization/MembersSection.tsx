@@ -143,7 +143,7 @@ export function MembersSection({ organizationId, showOnlyStaff = false }: Member
   };
 
   const handleCancelInvitation = async (invitationId: string) => {
-    if (!confirm('Are you sure you want to cancel this invitation?')) {
+    if (!confirm('Are you sure you want to delete this invitation? The invitation link will no longer work.')) {
       return;
     }
 
@@ -156,11 +156,11 @@ export function MembersSection({ organizationId, showOnlyStaff = false }: Member
 
       if (error) throw error;
       
-      toast.success('Invitation cancelled successfully');
+      toast.success('Invitation deleted successfully');
       loadData();
     } catch (error: any) {
-      console.error('Error cancelling invitation:', error);
-      toast.error('Failed to cancel invitation');
+      console.error('Error deleting invitation:', error);
+      toast.error('Failed to delete invitation');
     }
   };
 
@@ -306,9 +306,10 @@ export function MembersSection({ organizationId, showOnlyStaff = false }: Member
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
                     onClick={() => handleCancelInvitation(invitation.id)}
                   >
-                    Cancel
+                    Delete
                   </Button>
                 </div>
               </div>
