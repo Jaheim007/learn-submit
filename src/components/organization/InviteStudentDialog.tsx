@@ -25,7 +25,7 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
-  const [classId, setClassId] = useState<string>('');
+  const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [registrationUrl, setRegistrationUrl] = useState<string>('');
 
@@ -62,8 +62,8 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
       return;
     }
 
-    if (!classId) {
-      toast.error('Please select a class for the student');
+    if (selectedClassIds.length === 0) {
+      toast.error('Please select at least one class for the student');
       return;
     }
 
@@ -81,7 +81,7 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
           full_name: fullName.trim(),
           organization_id: organizationId,
           organization_slug: organizationSlug,
-          class_id: classId
+          class_ids: selectedClassIds
         },
         headers: {
           Authorization: `Bearer ${session.access_token}`
@@ -94,7 +94,7 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
 
       setEmail('');
       setFullName('');
-      setClassId('');
+      setSelectedClassIds([]);
       setOpen(false);
       
       onInviteSent?.();
@@ -110,7 +110,15 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
     setOpen(false);
     setEmail('');
     setFullName('');
-    setClassId('');
+    setSelectedClassIds([]);
+  };
+
+  const toggleClassSelection = (classId: string) => {
+    setSelectedClassIds(prev => 
+      prev.includes(classId)
+        ? prev.filter(id => id !== classId)
+        : [...prev, classId]
+    );
   };
 
   return (
@@ -158,24 +166,37 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="class">Assign to Class *</Label>
-            <Select value={classId} onValueChange={setClassId} disabled={loading}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a class" />
-              </SelectTrigger>
-              <SelectContent>
-                {classes.map((cls) => (
-                  <SelectItem key={cls.id} value={cls.id}>
-                    {cls.name} ({cls.code})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {classes.length === 0 && (
-              <p className="text-xs text-muted-foreground">
-                No active classes available. Create a class first.
-              </p>
-            )}
+            <Label>Assign to Classes *</Label>
+            <div className="border border-border rounded-md p-3 max-h-40 overflow-y-auto bg-background">
+              {classes.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  No active classes available. Create a class first.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {classes.map((cls) => (
+                    <label
+                      key={cls.id}
+                      className="flex items-center space-x-2 cursor-pointer hover:bg-accent/50 p-2 rounded"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedClassIds.includes(cls.id)}
+                        onChange={() => toggleClassSelection(cls.id)}
+                        disabled={loading}
+                        className="w-4 h-4 rounded border-border"
+                      />
+                      <span className="text-sm">
+                        {cls.name} ({cls.code})
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Select one or more classes to assign the student to
+            </p>
           </div>
 
           <div className="flex gap-2 pt-4">
@@ -189,7 +210,7 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
             </Button>
             <Button
               onClick={handleInvite}
-              disabled={loading || !email || !fullName || !classId}
+              disabled={loading || !email || !fullName || selectedClassIds.length === 0}
               className="flex-1 gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}

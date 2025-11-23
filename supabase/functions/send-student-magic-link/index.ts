@@ -12,7 +12,7 @@ interface StudentInvitationRequest {
   full_name: string;
   organization_id: string;
   organization_slug: string;
-  class_id?: string | null;
+  class_ids?: string[];
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -50,7 +50,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Parse request body first
-    const { email, full_name, organization_id, organization_slug, class_id }: StudentInvitationRequest = await req.json();
+    const { email, full_name, organization_id, organization_slug, class_ids }: StudentInvitationRequest = await req.json();
 
     // Verify user has permission to invite students
     const { data: orgMember } = await supabaseClient
@@ -85,20 +85,26 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Create student record with pending status
+    // Create student record with pending status (assign first class as primary)
+    const primaryClassId = class_ids && class_ids.length > 0 ? class_ids[0] : null;
+    
     const { data: newStudent, error: studentError } = await supabaseClient
       .from("submito_organization_students")
       .insert({
         email: email.toLowerCase(),
         full_name: full_name.trim(),
         organization_id,
-        class_id,
+        class_id: primaryClassId,
         status: "pending",
       })
       .select()
       .single();
 
     if (studentError) throw studentError;
+
+    // Store all assigned class IDs in metadata for future use
+    // This will be used when student accepts invitation
+    console.log("Student assigned to classes:", class_ids);
 
     // Send magic link using Supabase Auth
     const redirectUrl = `${req.headers.get("origin") || supabaseUrl}/student/setup?student_id=${newStudent.id}&org_id=${organization_id}`;
@@ -113,6 +119,7 @@ const handler = async (req: Request): Promise<Response> => {
           organization_id,
           full_name: full_name.trim(),
           role: "student",
+          class_ids: class_ids || [],
         },
       },
     });
