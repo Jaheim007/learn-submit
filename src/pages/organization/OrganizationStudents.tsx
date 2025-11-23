@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Mail, Phone, Shield, GraduationCap } from 'lucide-react';
+import { Search, Mail, Phone, Shield, GraduationCap, UserPlus, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { InviteStudentDialog } from '@/components/organization/InviteStudentDialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface Student {
   id: string;
@@ -37,6 +39,7 @@ export default function OrganizationStudents() {
   const [teacherSearchQuery, setTeacherSearchQuery] = useState('');
   const [organizationId, setOrganizationId] = useState<string>('');
   const [organizationSlug, setOrganizationSlug] = useState<string>('');
+  const [studentToCancel, setStudentToCancel] = useState<Student | null>(null);
 
   useEffect(() => {
     loadData();
@@ -124,6 +127,26 @@ export default function OrganizationStudents() {
     }
   };
 
+  const handleCancelInvitation = async () => {
+    if (!studentToCancel) return;
+
+    try {
+      const { error } = await supabase
+        .from('submito_organization_students')
+        .delete()
+        .eq('id', studentToCancel.id);
+
+      if (error) throw error;
+
+      toast.success(`Invitation to ${studentToCancel.email} cancelled`);
+      setStudentToCancel(null);
+      loadData();
+    } catch (error) {
+      console.error('Error cancelling invitation:', error);
+      toast.error('Failed to cancel invitation');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -151,7 +174,14 @@ export default function OrganizationStudents() {
         <TabsContent value="students" className="space-y-4">
           <Card className="bg-card/40 backdrop-blur-xl border-border/50">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-foreground mb-4">Students</CardTitle>
+              <div className="flex items-center justify-between mb-4">
+                <CardTitle className="text-xl font-semibold text-foreground">Students</CardTitle>
+                <InviteStudentDialog 
+                  organizationId={organizationId}
+                  organizationSlug={organizationSlug}
+                  onInviteSent={loadData}
+                />
+              </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -198,9 +228,21 @@ export default function OrganizationStudents() {
                           </div>
                         </div>
                       </div>
-                      <Badge className={getStatusColor(student.status)}>
-                        {student.status}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge className={getStatusColor(student.status)}>
+                          {student.status}
+                        </Badge>
+                        {student.status === 'pending' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setStudentToCancel(student)}
+                            className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))
                 )}
@@ -322,6 +364,24 @@ export default function OrganizationStudents() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <AlertDialog open={!!studentToCancel} onOpenChange={(open) => !open && setStudentToCancel(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Student Invitation</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel the invitation for <strong>{studentToCancel?.email}</strong>? 
+              The magic link will be invalidated and they won't be able to complete registration.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No, keep it</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCancelInvitation} className="bg-red-500 hover:bg-red-600">
+              Yes, cancel invitation
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
