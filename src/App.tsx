@@ -61,6 +61,8 @@ import TeacherHome from "./pages/teacher/TeacherHome";
 import TeacherGuard from "./components/teacher/TeacherGuard";
 import StudentCourses from "./pages/StudentCourses";
 import CourseDetail from "./pages/CourseDetail";
+import StudentSetup from "./pages/StudentSetup";
+import StudentSignin from "./pages/StudentSignin";
 
 import SupervisorDashboard from "./pages/SupervisorDashboard";
 import SupervisorSubmissions from "./pages/SupervisorSubmissions";
@@ -91,6 +93,10 @@ const App = () => (
         <Route path="/onboarding" element={<OrganizationOnboarding />} />
         <Route path="/accept-invitation" element={<AcceptInvitation />} />
           <Route path="/organization/dashboard" element={<OrganizationDashboard />} />
+              
+              {/* Student setup and auth routes */}
+              <Route path="/student/setup" element={<StudentSetup />} />
+              <Route path="/student/signin" element={<StudentSignin />} />
               
               {/* Student auth routes */}
               <Route path="/etudiant/login" element={<StudentLogin />} />

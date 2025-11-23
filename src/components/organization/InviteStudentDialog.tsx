@@ -70,7 +70,7 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke('send-student-invitation', {
+      const { data, error } = await supabase.functions.invoke('send-student-magic-link', {
         body: {
           email: email.toLowerCase(),
           full_name: fullName.trim(),
@@ -85,42 +85,36 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
 
       if (error) throw error;
 
-      if (data.registration_url) {
-        setRegistrationUrl(data.registration_url);
-        // Copy to clipboard
-        navigator.clipboard.writeText(data.registration_url);
-        toast.success('Invitation created! Registration URL copied to clipboard.');
+      toast.success(`Magic link sent to ${email}! The student will receive an email to set up their account.`);
 
-        // Create notification for organization members about new student invitation
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        const { data: orgMembers } = await supabase
-          .from('submito_organization_users')
-          .select('user_id')
-          .eq('organization_id', organizationId)
-          .neq('user_id', currentUser?.id || '');
+      // Create notification for organization members about new student invitation
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: orgMembers } = await supabase
+        .from('submito_organization_users')
+        .select('user_id')
+        .eq('organization_id', organizationId)
+        .neq('user_id', currentUser?.id || '');
 
-        if (orgMembers && orgMembers.length > 0) {
-          const notifications = orgMembers.map(member => ({
-            user_id: member.user_id,
-            type: 'student_invited',
-            title: 'Student Invitation Sent',
-            body: `A new student invitation was sent to ${fullName}`,
-            metadata: {
-              student_email: email,
-              student_name: fullName,
-              organization_id: organizationId
-            }
-          }));
+      if (orgMembers && orgMembers.length > 0) {
+        const notifications = orgMembers.map(member => ({
+          user_id: member.user_id,
+          type: 'student_invited',
+          title: 'Student Invitation Sent',
+          body: `A magic link invitation was sent to ${fullName} (${email})`,
+          metadata: {
+            student_email: email,
+            student_name: fullName,
+            organization_id: organizationId
+          }
+        }));
 
-          await supabase.from('notifications').insert(notifications);
-        }
-      } else {
-        toast.success(`Invitation sent to ${email}`);
-        setEmail('');
-        setFullName('');
-        setClassId('');
-        setOpen(false);
+        await supabase.from('notifications').insert(notifications);
       }
+
+      setEmail('');
+      setFullName('');
+      setClassId('');
+      setOpen(false);
       
       onInviteSent?.();
     } catch (error: any) {
@@ -136,12 +130,6 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
     setEmail('');
     setFullName('');
     setClassId('');
-    setRegistrationUrl('');
-  };
-
-  const copyUrl = () => {
-    navigator.clipboard.writeText(registrationUrl);
-    toast.success('URL copied to clipboard');
   };
 
   return (
@@ -163,32 +151,7 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
           </DialogDescription>
         </DialogHeader>
 
-        {registrationUrl ? (
-          <div className="space-y-4 pt-4">
-            <div className="p-4 bg-muted rounded-lg space-y-2">
-              <Label>Registration URL</Label>
-              <p className="text-sm text-muted-foreground">Share this URL with the student to complete registration:</p>
-              <div className="flex items-center gap-2">
-                <Input
-                  value={registrationUrl}
-                  readOnly
-                  className="font-mono text-xs"
-                />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={copyUrl}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <Button onClick={handleClose} className="w-full">
-              Done
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4 pt-4">
+        <div className="space-y-4 pt-4">
             <div className="space-y-2">
               <Label htmlFor="student-name">Full Name</Label>
               <Input
@@ -254,7 +217,6 @@ export function InviteStudentDialog({ organizationId, organizationSlug, onInvite
               </Button>
             </div>
           </div>
-        )}
       </DialogContent>
     </Dialog>
   );
