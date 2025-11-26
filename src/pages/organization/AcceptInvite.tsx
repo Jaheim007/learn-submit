@@ -29,15 +29,21 @@ const AcceptInvite = () => {
         setStatus('processing');
         setMessage('Activation de votre accès à l\'organisation...');
 
-        const { error } = await supabase.functions.invoke('accept-organization-invitation', {
+        const { data, error } = await supabase.functions.invoke('accept-organization-invitation', {
           body: { token },
         });
 
         if (error) {
-          console.error('Error from edge function:', error);
+          console.error('Error from edge function:', error, 'Response data:', data);
+          const backendMessage =
+            (data as any)?.message ||
+            (data as any)?.error ||
+            (error as any)?.message ||
+            'Impossible de valider votre invitation.';
+
           setStatus('error');
-          setMessage(error.message || 'Impossible de valider votre invitation.');
-          toast.error(error.message || 'Impossible de valider votre invitation.');
+          setMessage(backendMessage);
+          toast.error(backendMessage);
           navigate('/organization/signin');
           return;
         }
