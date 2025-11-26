@@ -120,7 +120,7 @@ const handler = async (req: Request): Promise<Response> => {
       const emailResponse = await resend.emails.send({
         from: 'Submito <info@genessible.com>',
         to: [email.toLowerCase()],
-        subject: "You've been invited to join an organization on Submito 🎉",
+        subject: `You've been invited to join ${organization.name} on Submito 🎉`,
         html: `
           <!DOCTYPE html>
           <html>
