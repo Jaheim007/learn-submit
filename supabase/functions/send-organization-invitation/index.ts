@@ -111,9 +111,8 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Send invitation email via Resend
-    const invitationUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/accept-organization-invitation?token=${invitation.invitation_token}`;
-    
+    const appUrl = Deno.env.get('PUBLIC_SITE_URL') || 'https://d684e6da-9985-4c90-afe5-fc8b02ef26fe.lovableproject.com';
+    const invitationUrl = `${appUrl}/accept-invite?token=${invitation.invitation_token}`;
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
     
     try {

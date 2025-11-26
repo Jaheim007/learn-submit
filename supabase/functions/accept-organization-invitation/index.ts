@@ -12,8 +12,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const url = new URL(req.url);
-    const token = url.searchParams.get('token');
+    const { token } = await req.json();
 
     if (!token) {
       return new Response(JSON.stringify({ error: 'No invitation token provided' }), {
@@ -30,12 +29,11 @@ const handler = async (req: Request): Promise<Response> => {
     // Get auth token from request
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      // Redirect to invitation acceptance page with token
-      const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/') || 'https://d684e6da-9985-4c90-afe5-fc8b02ef26fe.lovableproject.com';
-      const redirectUrl = `${origin}/accept-invitation?token=${token}`;
-      return Response.redirect(redirectUrl, 302);
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
-
     // Verify user is authenticated
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(
       authHeader.replace('Bearer ', '')
@@ -108,11 +106,10 @@ const handler = async (req: Request): Promise<Response> => {
       .update({ accepted_at: new Date().toISOString() })
       .eq('id', invitation.id);
 
-    // Redirect to organization dashboard
-    const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/') || 'https://d684e6da-9985-4c90-afe5-fc8b02ef26fe.lovableproject.com';
-    const redirectUrl = `${origin}/organization/dashboard`;
-    return Response.redirect(redirectUrl, 302);
-
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   } catch (error: any) {
     console.error('Error in accept-organization-invitation function:', error);
     return new Response(JSON.stringify({ error: error.message }), {

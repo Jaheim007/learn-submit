@@ -18,6 +18,7 @@ import OrganizationCourses from "./pages/organization/OrganizationCourses";
 import OrganizationAnalytics from "./pages/organization/OrganizationAnalytics";
 import OrganizationSettings from "./pages/organization/OrganizationSettings";
 import AcceptInvitation from "./pages/organization/AcceptInvitation";
+import AcceptInvite from "./pages/organization/AcceptInvite";
 import Auth from "./pages/Auth";
 import AuthRedirect from "./pages/AuthRedirect";
 import StudentLogin from "./pages/StudentLogin";
@@ -92,6 +93,7 @@ const App = () => (
         <Route path="/auth-redirect" element={<AuthRedirect />} />
         <Route path="/onboarding" element={<OrganizationOnboarding />} />
         <Route path="/accept-invitation" element={<AcceptInvitation />} />
+        <Route path="/accept-invite" element={<AcceptInvite />} />
           <Route path="/organization/dashboard" element={<OrganizationDashboard />} />
               
               {/* Student setup and auth routes */}
