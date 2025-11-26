@@ -31,7 +31,8 @@ const handler = async (req: Request): Promise<Response> => {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       // Redirect to invitation acceptance page with token
-      const redirectUrl = `${Deno.env.get('SUPABASE_URL')?.replace('/functions/v1/accept-organization-invitation', '')}/accept-invitation?token=${token}`;
+      const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/') || 'https://d684e6da-9985-4c90-afe5-fc8b02ef26fe.lovableproject.com';
+      const redirectUrl = `${origin}/accept-invitation?token=${token}`;
       return Response.redirect(redirectUrl, 302);
     }
 
@@ -108,7 +109,8 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('id', invitation.id);
 
     // Redirect to organization dashboard
-    const redirectUrl = `${Deno.env.get('SUPABASE_URL')}/organization/dashboard`;
+    const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/') || 'https://d684e6da-9985-4c90-afe5-fc8b02ef26fe.lovableproject.com';
+    const redirectUrl = `${origin}/organization/dashboard`;
     return Response.redirect(redirectUrl, 302);
 
   } catch (error: any) {
