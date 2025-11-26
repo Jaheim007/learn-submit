@@ -111,10 +111,12 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    const appUrl = Deno.env.get('PUBLIC_SITE_URL') || 'https://d684e6da-9985-4c90-afe5-fc8b02ef26fe.lovableproject.com';
-    const invitationUrl = `${appUrl}/accept-invite?token=${invitation.invitation_token}`;
+    // Determine app base URL: prefer PUBLIC_SITE_URL, then request origin, then fallback
+    const origin = req.headers.get('origin');
+    const appUrl = Deno.env.get('PUBLIC_SITE_URL') || origin || 'https://soum1.hackerprof.com';
+    const invitationUrl = `${appUrl.replace(/\/$/, '')}/accept-invite?token=${invitation.invitation_token}`;
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
-    
+
     try {
       const emailResponse = await resend.emails.send({
         from: 'Submito <info@genessible.com>',
