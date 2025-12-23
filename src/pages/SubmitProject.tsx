@@ -144,8 +144,17 @@ export default function SubmitProject() {
     return data.path;
   };
 
+  // Check if deadline has expired
+  const isDeadlineExpired = project?.deadline_at && new Date(project.deadline_at) < new Date();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Block submission if deadline has expired
+    if (isDeadlineExpired) {
+      toast.error('Le délai de soumission est expiré. Vous ne pouvez plus soumettre ce projet.');
+      return;
+    }
     
     if (!studentId || !classId) {
       toast.error('Données manquantes');
@@ -411,13 +420,19 @@ export default function SubmitProject() {
             <Button
               type="submit"
               size="lg"
-              disabled={submitting}
+              disabled={submitting || isDeadlineExpired}
+              variant={isDeadlineExpired ? "outline" : "default"}
               className="gap-2"
             >
               {submitting ? (
                 <>
                   <span className="animate-spin">⏳</span>
                   Envoi en cours...
+                </>
+              ) : isDeadlineExpired ? (
+                <>
+                  <X className="h-4 w-4" />
+                  Délai expiré - Soumission impossible
                 </>
               ) : (
                 <>
