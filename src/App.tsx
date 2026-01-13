@@ -41,6 +41,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminPendingStudents from "./pages/admin/AdminPendingStudents";
 import AdminCourses from "./pages/admin/AdminCourses";
+import AdminClasses from "./pages/admin/AdminClasses";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminRegister from "./pages/admin/AdminRegister";
 import AdminAcademyUsers from "./pages/admin/AdminAcademyUsers";
@@ -127,6 +128,7 @@ const App = () => (
                 <Route path="submissions" element={<AdminSubmissions />} />
                 <Route path="projects" element={<AdminProjects />} />
                 <Route path="courses" element={<AdminCourses />} />
+                <Route path="classes" element={<AdminClasses />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="academy-users" element={<AdminAcademyUsers />} />
                 <Route path="settings" element={<AdminSettings />} />

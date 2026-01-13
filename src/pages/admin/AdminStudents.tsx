@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, Download, UserX, UserCheck, Eye } from 'lucide-react';
+import { Search, Download, UserX, UserCheck, Eye, ArrowRightLeft } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
@@ -14,6 +14,7 @@ import { fr } from 'date-fns/locale';
 import { useRefreshInterval } from '@/hooks/useRefreshInterval';
 import { RefreshHeader } from '@/components/admin/RefreshHeader';
 import { StudentProfileModal } from '@/components/admin/StudentProfileModal';
+import { ChangeClassDialog } from '@/components/admin/ChangeClassDialog';
 
 interface Student {
   id: string;
@@ -48,6 +49,8 @@ export default function AdminStudents() {
   const [showInactive, setShowInactive] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [changeClassOpen, setChangeClassOpen] = useState(false);
+  const [studentToChangeClass, setStudentToChangeClass] = useState<Student | null>(null);
 
   // Debounce search term
   useEffect(() => {
@@ -362,8 +365,21 @@ export default function AdminStudents() {
                           setSelectedStudent(student);
                           setProfileModalOpen(true);
                         }}
+                        title="Voir profil"
                       >
                         <Eye className="h-4 w-4" />
+                      </Button>
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setStudentToChangeClass(student);
+                          setChangeClassOpen(true);
+                        }}
+                        title="Changer de classe"
+                      >
+                        <ArrowRightLeft className="h-4 w-4" />
                       </Button>
                       
                       <AlertDialog>
@@ -419,6 +435,14 @@ export default function AdminStudents() {
         student={selectedStudent}
         open={profileModalOpen}
         onOpenChange={setProfileModalOpen}
+      />
+
+      {/* Change Class Dialog */}
+      <ChangeClassDialog
+        open={changeClassOpen}
+        onOpenChange={setChangeClassOpen}
+        student={studentToChangeClass}
+        onSuccess={loadData}
       />
     </div>
   );

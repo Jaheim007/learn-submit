@@ -2,7 +2,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, BarChart3, Users, FileText, FolderOpen, UserCheck, Settings, BookOpen, GraduationCap } from 'lucide-react';
+import { LogOut, BarChart3, Users, FileText, FolderOpen, UserCheck, Settings, BookOpen, GraduationCap, School } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import nysLogo from '@/assets/nys-logo.png';
 
@@ -19,6 +19,7 @@ export default function AdminLayout() {
   const navItems = [
     { path: '/admin', label: 'Tableau de bord', icon: BarChart3 },
     { path: '/admin/students', label: 'Étudiants', icon: Users },
+    { path: '/admin/classes', label: 'Classes', icon: School },
     { path: '/admin/submissions', label: 'Soumissions', icon: FileText },
     { path: '/admin/projects', label: 'Projets', icon: FolderOpen },
     { path: '/admin/courses', label: 'Cours', icon: BookOpen },
