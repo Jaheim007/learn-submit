@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,12 +10,20 @@ interface StudentGuardProps {
 export default function StudentGuard({ children }: StudentGuardProps) {
   const { user, authLoading, session } = useAuth();
   const [studentCheck, setStudentCheck] = useState<'loading' | 'found' | 'not_found' | 'rejected'>('loading');
+  
+  // Track if we've already checked for this user to avoid re-checking on tab switch
+  const checkedForUserRef = useRef<string | null>(null);
 
   // Ensure student profile exists (handles OAuth auto-provisioning)
   useEffect(() => {
     if (!user || authLoading || !session) return;
+    
+    // Skip if we've already checked for this user
+    if (checkedForUserRef.current === user.id && studentCheck !== 'loading') {
+      return;
+    }
 
-  const ensureStudentProfile = async () => {
+    const ensureStudentProfile = async () => {
       try {
         // 1) Fast path: does a student profile already exist?
         const { data: studentData, error: studentErr } = await supabase
@@ -25,6 +33,7 @@ export default function StudentGuard({ children }: StudentGuardProps) {
           .maybeSingle();
 
         if (!studentErr && studentData) {
+          checkedForUserRef.current = user.id;
           // Check student status
           if (studentData.status === 'pending') {
             setStudentCheck('not_found'); // Will redirect to pending page
@@ -41,7 +50,6 @@ export default function StudentGuard({ children }: StudentGuardProps) {
         // 2) If not found and this is an OAuth user, auto-create via edge function
         const provider = session?.user?.app_metadata?.provider;
         if (provider && provider !== 'email') {
-          setStudentCheck('loading');
           try {
             // 2a) Try direct insert (works if RLS allows creating own student row)
             const { data: created, error: insertErr } = await supabase
@@ -57,6 +65,7 @@ export default function StudentGuard({ children }: StudentGuardProps) {
               .single();
 
             if (!insertErr && created) {
+              checkedForUserRef.current = user.id;
               setStudentCheck('found');
               return;
             }
@@ -82,21 +91,24 @@ export default function StudentGuard({ children }: StudentGuardProps) {
             .maybeSingle();
 
           if (!afterErr && afterData) {
+            checkedForUserRef.current = user.id;
             setStudentCheck('found');
             return;
           }
         }
 
         // 3) Still not found -> require registration (email/password path)
+        checkedForUserRef.current = user.id;
         setStudentCheck('not_found');
       } catch (error) {
         console.error('Error ensuring student profile:', error);
+        checkedForUserRef.current = user.id;
         setStudentCheck('not_found');
       }
     };
 
     ensureStudentProfile();
-  }, [user, authLoading, session]);
+  }, [user?.id, authLoading, session?.access_token]); // Only re-run if user ID actually changes
 
   // Wait for auth to finish loading
   if (authLoading || studentCheck === 'loading') {

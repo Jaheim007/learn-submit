@@ -254,73 +254,6 @@ export default function AdminClasses() {
     );
   }
 
-  const ClassFormFields = () => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="code">Code *</Label>
-          <Input
-            id="code"
-            value={formData.code}
-            onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-            placeholder="VCP"
-            className="uppercase"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="session_name">Nom de session</Label>
-          <Input
-            id="session_name"
-            value={formData.session_name}
-            onChange={(e) => setFormData({ ...formData, session_name: e.target.value })}
-            placeholder="VibeCoder PRO"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="title">Titre *</Label>
-        <Input
-          id="title"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          placeholder="VibeCoder PRO"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Description de la classe..."
-          rows={3}
-        />
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="is_active"
-            checked={formData.is_active}
-            onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-          />
-          <Label htmlFor="is_active">Classe active</Label>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="is_open_for_signup"
-            checked={formData.is_open_for_signup}
-            onCheckedChange={(checked) => setFormData({ ...formData, is_open_for_signup: checked })}
-          />
-          <Label htmlFor="is_open_for_signup">Inscriptions ouvertes</Label>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -348,7 +281,70 @@ export default function AdminClasses() {
                 Remplissez les informations pour créer une nouvelle classe
               </DialogDescription>
             </DialogHeader>
-            <ClassFormFields />
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="create-code">Code *</Label>
+                  <Input
+                    id="create-code"
+                    value={formData.code}
+                    onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
+                    placeholder="VCP"
+                    className="uppercase"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="create-session_name">Nom de session</Label>
+                  <Input
+                    id="create-session_name"
+                    value={formData.session_name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, session_name: e.target.value }))}
+                    placeholder="VibeCoder PRO"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="create-title">Titre *</Label>
+                <Input
+                  id="create-title"
+                  value={formData.title}
+                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="VibeCoder PRO"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="create-description">Description</Label>
+                <Textarea
+                  id="create-description"
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Description de la classe..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="create-is_active"
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                  />
+                  <Label htmlFor="create-is_active">Classe active</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="create-is_open_for_signup"
+                    checked={formData.is_open_for_signup}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_open_for_signup: checked }))}
+                  />
+                  <Label htmlFor="create-is_open_for_signup">Inscriptions ouvertes</Label>
+                </div>
+              </div>
+            </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
                 Annuler
@@ -451,7 +447,70 @@ export default function AdminClasses() {
               Modifiez les informations de la classe
             </DialogDescription>
           </DialogHeader>
-          <ClassFormFields />
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-code">Code *</Label>
+                <Input
+                  id="edit-code"
+                  value={formData.code}
+                  onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
+                  placeholder="VCP"
+                  className="uppercase"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-session_name">Nom de session</Label>
+                <Input
+                  id="edit-session_name"
+                  value={formData.session_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, session_name: e.target.value }))}
+                  placeholder="VibeCoder PRO"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Titre *</Label>
+              <Input
+                id="edit-title"
+                value={formData.title}
+                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="VibeCoder PRO"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Description de la classe..."
+                rows={3}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="edit-is_active"
+                  checked={formData.is_active}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                />
+                <Label htmlFor="edit-is_active">Classe active</Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="edit-is_open_for_signup"
+                  checked={formData.is_open_for_signup}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_open_for_signup: checked }))}
+                />
+                <Label htmlFor="edit-is_open_for_signup">Inscriptions ouvertes</Label>
+              </div>
+            </div>
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>
               Annuler

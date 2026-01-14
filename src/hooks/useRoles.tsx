@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -19,8 +19,12 @@ export function useRoles() {
   const [isTeacher, setIsTeacher] = useState(false);
   const [isAcademy, setIsAcademy] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Track if we've already fetched roles for this user to avoid re-fetching
+  const fetchedForUserRef = useRef<string | null>(null);
+  const hasFetchedRef = useRef(false);
 
-  const fetchRoles = useCallback(async () => {
+  const fetchRoles = useCallback(async (forceRefetch = false) => {
     if (!user) {
       setRoles([]);
       setIsAdmin(false);
@@ -28,6 +32,13 @@ export function useRoles() {
       setIsTeacher(false);
       setIsAcademy(false);
       setIsLoading(false);
+      fetchedForUserRef.current = null;
+      hasFetchedRef.current = false;
+      return;
+    }
+
+    // Skip refetch if we already have roles for this user (unless forced)
+    if (!forceRefetch && hasFetchedRef.current && fetchedForUserRef.current === user.id) {
       return;
     }
 
@@ -58,6 +69,10 @@ export function useRoles() {
         setIsSupervisor(roleData.isSupervisor || false);
         setIsTeacher(roleData.isTeacher || false);
         setIsAcademy(roleData.isAcademy || false);
+        
+        // Mark that we've successfully fetched for this user
+        fetchedForUserRef.current = user.id;
+        hasFetchedRef.current = true;
       }
     } catch (error) {
       console.error('Unexpected error fetching roles:', error);
@@ -69,16 +84,22 @@ export function useRoles() {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user?.id]); // Only depend on user.id, not the entire user object
 
   const refetch = useCallback(async () => {
     console.log('Refetching roles...');
-    await fetchRoles();
+    await fetchRoles(true); // Force refetch
   }, [fetchRoles]);
 
   useEffect(() => {
-    fetchRoles();
-  }, [fetchRoles]);
+    // Only fetch if user ID changed
+    if (user?.id !== fetchedForUserRef.current) {
+      fetchRoles();
+    } else if (!user) {
+      // Reset if user logged out
+      fetchRoles();
+    }
+  }, [user?.id, fetchRoles]);
 
   return {
     roles,
