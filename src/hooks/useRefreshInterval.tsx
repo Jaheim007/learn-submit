@@ -1,12 +1,14 @@
-import { useEffect, useState, useCallback } from 'react';
-
-const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+import { useState, useCallback } from 'react';
 
 interface UseRefreshIntervalReturn {
   lastRefreshTime: Date;
   refresh: () => void;
 }
 
+/**
+ * Hook for manual refresh functionality.
+ * No automatic refresh - users can click the refresh button when needed.
+ */
 export function useRefreshInterval(
   onRefresh: () => void | Promise<void>
 ): UseRefreshIntervalReturn {
@@ -16,14 +18,6 @@ export function useRefreshInterval(
     await onRefresh();
     setLastRefreshTime(new Date());
   }, [onRefresh]);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      refresh();
-    }, REFRESH_INTERVAL_MS);
-
-    return () => clearInterval(intervalId);
-  }, [refresh]);
 
   return { lastRefreshTime, refresh };
 }
