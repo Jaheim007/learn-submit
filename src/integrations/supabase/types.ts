@@ -372,6 +372,102 @@ export type Database = {
           },
         ]
       }
+      csir_formations: {
+        Row: {
+          application_status: Database["public"]["Enums"]["csir_application_status"]
+          availability: string | null
+          city: string | null
+          cohort: string | null
+          consent_given: boolean
+          country: string
+          created_at: string
+          current_profession: string | null
+          cv_upload: string | null
+          education_level: string | null
+          email: string
+          first_name: string
+          id: string
+          interview_date: string | null
+          last_name: string
+          motivation_text: string
+          objectives: string | null
+          payment_status: Database["public"]["Enums"]["csir_payment_status"]
+          phone_number: string
+          portfolio_link: string | null
+          preferred_format: Database["public"]["Enums"]["csir_format"] | null
+          prior_projects: string | null
+          problem_to_solve: string | null
+          program_type: Database["public"]["Enums"]["csir_program_type"]
+          referral_source: string | null
+          reviewer_notes: string | null
+          sector_interest: string | null
+          updated_at: string
+          years_experience: number | null
+        }
+        Insert: {
+          application_status?: Database["public"]["Enums"]["csir_application_status"]
+          availability?: string | null
+          city?: string | null
+          cohort?: string | null
+          consent_given?: boolean
+          country?: string
+          created_at?: string
+          current_profession?: string | null
+          cv_upload?: string | null
+          education_level?: string | null
+          email: string
+          first_name: string
+          id?: string
+          interview_date?: string | null
+          last_name: string
+          motivation_text: string
+          objectives?: string | null
+          payment_status?: Database["public"]["Enums"]["csir_payment_status"]
+          phone_number: string
+          portfolio_link?: string | null
+          preferred_format?: Database["public"]["Enums"]["csir_format"] | null
+          prior_projects?: string | null
+          problem_to_solve?: string | null
+          program_type: Database["public"]["Enums"]["csir_program_type"]
+          referral_source?: string | null
+          reviewer_notes?: string | null
+          sector_interest?: string | null
+          updated_at?: string
+          years_experience?: number | null
+        }
+        Update: {
+          application_status?: Database["public"]["Enums"]["csir_application_status"]
+          availability?: string | null
+          city?: string | null
+          cohort?: string | null
+          consent_given?: boolean
+          country?: string
+          created_at?: string
+          current_profession?: string | null
+          cv_upload?: string | null
+          education_level?: string | null
+          email?: string
+          first_name?: string
+          id?: string
+          interview_date?: string | null
+          last_name?: string
+          motivation_text?: string
+          objectives?: string | null
+          payment_status?: Database["public"]["Enums"]["csir_payment_status"]
+          phone_number?: string
+          portfolio_link?: string | null
+          preferred_format?: Database["public"]["Enums"]["csir_format"] | null
+          prior_projects?: string | null
+          problem_to_solve?: string | null
+          program_type?: Database["public"]["Enums"]["csir_program_type"]
+          referral_source?: string | null
+          reviewer_notes?: string | null
+          sector_interest?: string | null
+          updated_at?: string
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
       efi_preinscriptions: {
         Row: {
           created_at: string
@@ -2308,6 +2404,17 @@ export type Database = {
       }
     }
     Enums: {
+      csir_application_status:
+        | "Received"
+        | "Under Review"
+        | "Test Sent"
+        | "Interview Scheduled"
+        | "Accepted"
+        | "Rejected"
+        | "Waitlist"
+      csir_format: "Présentiel" | "Hybride" | "En ligne"
+      csir_payment_status: "Not Paid" | "Deposit Paid" | "Fully Paid"
+      csir_program_type: "CSIR Elite" | "CSIR Elite Plus"
       submission_status:
         | "Reçu"
         | "En révision"
@@ -2445,6 +2552,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      csir_application_status: [
+        "Received",
+        "Under Review",
+        "Test Sent",
+        "Interview Scheduled",
+        "Accepted",
+        "Rejected",
+        "Waitlist",
+      ],
+      csir_format: ["Présentiel", "Hybride", "En ligne"],
+      csir_payment_status: ["Not Paid", "Deposit Paid", "Fully Paid"],
+      csir_program_type: ["CSIR Elite", "CSIR Elite Plus"],
       submission_status: [
         "Reçu",
         "En révision",
