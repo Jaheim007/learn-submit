@@ -125,23 +125,23 @@ export default function AdminSettings() {
       // Get all file paths from submissions
       const { data: submissions } = await supabase
         .from('submissions')
-        .select('id, description, students!inner(full_name), projects!inner(title)');
+        .select('id, description, link1, link2, link3, students!inner(full_name), projects!inner(title)');
 
       if (!submissions || submissions.length === 0) {
         toast.info('Aucun fichier à exporter');
         return;
       }
 
-      // Create a report of submissions
-      const fileReport = ['ID Soumission', 'Étudiant', 'Projet', 'Description'];
-      const fileRows = submissions
-        ?.filter(s => s.description)
-        .map(s => [
-          s.id,
-          (s.students as any).full_name,
-          (s.projects as any).title,
-          s.description || ''
-        ]) || [];
+      const fileReport = ['ID Soumission', 'Étudiant', 'Projet', 'Lien 1', 'Lien 2', 'Lien 3', 'Description'];
+      const fileRows = submissions.map(s => [
+        s.id,
+        (s.students as any).full_name,
+        (s.projects as any).title,
+        s.link1 || '',
+        s.link2 || '',
+        s.link3 || '',
+        s.description || ''
+      ]);
 
       const csvContent = createCSV(fileReport, fileRows);
       downloadCSV(csvContent, `fichiers_soumissions_${new Date().toISOString().split('T')[0]}.csv`);
