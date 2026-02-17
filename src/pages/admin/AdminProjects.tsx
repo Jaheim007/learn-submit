@@ -114,33 +114,30 @@ export default function AdminProjects() {
           return acc;
         }, {} as Record<number, number>) || {};
 
-        // Transform the data to group classes
-        const transformedProjects = projectsResponse.data.reduce((acc, item: any) => {
-          const existingProject = acc.find(p => p.id === item.id);
-          const classData = Array.isArray(item.class_projects) 
-            ? item.class_projects[0]?.classes 
-            : item.class_projects?.classes;
-          
-          if (existingProject && classData) {
-            existingProject.classes.push(classData);
-          } else if (classData) {
-            acc.push({
-              id: item.id,
-              title: item.title,
-              description: item.description,
-              deadline_at: item.deadline_at,
-              allow_resubmit: item.allow_resubmit,
-              max_resubmits: item.max_resubmits,
-              is_active: item.is_active,
-              created_at: item.created_at,
-              image_url: item.image_url,
-              classes: [classData],
-              submissions_count: submissionCounts[item.id] || 0
-            });
-          }
-          
-          return acc;
-        }, [] as Project[]);
+        // Transform the data to extract classes from nested class_projects
+        const transformedProjects = projectsResponse.data.map((item: any) => {
+          const classesArray = Array.isArray(item.class_projects)
+            ? item.class_projects
+                .map((cp: any) => cp.classes)
+                .filter(Boolean)
+            : item.class_projects?.classes
+              ? [item.class_projects.classes]
+              : [];
+
+          return {
+            id: item.id,
+            title: item.title,
+            description: item.description,
+            deadline_at: item.deadline_at,
+            allow_resubmit: item.allow_resubmit,
+            max_resubmits: item.max_resubmits,
+            is_active: item.is_active,
+            created_at: item.created_at,
+            image_url: item.image_url,
+            classes: classesArray,
+            submissions_count: submissionCounts[item.id] || 0
+          };
+        });
 
         setProjects(transformedProjects);
       }
