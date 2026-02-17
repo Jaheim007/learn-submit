@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_notification_emails: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       admins: {
         Row: {
           created_at: string | null
@@ -185,6 +212,122 @@ export type Database = {
           },
         ]
       }
+      chatbot_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          prospect_id: string
+          role: string
+          score_delta: number | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          prospect_id: string
+          role: string
+          score_delta?: number | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          prospect_id?: string
+          role?: string
+          score_delta?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chatbot_messages_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "chatbot_prospects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chatbot_prospects: {
+        Row: {
+          admin_notes: string | null
+          assigned_to: string | null
+          brochure_sent: boolean | null
+          classification: string
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          is_hot_alert_sent: boolean | null
+          last_reminder_at: string | null
+          max_scroll_percent: number | null
+          pages_visited: string[] | null
+          phone: string | null
+          pipeline_status: string
+          priority: string
+          profile_type: string | null
+          reminder_count: number | null
+          score: number
+          session_id: string
+          sla_deadline: string | null
+          source_url: string | null
+          time_on_page_seconds: number | null
+          updated_at: string
+          wants_reminder: boolean | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          assigned_to?: string | null
+          brochure_sent?: boolean | null
+          classification?: string
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_hot_alert_sent?: boolean | null
+          last_reminder_at?: string | null
+          max_scroll_percent?: number | null
+          pages_visited?: string[] | null
+          phone?: string | null
+          pipeline_status?: string
+          priority?: string
+          profile_type?: string | null
+          reminder_count?: number | null
+          score?: number
+          session_id: string
+          sla_deadline?: string | null
+          source_url?: string | null
+          time_on_page_seconds?: number | null
+          updated_at?: string
+          wants_reminder?: boolean | null
+        }
+        Update: {
+          admin_notes?: string | null
+          assigned_to?: string | null
+          brochure_sent?: boolean | null
+          classification?: string
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_hot_alert_sent?: boolean | null
+          last_reminder_at?: string | null
+          max_scroll_percent?: number | null
+          pages_visited?: string[] | null
+          phone?: string | null
+          pipeline_status?: string
+          priority?: string
+          profile_type?: string | null
+          reminder_count?: number | null
+          score?: number
+          session_id?: string
+          sla_deadline?: string | null
+          source_url?: string | null
+          time_on_page_seconds?: number | null
+          updated_at?: string
+          wants_reminder?: boolean | null
+        }
+        Relationships: []
+      }
       class_enrollments: {
         Row: {
           class_id: number
@@ -316,6 +459,117 @@ export type Database = {
           session_name?: string | null
           signup_deadline?: string | null
           title?: string
+        }
+        Relationships: []
+      }
+      coaching_reports: {
+        Row: {
+          conseiller: string
+          conseiller_en_charge: string
+          created_at: string
+          created_by: string | null
+          details_appel: string | null
+          dit_client: string
+          id: string
+          nom_client: string
+          telephone_client: string
+          updated_at: string
+          whatsapp_client: string | null
+        }
+        Insert: {
+          conseiller: string
+          conseiller_en_charge: string
+          created_at?: string
+          created_by?: string | null
+          details_appel?: string | null
+          dit_client: string
+          id?: string
+          nom_client: string
+          telephone_client: string
+          updated_at?: string
+          whatsapp_client?: string | null
+        }
+        Update: {
+          conseiller?: string
+          conseiller_en_charge?: string
+          created_at?: string
+          created_by?: string | null
+          details_appel?: string | null
+          dit_client?: string
+          id?: string
+          nom_client?: string
+          telephone_client?: string
+          updated_at?: string
+          whatsapp_client?: string | null
+        }
+        Relationships: []
+      }
+      conference_leads: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          email: string | null
+          follow_up_status: string
+          full_name: string
+          id: string
+          is_hot_alert_sent: boolean
+          lead_score: number
+          lead_temperature: string
+          message: string | null
+          mode: string
+          phone: string
+          source: string | null
+          status: string
+          updated_at: string
+          utm_ad: string | null
+          utm_adset: string | null
+          utm_campaign: string | null
+          utm_source: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string | null
+          follow_up_status?: string
+          full_name: string
+          id?: string
+          is_hot_alert_sent?: boolean
+          lead_score?: number
+          lead_temperature?: string
+          message?: string | null
+          mode?: string
+          phone: string
+          source?: string | null
+          status?: string
+          updated_at?: string
+          utm_ad?: string | null
+          utm_adset?: string | null
+          utm_campaign?: string | null
+          utm_source?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string | null
+          follow_up_status?: string
+          full_name?: string
+          id?: string
+          is_hot_alert_sent?: boolean
+          lead_score?: number
+          lead_temperature?: string
+          message?: string | null
+          mode?: string
+          phone?: string
+          source?: string | null
+          status?: string
+          updated_at?: string
+          utm_ad?: string | null
+          utm_adset?: string | null
+          utm_campaign?: string | null
+          utm_source?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -468,6 +722,33 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_reports: {
+        Row: {
+          created_at: string
+          id: string
+          report_business: string
+          report_date: string
+          report_technical: string
+          stats: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          report_business: string
+          report_date: string
+          report_technical: string
+          stats?: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          report_business?: string
+          report_date?: string
+          report_technical?: string
+          stats?: Json
+        }
+        Relationships: []
+      }
       efi_preinscriptions: {
         Row: {
           created_at: string
@@ -503,6 +784,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      email_send_logs: {
+        Row: {
+          created_at: string
+          email_type: string
+          error_message: string | null
+          id: string
+          prospect_id: string | null
+          recipient_email: string
+          recipient_name: string | null
+          resend_response: Json | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email_type: string
+          error_message?: string | null
+          id?: string
+          prospect_id?: string | null
+          recipient_email: string
+          recipient_name?: string | null
+          resend_response?: Json | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          prospect_id?: string | null
+          recipient_email?: string
+          recipient_name?: string | null
+          resend_response?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_send_logs_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "chatbot_prospects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       end_of_training_forms: {
         Row: {
@@ -921,6 +1246,39 @@ export type Database = {
         }
         Relationships: []
       }
+      hacker_registrations: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          motivation: string | null
+          phone: string
+          plan: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          motivation?: string | null
+          phone: string
+          plan?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          motivation?: string | null
+          phone?: string
+          plan?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       instructors: {
         Row: {
           created_at: string
@@ -1142,6 +1500,76 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      prospect_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          description: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+          performed_by: string | null
+          prospect_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          description: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          performed_by?: string | null
+          prospect_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          description?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          performed_by?: string | null
+          prospect_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prospect_actions_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "chatbot_prospects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prospect_emails_sent: {
+        Row: {
+          email_type: string
+          id: string
+          prospect_id: string
+          sent_at: string
+        }
+        Insert: {
+          email_type: string
+          id?: string
+          prospect_id: string
+          sent_at?: string
+        }
+        Update: {
+          email_type?: string
+          id?: string
+          prospect_id?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prospect_emails_sent_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "chatbot_prospects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quiz_responses: {
         Row: {
@@ -2279,6 +2707,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      chatbot_claim_prospect: {
+        Args: {
+          p_email: string
+          p_full_name: string
+          p_new_session_id: string
+          p_phone: string
+        }
+        Returns: Json
+      }
+      chatbot_create_prospect: { Args: { p_data: Json }; Returns: string }
+      chatbot_get_prospect: {
+        Args: { p_id: string; p_session_id: string }
+        Returns: Json
+      }
+      chatbot_restore: {
+        Args: { p_email: string; p_new_session_id: string }
+        Returns: Json
+      }
+      chatbot_update_prospect: {
+        Args: { p_data: Json; p_id: string; p_session_id: string }
+        Returns: undefined
+      }
       get_full_training_form: {
         Args: { access_reason: string; form_id: string }
         Returns: {
