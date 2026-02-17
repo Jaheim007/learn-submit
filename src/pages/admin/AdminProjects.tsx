@@ -360,8 +360,7 @@ export default function AdminProjects() {
     );
   }
 
-  // ProjectForm Component
-  const ProjectForm = () => (
+  const projectFormContent = (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <Label htmlFor="title">Titre du projet *</Label>
@@ -397,7 +396,6 @@ export default function AdminProjects() {
       <div>
         <Label>Classes cibles *</Label>
         <div className="space-y-4 mt-2">
-          {/* Group classes by session */}
           {Array.from(new Set(classes.map(c => c.session_name).filter(Boolean))).map(sessionName => (
             <div key={sessionName} className="space-y-2">
               <h4 className="font-medium text-sm text-muted-foreground">{sessionName}</h4>
@@ -420,7 +418,6 @@ export default function AdminProjects() {
             </div>
           ))}
           
-          {/* Show classes without session */}
           {classes.filter(c => !c.session_name).length > 0 && (
             <div className="space-y-2">
               <h4 className="font-medium text-sm text-muted-foreground">Autres classes</h4>
@@ -488,7 +485,6 @@ export default function AdminProjects() {
               onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  // Validate file size (max 5MB)
                   if (file.size > 5 * 1024 * 1024) {
                     toast.error('L\'image ne doit pas dépasser 5 MB');
                     return;
@@ -677,7 +673,7 @@ export default function AdminProjects() {
             <DialogTitle>Créer un projet</DialogTitle>
           </DialogHeader>
           <div className="overflow-y-auto flex-1 pr-2">
-            <ProjectForm />
+            {projectFormContent}
           </div>
         </DialogContent>
       </Dialog>
@@ -689,7 +685,7 @@ export default function AdminProjects() {
             <DialogTitle>Modifier le projet</DialogTitle>
           </DialogHeader>
           <div className="overflow-y-auto flex-1 pr-2">
-            <ProjectForm />
+            {projectFormContent}
           </div>
         </DialogContent>
       </Dialog>
