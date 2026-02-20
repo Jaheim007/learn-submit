@@ -464,41 +464,56 @@ export type Database = {
       }
       coaching_reports: {
         Row: {
+          call_date: string | null
           conseiller: string
-          conseiller_en_charge: string
+          conseiller_en_charge: string | null
           created_at: string
           created_by: string | null
           details_appel: string | null
-          dit_client: string
+          dit_client: string | null
           id: string
-          nom_client: string
-          telephone_client: string
+          nom_client: string | null
+          program: string
+          source: string | null
+          statut_prospect: string | null
+          suivi: string | null
+          telephone_client: string | null
           updated_at: string
           whatsapp_client: string | null
         }
         Insert: {
+          call_date?: string | null
           conseiller: string
-          conseiller_en_charge: string
+          conseiller_en_charge?: string | null
           created_at?: string
           created_by?: string | null
           details_appel?: string | null
-          dit_client: string
+          dit_client?: string | null
           id?: string
-          nom_client: string
-          telephone_client: string
+          nom_client?: string | null
+          program?: string
+          source?: string | null
+          statut_prospect?: string | null
+          suivi?: string | null
+          telephone_client?: string | null
           updated_at?: string
           whatsapp_client?: string | null
         }
         Update: {
+          call_date?: string | null
           conseiller?: string
-          conseiller_en_charge?: string
+          conseiller_en_charge?: string | null
           created_at?: string
           created_by?: string | null
           details_appel?: string | null
-          dit_client?: string
+          dit_client?: string | null
           id?: string
-          nom_client?: string
-          telephone_client?: string
+          nom_client?: string | null
+          program?: string
+          source?: string | null
+          statut_prospect?: string | null
+          suivi?: string | null
+          telephone_client?: string | null
           updated_at?: string
           whatsapp_client?: string | null
         }
@@ -509,7 +524,9 @@ export type Database = {
           admin_notes: string | null
           created_at: string
           email: string | null
+          event_tag: string | null
           follow_up_status: string
+          formation_interest: string | null
           full_name: string
           id: string
           is_hot_alert_sent: boolean
@@ -525,13 +542,16 @@ export type Database = {
           utm_adset: string | null
           utm_campaign: string | null
           utm_source: string | null
+          wants_callback: boolean | null
           whatsapp: string | null
         }
         Insert: {
           admin_notes?: string | null
           created_at?: string
           email?: string | null
+          event_tag?: string | null
           follow_up_status?: string
+          formation_interest?: string | null
           full_name: string
           id?: string
           is_hot_alert_sent?: boolean
@@ -547,13 +567,16 @@ export type Database = {
           utm_adset?: string | null
           utm_campaign?: string | null
           utm_source?: string | null
+          wants_callback?: boolean | null
           whatsapp?: string | null
         }
         Update: {
           admin_notes?: string | null
           created_at?: string
           email?: string | null
+          event_tag?: string | null
           follow_up_status?: string
+          formation_interest?: string | null
           full_name?: string
           id?: string
           is_hot_alert_sent?: boolean
@@ -569,6 +592,7 @@ export type Database = {
           utm_adset?: string | null
           utm_campaign?: string | null
           utm_source?: string | null
+          wants_callback?: boolean | null
           whatsapp?: string | null
         }
         Relationships: []
