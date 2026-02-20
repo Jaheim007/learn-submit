@@ -41,6 +41,8 @@ export default function SubmitProject() {
   const [files, setFiles] = useState<File[]>([]);
   
   const [description, setDescription] = useState('');
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploadingFile, setUploadingFile] = useState<string>('');
 
   useEffect(() => {
     if (user && projectId) {
@@ -101,8 +103,22 @@ export default function SubmitProject() {
     setLinks(newLinks);
   };
 
+  // 50 MB max per file
+  const MAX_FILE_SIZE_MB = 50;
+  const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
+    const oversized = selectedFiles.filter(f => f.size > MAX_FILE_SIZE_BYTES);
+    if (oversized.length > 0) {
+      toast.error(
+        `Fichier(s) trop volumineux : ${oversized.map(f => f.name).join(', ')}. Taille max : ${MAX_FILE_SIZE_MB} MB.`
+      );
+      // Only add files that are within limit
+      const validFiles = selectedFiles.filter(f => f.size <= MAX_FILE_SIZE_BYTES);
+      if (validFiles.length > 0) setFiles([...files, ...validFiles]);
+      return;
+    }
     setFiles([...files, ...selectedFiles]);
   };
 
@@ -130,18 +146,32 @@ export default function SubmitProject() {
   };
 
   const uploadFile = async (file: File, path: string) => {
-    const { data, error } = await supabase.storage
-      .from('submissions')
-      .upload(path, file);
+    setUploadingFile(file.name);
+    try {
+      const { data, error } = await supabase.storage
+        .from('submissions')
+        .upload(path, file, {
+          upsert: false,
+          duplex: 'half',
+        });
 
-    if (error) {
-      const msg = String(error.message || '').toLowerCase();
-      if (msg.includes('invalid key')) {
-        throw new Error('Nom de fichier non valide. Renommez-le sans accents, apostrophes ou caractères spéciaux (ex: capture_2025.png).');
+      if (error) {
+        const msg = String(error.message || '').toLowerCase();
+        if (msg.includes('invalid key')) {
+          throw new Error('Nom de fichier non valide. Renommez-le sans accents, apostrophes ou caractères spéciaux (ex: capture_2025.png).');
+        }
+        if (msg.includes('payload too large') || msg.includes('file size') || msg.includes('too large')) {
+          throw new Error(`Fichier trop volumineux : ${file.name}. Taille max : ${MAX_FILE_SIZE_MB} MB.`);
+        }
+        if (msg.includes('failed to fetch') || msg.includes('network') || msg.includes('fetch')) {
+          throw new Error(`Erreur réseau lors de l'upload de "${file.name}". Vérifiez votre connexion internet et réessayez. Si le fichier est très volumineux (>${MAX_FILE_SIZE_MB}MB), réduisez sa taille.`);
+        }
+        throw error;
       }
-      throw error;
+      return data.path;
+    } finally {
+      setUploadingFile('');
     }
-    return data.path;
   };
 
   // Check if deadline has expired
@@ -370,10 +400,21 @@ export default function SubmitProject() {
                     Cliquez pour sélectionner des fichiers
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Vous pouvez ajouter plusieurs fichiers
+                    Taille max par fichier : {MAX_FILE_SIZE_MB} MB (ZIP, RAR, PDF, etc.)
                   </p>
                 </Label>
               </div>
+
+              {/* Upload progress indicator */}
+              {uploadingFile && (
+                <div className="flex items-center gap-3 p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                  <span className="animate-spin text-primary">⏳</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-primary">Upload en cours...</p>
+                    <p className="text-xs text-muted-foreground truncate">{uploadingFile}</p>
+                  </div>
+                </div>
+              )}
 
               {files.length > 0 && (
                 <div className="space-y-2">
@@ -383,12 +424,18 @@ export default function SubmitProject() {
                       key={index}
                       className="flex items-center justify-between p-3 bg-muted rounded-lg"
                     >
-                      <span className="text-sm truncate flex-1">{file.name}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm truncate block">{file.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {(file.size / (1024 * 1024)).toFixed(1)} MB
+                        </span>
+                      </div>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => removeFile(index)}
+                        disabled={submitting}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -427,7 +474,7 @@ export default function SubmitProject() {
               {submitting ? (
                 <>
                   <span className="animate-spin">⏳</span>
-                  Envoi en cours...
+                  {uploadingFile ? `Upload: ${uploadingFile.slice(0, 20)}...` : 'Envoi en cours...'}
                 </>
               ) : isDeadlineExpired ? (
                 <>
