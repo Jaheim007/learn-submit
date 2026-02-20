@@ -1863,6 +1863,7 @@ export type Database = {
           class_id: number
           description: string | null
           feedback: string | null
+          file_urls: string[] | null
           file1_url: string | null
           file2_url: string | null
           file3_url: string | null
@@ -1886,6 +1887,7 @@ export type Database = {
           class_id: number
           description?: string | null
           feedback?: string | null
+          file_urls?: string[] | null
           file1_url?: string | null
           file2_url?: string | null
           file3_url?: string | null
@@ -1909,6 +1911,7 @@ export type Database = {
           class_id?: number
           description?: string | null
           feedback?: string | null
+          file_urls?: string[] | null
           file1_url?: string | null
           file2_url?: string | null
           file3_url?: string | null
