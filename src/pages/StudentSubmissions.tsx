@@ -140,64 +140,64 @@ export default function StudentSubmissions() {
 
   return (
     <StudentDashboardLayout>
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-4 lg:space-y-6">
         <div>
-          <h1 className="text-4xl font-bold mb-2">Mes Soumissions</h1>
-          <p className="text-muted-foreground">Historique de vos soumissions</p>
+          <h1 className="text-2xl lg:text-4xl font-bold mb-1">Mes Soumissions</h1>
+          <p className="text-sm text-muted-foreground">Historique de vos soumissions</p>
         </div>
 
         <div className="grid gap-6">
           {submissions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16">
-              <FileText className="h-16 w-16 text-muted-foreground/50 mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Aucune soumission</h3>
-              <p className="text-muted-foreground">Vous n'avez pas encore soumis de projet</p>
+            <div className="flex flex-col items-center justify-center py-12">
+              <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Aucune soumission</h3>
+              <p className="text-sm text-muted-foreground">Vous n'avez pas encore soumis de projet</p>
             </div>
           ) : (
             submissions.map((sub) => (
               <div key={sub.id} className="premium-card overflow-hidden">
                 {/* Project Image Hero */}
                 {sub.project_image_url ? (
-                  <div className="relative h-48 w-full overflow-hidden">
+                  <div className="relative h-32 lg:h-48 w-full overflow-hidden">
                     <img
                       src={sub.project_image_url}
                       alt={sub.project_title}
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-                    <div className="absolute top-4 left-4">
-                      <Badge variant="outline" className="bg-background/90 backdrop-blur-sm border-border/50">
+                    <div className="absolute top-3 left-3">
+                      <Badge variant="outline" className="bg-background/90 backdrop-blur-sm border-border/50 text-xs">
                         {sub.project_code}
                       </Badge>
                     </div>
-                    <div className="absolute top-4 right-4">
+                    <div className="absolute top-3 right-3">
                       <StatusBadge status={sub.status} />
                     </div>
                   </div>
                 ) : (
-                  <div className="relative h-32 w-full bg-gradient-to-br from-primary/10 via-background to-accent/10">
-                    <div className="absolute top-4 left-4">
-                      <Badge variant="outline" className="bg-background/90 backdrop-blur-sm border-border/50">
+                  <div className="relative h-20 lg:h-32 w-full bg-gradient-to-br from-primary/10 via-background to-accent/10">
+                    <div className="absolute top-3 left-3">
+                      <Badge variant="outline" className="bg-background/90 backdrop-blur-sm border-border/50 text-xs">
                         {sub.project_code}
                       </Badge>
                     </div>
-                    <div className="absolute top-4 right-4">
+                    <div className="absolute top-3 right-3">
                       <StatusBadge status={sub.status} />
                     </div>
                   </div>
                 )}
 
                 {/* Content */}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-3">{sub.project_title}</h3>
-                  
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                    <Calendar className="h-4 w-4" />
+                <div className="p-4 lg:p-6">
+                  <h3 className="text-base lg:text-xl font-bold mb-2">{sub.project_title}</h3>
+
+                  <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground mb-3">
+                    <Calendar className="h-3.5 w-3.5 shrink-0" />
                     <span>
                       {new Date(sub.submitted_at).toLocaleDateString('fr-FR')} à{' '}
-                      {new Date(sub.submitted_at).toLocaleTimeString('fr-FR', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
+                      {new Date(sub.submitted_at).toLocaleTimeString('fr-FR', {
+                        hour: '2-digit',
+                        minute: '2-digit'
                       })}
                     </span>
                   </div>
