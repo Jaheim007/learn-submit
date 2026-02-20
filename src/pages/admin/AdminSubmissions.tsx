@@ -338,6 +338,7 @@ export default function AdminSubmissions() {
             file1_url,
             file2_url,
             file3_url,
+            file_urls,
             description,
             is_latest,
             student_id,
@@ -375,7 +376,10 @@ export default function AdminSubmissions() {
           feedback: sub.feedback,
           version: sub.version,
           links: [sub.link1, sub.link2, sub.link3].filter(Boolean),
-          files: [sub.file1_url, sub.file2_url, sub.file3_url].filter(Boolean),
+          // Prefer file_urls array (unlimited), fallback to legacy columns
+          files: (sub.file_urls && sub.file_urls.length > 0)
+            ? sub.file_urls
+            : [sub.file1_url, sub.file2_url, sub.file3_url].filter(Boolean),
           description: sub.description,
           student: sub.students,
           project: sub.projects,

@@ -44,6 +44,7 @@ interface Submission {
   file1_url: string | null;
   file2_url: string | null;
   file3_url: string | null;
+  file_urls: string[] | null;
   description: string | null;
   feedback: string | null;
 }
@@ -415,40 +416,26 @@ export default function SupervisorSubmissions() {
                                 )}
 
                                 {/* Files */}
-                                {(selectedSubmission.file1_url || selectedSubmission.file2_url || selectedSubmission.file3_url) && (
+                                {/* Files - support unlimited via file_urls array */}
+                                {((selectedSubmission.file_urls && selectedSubmission.file_urls.length > 0) ||
+                                  selectedSubmission.file1_url || selectedSubmission.file2_url || selectedSubmission.file3_url) && (
                                   <div>
                                     <h4 className="font-medium mb-2">Fichiers</h4>
                                     <div className="space-y-1">
-                                      {selectedSubmission.file1_url && (
-                                        <Button 
-                                          variant="outline" 
+                                      {(selectedSubmission.file_urls && selectedSubmission.file_urls.length > 0
+                                        ? selectedSubmission.file_urls
+                                        : [selectedSubmission.file1_url, selectedSubmission.file2_url, selectedSubmission.file3_url].filter(Boolean) as string[]
+                                      ).map((fileUrl, idx) => (
+                                        <Button
+                                          key={idx}
+                                          variant="outline"
                                           size="sm"
-                                          onClick={() => downloadFile(selectedSubmission.file1_url!, 'fichier_1')}
+                                          onClick={() => downloadFile(fileUrl, fileUrl.split('/').pop() || `fichier_${idx + 1}`)}
                                         >
                                           <Download className="h-4 w-4 mr-2" />
-                                          Fichier 1
+                                          {fileUrl.split('/').pop()?.replace(/^\d+_/, '') || `Fichier ${idx + 1}`}
                                         </Button>
-                                      )}
-                                      {selectedSubmission.file2_url && (
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm"
-                                          onClick={() => downloadFile(selectedSubmission.file2_url!, 'fichier_2')}
-                                        >
-                                          <Download className="h-4 w-4 mr-2" />
-                                          Fichier 2
-                                        </Button>
-                                      )}
-                                      {selectedSubmission.file3_url && (
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm"
-                                          onClick={() => downloadFile(selectedSubmission.file3_url!, 'fichier_3')}
-                                        >
-                                          <Download className="h-4 w-4 mr-2" />
-                                          Fichier 3
-                                        </Button>
-                                      )}
+                                      ))}
                                     </div>
                                   </div>
                                 )}

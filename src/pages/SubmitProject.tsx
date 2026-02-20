@@ -196,8 +196,10 @@ export default function SubmitProject() {
     try {
       const fileUrls: string[] = [];
 
-      // Upload all files
-      for (const file of files) {
+      // Upload all files (no limit)
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        setUploadingFile(`${file.name} (${i + 1}/${files.length})`);
         const path = buildStoragePath(file);
         const fileUrl = await uploadFile(file, path);
         fileUrls.push(fileUrl);
@@ -212,14 +214,16 @@ export default function SubmitProject() {
         class_id: classId,
         project_id: parseInt(projectId!),
         description: description || null,
+        // Store all file URLs in the new unlimited array column
+        file_urls: fileUrls.length > 0 ? fileUrls : [],
       };
 
-      // Add links (up to 3)
+      // Also populate legacy columns (up to 3) for backward compatibility
       if (validLinks[0]) submissionData.link1 = validLinks[0];
       if (validLinks[1]) submissionData.link2 = validLinks[1];
       if (validLinks[2]) submissionData.link3 = validLinks[2];
 
-      // Add file URLs (up to 3)
+      // Legacy file columns (for backward compat)
       if (fileUrls[0]) submissionData.file1_url = fileUrls[0];
       if (fileUrls[1]) submissionData.file2_url = fileUrls[1];
       if (fileUrls[2]) submissionData.file3_url = fileUrls[2];
@@ -397,10 +401,10 @@ export default function SubmitProject() {
                 <Label htmlFor="file-upload" className="cursor-pointer">
                   <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">
-                    Cliquez pour sélectionner des fichiers
+                    Cliquez pour sélectionner des fichiers (nombre illimité)
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Taille max par fichier : {MAX_FILE_SIZE_MB} MB (ZIP, RAR, PDF, etc.)
+                    Taille max par fichier : {MAX_FILE_SIZE_MB} MB (ZIP, RAR, PDF, MP4, etc.)
                   </p>
                 </Label>
               </div>

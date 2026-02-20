@@ -22,6 +22,7 @@ interface Submission {
   file1_url: string | null;
   file2_url: string | null;
   file3_url: string | null;
+  file_urls: string[] | null;
   description: string | null;
   grade: number | null;
   feedback: string | null;
@@ -58,6 +59,7 @@ export default function StudentSubmissions() {
           file1_url,
           file2_url,
           file3_url,
+          file_urls,
           description,
           grade,
           feedback,
@@ -213,10 +215,14 @@ export default function StudentSubmissions() {
                       </a>
                     ))}
 
-                    {[sub.file1_url, sub.file2_url, sub.file3_url].filter(Boolean).map((file, idx) => (
-                      <button key={idx} onClick={() => downloadFile(file!)} className="text-sm text-primary hover:underline flex items-center gap-2">
+                    {/* Show all files from file_urls array (unlimited), or fallback to legacy columns */}
+                    {(sub.file_urls && sub.file_urls.length > 0
+                      ? sub.file_urls
+                      : [sub.file1_url, sub.file2_url, sub.file3_url].filter(Boolean) as string[]
+                    ).map((file, idx) => (
+                      <button key={idx} onClick={() => downloadFile(file)} className="text-sm text-primary hover:underline flex items-center gap-2">
                         <Download className="h-4 w-4" />
-                        Fichier {idx + 1}
+                        {file.split('/').pop()?.replace(/^\d+_/, '') || `Fichier ${idx + 1}`}
                       </button>
                     ))}
                   </div>
