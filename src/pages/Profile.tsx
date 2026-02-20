@@ -187,20 +187,20 @@ export default function Profile() {
 
   return (
     <StudentDashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-4 lg:space-y-6">
         {/* Header with Background */}
-        <div className="relative h-48 rounded-xl overflow-hidden premium-card">
+        <div className="relative h-36 lg:h-48 rounded-xl overflow-hidden premium-card">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-primary/20 to-accent/30" />
-          <div className="absolute inset-0 flex items-end p-6">
-            <div className="flex items-end gap-6">
+          <div className="absolute inset-0 flex items-end p-4 lg:p-6">
+            <div className="flex items-end gap-3 lg:gap-6">
               <div className="relative group">
-                <ProfileAvatar 
-                  avatarUrl={profile.avatar_url} 
-                  fullName={profile.full_name} 
+                <ProfileAvatar
+                  avatarUrl={profile.avatar_url}
+                  fullName={profile.full_name}
                   size="xl"
                 />
                 <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full">
-                  <Upload className="h-8 w-8 text-white" />
+                  <Upload className="h-6 w-6 text-white" />
                   <input
                     type="file"
                     accept="image/*"
@@ -210,9 +210,9 @@ export default function Profile() {
                   />
                 </label>
               </div>
-              <div className="mb-2">
-                <h1 className="text-3xl font-bold text-white">{profile.full_name || 'Votre Nom'}</h1>
-                <p className="text-white/80">{profile.email}</p>
+              <div className="mb-1">
+                <h1 className="text-xl lg:text-3xl font-bold text-white leading-tight">{profile.full_name || 'Votre Nom'}</h1>
+                <p className="text-white/80 text-xs lg:text-sm truncate max-w-[200px] lg:max-w-none">{profile.email}</p>
               </div>
             </div>
           </div>
@@ -236,10 +236,10 @@ export default function Profile() {
         )}
 
         {/* Profile Information */}
-        <div className="premium-card p-8 space-y-6">
-          <h2 className="text-2xl font-bold mb-6">Informations Personnelles</h2>
+        <div className="premium-card p-4 lg:p-8 space-y-4 lg:space-y-6">
+          <h2 className="text-xl lg:text-2xl font-bold">Informations Personnelles</h2>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
             <div className="space-y-2">
               <Label htmlFor="full_name" className="flex items-center gap-2">
                 <User className="h-4 w-4" />

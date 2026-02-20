@@ -259,10 +259,11 @@ export default function SubmitProject() {
 
   return (
     <StudentDashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-4 lg:space-y-6">
         {/* Back Button */}
         <Button
           variant="ghost"
+          size="sm"
           onClick={() => navigate('/etudiant/projets')}
           className="gap-2"
         >
@@ -271,36 +272,36 @@ export default function SubmitProject() {
         </Button>
 
         {/* Project Hero Section */}
-        <div className="space-y-6">
+        <div className="space-y-4 lg:space-y-6">
           {/* Hero Image or Header */}
           {project.image_url ? (
-            <div className="relative w-full h-[500px] rounded-2xl overflow-hidden shadow-2xl border border-border/50">
+            <div className="relative w-full h-48 lg:h-[400px] rounded-xl lg:rounded-2xl overflow-hidden shadow-2xl border border-border/50">
               <img
                 src={project.image_url}
                 alt={project.title}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+              <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-10">
                 <div className="max-w-3xl">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30 mb-4">
-                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                    <span className="text-sm font-semibold text-primary">{project.code}</span>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30 mb-2 lg:mb-4">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                    <span className="text-xs font-semibold text-primary">{project.code}</span>
                   </div>
-                  <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-3 leading-tight">
+                  <h1 className="text-xl lg:text-5xl font-bold text-foreground leading-tight">
                     {project.title}
                   </h1>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="relative rounded-2xl overflow-hidden border border-border/50 bg-gradient-to-br from-primary/10 via-background to-accent/10 p-8 md:p-12">
+            <div className="relative rounded-xl lg:rounded-2xl overflow-hidden border border-border/50 bg-gradient-to-br from-primary/10 via-background to-accent/10 p-5 lg:p-10">
               <div className="max-w-3xl">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30 mb-4">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  <span className="text-sm font-semibold text-primary">{project.code}</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30 mb-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                  <span className="text-xs font-semibold text-primary">{project.code}</span>
                 </div>
-                <h1 className="text-4xl md:text-6xl font-bold mb-3 leading-tight">{project.title}</h1>
+                <h1 className="text-xl lg:text-5xl font-bold leading-tight">{project.title}</h1>
               </div>
             </div>
           )}

@@ -138,10 +138,10 @@ export default function StudentProjects() {
 
   return (
     <StudentDashboardLayout>
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-4 lg:space-y-6">
         <div>
-          <h1 className="text-4xl font-bold text-foreground mb-2">Mes Projets</h1>
-          <p className="text-muted-foreground">Consultez et soumettez vos projets</p>
+          <h1 className="text-2xl lg:text-4xl font-bold text-foreground mb-1">Mes Projets</h1>
+          <p className="text-sm text-muted-foreground">Consultez et soumettez vos projets</p>
         </div>
 
         {classes.length > 1 && (
@@ -149,8 +149,10 @@ export default function StudentProjects() {
             {classes.map((cls) => (
               <Button
                 key={cls.id}
+                size="sm"
                 variant={selectedClassId === cls.id ? 'default' : 'outline'}
                 onClick={() => setSelectedClassId(cls.id)}
+                className="text-xs lg:text-sm"
               >
                 {cls.code}
               </Button>
@@ -158,66 +160,67 @@ export default function StudentProjects() {
           </div>
         )}
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 lg:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {projects.length === 0 ? (
-            <div className="col-span-full flex flex-col items-center justify-center py-16">
-              <AlertCircle className="h-16 w-16 text-muted-foreground/50 mb-4" />
-              <h3 className="text-xl font-semibold text-foreground mb-2">Aucun projet</h3>
-              <p className="text-muted-foreground">Contactez votre administrateur</p>
+            <div className="col-span-full flex flex-col items-center justify-center py-12">
+              <AlertCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Aucun projet</h3>
+              <p className="text-sm text-muted-foreground">Contactez votre administrateur</p>
             </div>
           ) : (
             projects.map((project: any) => {
               const isExpired = project.deadline_at && new Date(project.deadline_at) < new Date();
-              
+
               return (
-                <div key={project.id} className="premium-card overflow-hidden hover:scale-[1.02] transition-transform">
+                <div key={project.id} className="premium-card overflow-hidden hover:scale-[1.01] transition-transform">
                   {project.image_url && (
-                    <div className="relative h-48 w-full overflow-hidden">
-                      <img 
-                        src={project.image_url} 
+                    <div className="relative h-36 lg:h-48 w-full overflow-hidden">
+                      <img
+                        src={project.image_url}
                         alt={project.title}
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
-                      <div className="absolute top-3 left-3">
-                        <Badge variant="outline" className="bg-background/80 backdrop-blur">{project.code}</Badge>
+                      <div className="absolute top-2 left-2 lg:top-3 lg:left-3">
+                        <Badge variant="outline" className="bg-background/80 backdrop-blur text-xs">{project.code}</Badge>
                       </div>
                     </div>
                   )}
-                  
-                  <div className="p-6">
+
+                  <div className="p-4 lg:p-6">
                     {!project.image_url && (
-                      <Badge variant="outline" className="mb-2">{project.code}</Badge>
+                      <Badge variant="outline" className="mb-2 text-xs">{project.code}</Badge>
                     )}
-                    <h3 className="text-xl font-bold mb-2">{project.title}</h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{project.description}</p>
+                    <h3 className="text-base lg:text-xl font-bold mb-2 leading-snug">{project.title}</h3>
+                    <p className="text-xs lg:text-sm text-muted-foreground line-clamp-2 mb-3">{project.description}</p>
 
                     {project.deadline_at && (
-                      <div className="mb-4">
+                      <div className="mb-3">
                         <DeadlineCountdown deadline={project.deadline_at} />
                       </div>
                     )}
 
                     {project.due_at && !project.deadline_at && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                        <Calendar className="h-4 w-4" />
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                        <Calendar className="h-3.5 w-3.5" />
                         <span>{new Date(project.due_at).toLocaleDateString('fr-FR')}</span>
                       </div>
                     )}
 
                     {project.latest_submission && (
-                      <div className="mb-4">
+                      <div className="mb-3">
                         <StatusBadge status={project.latest_submission.status} />
                       </div>
                     )}
 
-                    <Button 
-                      onClick={() => navigate(`/etudiant/soumettre/${project.id}`)} 
-                      className="w-full"
+                    <Button
+                      onClick={() => navigate(`/etudiant/soumettre/${project.id}`)}
+                      className="w-full text-sm"
+                      size="sm"
                       disabled={isExpired}
                       variant={isExpired ? "outline" : "default"}
                     >
-                      <Send className="h-4 w-4 mr-2" />
+                      <Send className="h-3.5 w-3.5 mr-2" />
                       {isExpired ? 'Délai expiré' : 'Soumettre'}
                     </Button>
                   </div>

@@ -141,45 +141,45 @@ export default function StudentLeaderboard() {
 
   return (
     <StudentDashboardLayout>
-      <div className="container mx-auto py-8 space-y-6">
+      <div className="container mx-auto space-y-4 lg:space-y-6">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Classement</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl lg:text-3xl font-bold mb-1">Classement</h1>
+          <p className="text-sm text-muted-foreground">
             Comparez vos performances par projet et par cohorte
           </p>
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Filtres</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base lg:text-lg">Filtres</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
               <div className="space-y-2">
-                <Label>Cohorte</Label>
+                <Label className="text-xs lg:text-sm">Cohorte</Label>
                 <Select value={cohort} onValueChange={setCohort}>
-                  <SelectTrigger>
+                  <SelectTrigger className="text-xs lg:text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="phase1">Phase 1 (G1-G5)</SelectItem>
                     <SelectItem value="phase2">Phase 2 (G6-G12)</SelectItem>
-                    <SelectItem value="phase3">Formation 1000Sites 3eme Session (G31-G35)</SelectItem>
+                    <SelectItem value="phase3">Formation 1000Sites 3eme Session</SelectItem>
                     <SelectItem value="advanced">Advanced Hacking</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label>Projet</Label>
+                <Label className="text-xs lg:text-sm">Projet</Label>
                 <Select value={selectedProject} onValueChange={setSelectedProject}>
-                  <SelectTrigger>
+                  <SelectTrigger className="text-xs lg:text-sm">
                     <SelectValue placeholder="Sélectionner un projet" />
                   </SelectTrigger>
                   <SelectContent>
                     {projects.map(project => (
                       <SelectItem key={project.id} value={project.id.toString()}>
-                        {project.code} - {project.title}
+                        {project.code}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -187,9 +187,9 @@ export default function StudentLeaderboard() {
               </div>
 
               <div className="space-y-2">
-                <Label>Statut</Label>
+                <Label className="text-xs lg:text-sm">Statut</Label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger>
+                  <SelectTrigger className="text-xs lg:text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -209,7 +209,7 @@ export default function StudentLeaderboard() {
                 checked={lastVersionsOnly}
                 onCheckedChange={(checked) => setLastVersionsOnly(checked as boolean)}
               />
-              <Label htmlFor="lastVersions" className="cursor-pointer">
+              <Label htmlFor="lastVersions" className="cursor-pointer text-xs lg:text-sm">
                 Dernières versions uniquement
               </Label>
             </div>
@@ -217,10 +217,10 @@ export default function StudentLeaderboard() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
             <div>
-              <CardTitle>Résultats</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
+              <CardTitle className="text-base lg:text-lg">Résultats</CardTitle>
+              <p className="text-xs lg:text-sm text-muted-foreground mt-1">
                 {leaderboard.length} étudiant{leaderboard.length !== 1 ? 's' : ''} • {cohortLabels[cohort]}
               </p>
             </div>
@@ -229,9 +229,10 @@ export default function StudentLeaderboard() {
               size="sm"
               onClick={exportToCSV}
               disabled={leaderboard.length === 0}
+              className="text-xs"
             >
-              <Download className="h-4 w-4 mr-2" />
-              Export CSV
+              <Download className="h-3.5 w-3.5 mr-1" />
+              CSV
             </Button>
           </CardHeader>
           <CardContent>
