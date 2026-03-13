@@ -316,15 +316,7 @@ const Landing = () => {
                 Se connecter
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
               </Button>
-              <Button 
-                size="lg"
-                variant="outline"
-                onClick={() => navigate('/etudiant/register')}
-                className="h-12 text-base font-medium rounded-xl border-border hover:bg-muted"
-              >
-                <UserPlus className="mr-2 h-4 w-4" />
-                Créer un compte
-              </Button>
+            
             </motion.div>
           </div>
 
