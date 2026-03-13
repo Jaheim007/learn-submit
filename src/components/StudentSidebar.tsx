@@ -1,10 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, BookOpen, Trophy, User, LogOut, X, Shield } from 'lucide-react';
+import { LayoutDashboard, FileText, BookOpen, Trophy, User, LogOut, X, Shield, Sparkles } from 'lucide-react';
 import kelyaLogo from '@/assets/kelya-logo-red.jpg';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useRoles } from '@/hooks/useRoles';
+import { motion } from 'framer-motion';
 
 const navItems = [
   { path: '/etudiant/projets', label: 'Mes Projets', icon: LayoutDashboard },
@@ -35,24 +36,30 @@ export const StudentSidebar = ({ open, onClose }: StudentSidebarProps) => {
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative overflow-hidden">
+      {/* Subtle gradient accent at the top */}
+      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+
       {/* Logo Section */}
-      <div className="p-5 border-b border-border flex items-center justify-between">
+      <div className="relative p-5 border-b border-border/50 flex items-center justify-between">
         <Link to="/etudiant/projets" className="flex items-center gap-3 group" onClick={handleNavClick}>
-          <img
-            src={kelyaLogo}
-            alt="Kelya Group"
-            className="h-9 w-9 object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
-          />
+          <div className="relative">
+            <img
+              src={kelyaLogo}
+              alt="Kelya Group"
+              className="h-10 w-10 object-cover rounded-xl transition-all duration-300 group-hover:scale-105 ring-2 ring-border/50 group-hover:ring-primary/30"
+            />
+            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-success border-2 border-background" />
+          </div>
           <div>
-            <h1 className="text-sm font-bold text-foreground">Kelya Group</h1>
-            <p className="text-xs text-muted-foreground">Espace Étudiant</p>
+            <h1 className="text-sm font-bold text-foreground tracking-tight">Kelya Group</h1>
+            <p className="text-[11px] text-muted-foreground font-medium">Espace Étudiant</p>
           </div>
         </Link>
         {onClose && (
           <button
             onClick={onClose}
-            className="lg:hidden p-1.5 rounded-lg text-foreground hover:bg-muted transition-colors"
+            className="lg:hidden p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all"
             aria-label="Fermer le menu"
           >
             <X className="h-5 w-5" />
@@ -61,7 +68,10 @@ export const StudentSidebar = ({ open, onClose }: StudentSidebarProps) => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-0.5">
+      <nav className="flex-1 p-3 space-y-1 relative">
+        <div className="px-3 py-2">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">Menu</span>
+        </div>
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -72,38 +82,41 @@ export const StudentSidebar = ({ open, onClose }: StudentSidebarProps) => {
               to={item.path}
               onClick={handleNavClick}
               className={`
-                flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                 ${isActive
-                  ? 'bg-secondary text-secondary-foreground font-medium'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
                 }
               `}
             >
-              <Icon className="h-4.5 w-4.5 shrink-0" />
-              <span className="text-sm">{item.label}</span>
+              <Icon className={`h-[18px] w-[18px] shrink-0 transition-transform duration-200 ${isActive ? '' : 'group-hover:scale-110'}`} />
+              <span className="text-[13px] font-medium">{item.label}</span>
+              {isActive && (
+                <Sparkles className="h-3 w-3 ml-auto opacity-60" />
+              )}
             </Link>
           );
         })}
       </nav>
 
       {/* Admin Access + Sign Out */}
-      <div className="p-3 border-t border-border space-y-0.5">
+      <div className="p-3 border-t border-border/50 space-y-1 relative">
         {isAdmin && (
           <Link
             to="/admin"
             onClick={handleNavClick}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 group"
           >
-            <Shield className="h-4.5 w-4.5 shrink-0" />
-            <span className="text-sm font-medium">Administration</span>
+            <Shield className="h-[18px] w-[18px] shrink-0 group-hover:scale-110 transition-transform" />
+            <span className="text-[13px] font-medium">Administration</span>
           </Link>
         )}
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all duration-200"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all duration-200 group"
         >
-          <LogOut className="h-4.5 w-4.5 shrink-0" />
-          <span className="text-sm">Déconnexion</span>
+          <LogOut className="h-[18px] w-[18px] shrink-0 group-hover:scale-110 transition-transform" />
+          <span className="text-[13px] font-medium">Déconnexion</span>
         </button>
       </div>
     </div>
@@ -112,17 +125,23 @@ export const StudentSidebar = ({ open, onClose }: StudentSidebarProps) => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex fixed left-0 top-0 h-screen w-60 bg-background border-r border-border flex-col z-50">
+      <div className="hidden lg:flex fixed left-0 top-0 h-screen w-[260px] bg-background/80 backdrop-blur-xl border-r border-border/40 flex-col z-50">
         {sidebarContent}
       </div>
 
       {/* Mobile Sidebar */}
       {open && (
         <>
-          <div className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-40 lg:hidden" onClick={onClose} />
-          <div className="fixed left-0 top-0 h-screen w-64 max-w-[80vw] bg-background border-r border-border flex flex-col z-50 lg:hidden shadow-xl animate-in slide-in-from-left duration-200">
+          <div className="fixed inset-0 bg-foreground/30 backdrop-blur-md z-40 lg:hidden" onClick={onClose} />
+          <motion.div
+            initial={{ x: -280 }}
+            animate={{ x: 0 }}
+            exit={{ x: -280 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed left-0 top-0 h-screen w-[280px] max-w-[85vw] bg-background border-r border-border/40 flex flex-col z-50 lg:hidden shadow-2xl"
+          >
             {sidebarContent}
-          </div>
+          </motion.div>
         </>
       )}
     </>

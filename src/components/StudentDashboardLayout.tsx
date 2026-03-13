@@ -6,7 +6,7 @@ import { ProfileAvatar } from './ProfileAvatar';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 
 interface StudentDashboardLayoutProps {
   children: ReactNode;
@@ -25,33 +25,46 @@ export const StudentDashboardLayout = ({ children }: StudentDashboardLayoutProps
     }
   }, [user]);
 
+  const greeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Bonjour';
+    if (hour < 18) return 'Bon après-midi';
+    return 'Bonsoir';
+  };
+
   return (
     <div className="min-h-screen w-full bg-muted/30">
       <StudentSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main Content */}
-      <div className="lg:ml-60">
-        {/* Top Bar */}
-        <div className="h-14 border-b border-border bg-background flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
+      <div className="lg:ml-[260px]">
+        {/* Top Bar — glassmorphism */}
+        <div className="h-16 bg-background/70 backdrop-blur-xl border-b border-border/40 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 -ml-2 rounded-lg text-foreground hover:bg-muted transition-colors"
+            className="lg:hidden p-2.5 -ml-1 rounded-xl text-foreground hover:bg-muted/60 transition-all active:scale-95"
             aria-label="Ouvrir le menu"
           >
             <Menu className="h-5 w-5" />
           </button>
 
+          {/* Mobile center brand */}
           <div className="lg:hidden flex-1 flex justify-center">
-            <span className="text-sm font-semibold text-foreground">Kelya Group</span>
+            <span className="text-sm font-bold text-foreground tracking-tight">Kelya Group</span>
           </div>
 
-          <div className="hidden lg:flex flex-1" />
+          {/* Desktop greeting */}
+          <div className="hidden lg:flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              {greeting()}, <span className="font-semibold text-foreground">{profile?.full_name?.split(' ')[0] || 'Étudiant'}</span> 👋
+            </span>
+          </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <NotificationBell />
             <button
               onClick={() => navigate('/etudiant/profil')}
-              className="hover:opacity-80 transition-opacity cursor-pointer"
+              className="hover:opacity-80 transition-all cursor-pointer active:scale-95 rounded-full ring-2 ring-transparent hover:ring-primary/20"
             >
               <ProfileAvatar
                 avatarUrl={profile?.avatar_url}
@@ -62,8 +75,8 @@ export const StudentDashboardLayout = ({ children }: StudentDashboardLayoutProps
           </div>
         </div>
 
-        {/* Page Content — add bottom padding on mobile for bottom nav */}
-        <main className="p-4 lg:p-6 pb-20 lg:pb-6">
+        {/* Page Content */}
+        <main className="p-4 lg:p-8 pb-24 lg:pb-8">
           {children}
         </main>
       </div>
