@@ -98,9 +98,37 @@ function getEmailTemplate(type: EventType, data: Record<string, any>): { subject
   }
 }
 
-async function sendViaResend(to: string[], subject: string, html: string) {
+async function logEmailAttempt(
+  supabase: any,
+  emailType: string,
+  recipientEmail: string,
+  status: 'success' | 'failed',
+  errorMessage: string | null,
+  resendResponse: unknown,
+) {
+  const { error } = await supabase.from('email_send_logs').insert({
+    email_type: emailType,
+    recipient_email: recipientEmail,
+    recipient_name: null,
+    status,
+    error_message: errorMessage,
+    resend_response: resendResponse,
+  });
+
+  if (error) {
+    console.error('Failed to log automated email attempt:', error.message);
+  }
+}
+
+async function sendViaResend(
+  supabase: any,
+  to: string[],
+  subject: string,
+  html: string,
+  emailType: string,
+) {
   const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-  const RESEND_FROM = Deno.env.get('RESEND_FROM') || 'Kelya Group <noreply@kelyagroup.com>';
+  const RESEND_FROM = Deno.env.get('RESEND_FROM') || 'Kelya Group <info@genessible.com>';
   if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY not configured');
 
   let sent = 0;
@@ -114,10 +142,39 @@ async function sendViaResend(to: string[], subject: string, html: string) {
         },
         body: JSON.stringify({ from: RESEND_FROM, to: [email], subject, html }),
       });
-      if (res.ok) sent++;
-      else console.error(`Resend error for ${email}:`, await res.text());
+
+      const rawBody = await res.text();
+      let parsedBody: unknown = null;
+      try {
+        parsedBody = rawBody ? JSON.parse(rawBody) : null;
+      } catch {
+        parsedBody = rawBody;
+      }
+
+      const errorMessage = res.ok
+        ? null
+        : typeof parsedBody === 'object' && parsedBody && 'message' in (parsedBody as Record<string, unknown>)
+          ? String((parsedBody as Record<string, unknown>).message)
+          : 'Resend request failed';
+
+      await logEmailAttempt(
+        supabase,
+        emailType,
+        email,
+        res.ok ? 'success' : 'failed',
+        errorMessage,
+        parsedBody,
+      );
+
+      if (res.ok) {
+        sent++;
+      } else {
+        console.error(`Resend error for ${email}:`, parsedBody);
+      }
     } catch (e: any) {
-      console.error(`Send failed for ${email}:`, e.message);
+      const errorMessage = e?.message || 'Unexpected send error';
+      console.error(`Send failed for ${email}:`, errorMessage);
+      await logEmailAttempt(supabase, emailType, email, 'failed', errorMessage, null);
     }
   }
   return sent;
@@ -176,7 +233,7 @@ const handler = async (req: Request): Promise<Response> => {
         site_url: siteUrl,
       });
 
-      const sent = await sendViaResend(emails, subject, html);
+      const sent = await sendViaResend(supabase, emails, subject, html, 'automation_new_course_material');
       return new Response(JSON.stringify({ success: true, sent, total: emails.length }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -230,7 +287,7 @@ const handler = async (req: Request): Promise<Response> => {
         site_url: siteUrl,
       });
 
-      const sent = await sendViaResend(emails, subject, html);
+      const sent = await sendViaResend(supabase, emails, subject, html, 'automation_new_project');
       return new Response(JSON.stringify({ success: true, sent, total: emails.length }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -301,7 +358,7 @@ const handler = async (req: Request): Promise<Response> => {
           site_url: siteUrl,
         });
 
-        const sent = await sendViaResend(emails, subject, html);
+        const sent = await sendViaResend(supabase, emails, subject, html, 'automation_deadline_reminder');
         totalSent += sent;
 
         // Also create in-app notifications for these students
