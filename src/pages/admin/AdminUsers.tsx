@@ -359,16 +359,21 @@ export default function AdminUsers() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Supprimer cet utilisateur ?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Le rôle sera retiré à <strong>{a.full_name}</strong> ({a.email}). Cette action est irréversible.
+                                Choisissez une action pour <strong>{a.full_name}</strong> ({a.email}).
                               </AlertDialogDescription>
                             </AlertDialogHeader>
-                            <AlertDialogFooter>
+                            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
                               <AlertDialogCancel>Annuler</AlertDialogCancel>
                               <AlertDialogAction
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                onClick={() => handleDeleteUser(a.user_id, a.role)}
+                                onClick={() => handleDeleteUser(a.user_id, a.role, false)}
                               >
-                                Supprimer
+                                Retirer le rôle
+                              </AlertDialogAction>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => handleDeleteUser(a.user_id, a.role, true)}
+                              >
+                                Supprimer le compte
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
