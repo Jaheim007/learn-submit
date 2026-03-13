@@ -145,6 +145,10 @@ export default function AdminEmails() {
             <Zap className="h-4 w-4" />
             Automatisations
           </TabsTrigger>
+          <TabsTrigger value="logs" className="gap-2">
+            <History className="h-4 w-4" />
+            Logs
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="compose">
