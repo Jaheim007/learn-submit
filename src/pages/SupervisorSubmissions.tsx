@@ -191,11 +191,15 @@ export default function SupervisorSubmissions() {
     return true;
   });
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-64">Chargement...</div>;
+  if (loading || rolesLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
-  if (!isSupervisor) {
+  if (!isSupervisor && !isTeacher) {
     return <Navigate to="/auth" replace />;
   }
 
