@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor, RichTextRenderer } from '@/components/ui/rich-text-editor';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { Search, Eye, FileText, ExternalLink, Download } from 'lucide-react';
@@ -181,8 +182,8 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
               {submission.description ? (
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Description du projet</Label>
-                  <div className="p-4 bg-muted/50 rounded-xl border text-sm leading-relaxed whitespace-pre-wrap break-words">
-                    {submission.description}
+                  <div className="p-4 bg-muted/50 rounded-xl border text-sm leading-relaxed">
+                    <RichTextRenderer content={submission.description} />
                   </div>
                 </div>
               ) : (
@@ -291,13 +292,11 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
 
                 <div className="space-y-2">
                   <Label htmlFor="feedback" className="text-sm font-medium">Commentaires & Feedback</Label>
-                  <Textarea
-                    id="feedback"
+                  <RichTextEditor
                     value={feedback}
-                    onChange={(e) => setFeedback(e.target.value)}
+                    onChange={setFeedback}
                     placeholder="Donnez un feedback détaillé à l'étudiant sur son travail, les points forts, les axes d'amélioration..."
-                    rows={8}
-                    className="resize-none"
+                    minHeight="180px"
                   />
                   <p className="text-xs text-muted-foreground">Ce commentaire sera visible par l'étudiant</p>
                 </div>

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DeadlineCountdown } from '@/components/DeadlineCountdown';
 import { toast } from 'sonner';
@@ -465,12 +466,11 @@ export default function SubmitProject() {
               <CardTitle>Description</CardTitle>
             </CardHeader>
             <CardContent>
-              <Textarea
+              <RichTextEditor
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={setDescription}
                 placeholder="Ajoutez des commentaires ou notes sur votre soumission..."
-                rows={6}
-                className="resize-none"
+                minHeight="140px"
               />
             </CardContent>
           </Card>

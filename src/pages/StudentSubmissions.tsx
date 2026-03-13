@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { StudentDashboardLayout } from '@/components/StudentDashboardLayout';
 import { FileText, Download, Calendar, AlertCircle } from 'lucide-react';
+import { RichTextRenderer } from '@/components/ui/rich-text-editor';
 import { toast } from 'sonner';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Badge } from '@/components/ui/badge';
@@ -203,9 +204,9 @@ export default function StudentSubmissions() {
                   </div>
 
                   {sub.description && (
-                    <p className="text-sm text-muted-foreground mb-4 pb-4 border-b border-border">
-                      {sub.description}
-                    </p>
+                    <div className="text-sm text-muted-foreground mb-4 pb-4 border-b border-border">
+                      <RichTextRenderer content={sub.description} />
+                    </div>
                   )}
 
                   <div className="grid gap-2">
@@ -230,7 +231,7 @@ export default function StudentSubmissions() {
                   {sub.grade !== null && (
                     <div className="mt-4 pt-4 border-t border-border">
                       <p className="text-sm font-semibold">Note: {sub.grade}/20</p>
-                      {sub.feedback && <p className="text-sm text-muted-foreground mt-2">{sub.feedback}</p>}
+                      {sub.feedback && <div className="text-sm text-muted-foreground mt-2"><RichTextRenderer content={sub.feedback} /></div>}
                     </div>
                   )}
                 </div>
