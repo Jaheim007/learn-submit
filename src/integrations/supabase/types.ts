@@ -1303,6 +1303,51 @@ export type Database = {
         }
         Relationships: []
       }
+      innov1: {
+        Row: {
+          bmc: string
+          created_at: string
+          features_explanation: string
+          id: string
+          launch_strategy: string
+          objective_30_days: string
+          platform_link: string
+          problem_solved: string
+          real_users_count: number
+          solution: string
+          student_name: string
+          updated_at: string
+        }
+        Insert: {
+          bmc: string
+          created_at?: string
+          features_explanation: string
+          id?: string
+          launch_strategy: string
+          objective_30_days: string
+          platform_link: string
+          problem_solved: string
+          real_users_count?: number
+          solution: string
+          student_name: string
+          updated_at?: string
+        }
+        Update: {
+          bmc?: string
+          created_at?: string
+          features_explanation?: string
+          id?: string
+          launch_strategy?: string
+          objective_30_days?: string
+          platform_link?: string
+          problem_solved?: string
+          real_users_count?: number
+          solution?: string
+          student_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       instructors: {
         Row: {
           created_at: string
