@@ -143,9 +143,10 @@ const App = () => (
               <Route path="/teacher/login" element={<TeacherLogin />} />
               <Route path="/teacher" element={<TeacherGuard><TeacherLayout /></TeacherGuard>}>
                 <Route index element={<TeacherHome />} />
-                <Route path="students" element={<AdminStudents />} />
+                <Route path="students" element={<TeacherStudents />} />
                 <Route path="submissions" element={<SupervisorSubmissions />} />
                 <Route path="courses" element={<AdminCourses />} />
+                <Route path="messages" element={<TeacherMessages />} />
               </Route>
               
               <Route path="/superviseur" element={<SupervisorDashboard />} />
