@@ -23,8 +23,7 @@ export default function AdminLayout() {
     { path: '/admin/submissions', label: 'Soumissions', icon: FileText },
     { path: '/admin/projects', label: 'Projets', icon: FolderOpen },
     { path: '/admin/courses', label: 'Cours', icon: BookOpen },
-    { path: '/admin/users', label: 'Superviseurs', icon: UserCheck },
-    { path: '/admin/academy-users', label: 'Personnel académique', icon: GraduationCap },
+    { path: '/admin/users', label: 'Utilisateurs', icon: Users },
     { path: '/admin/emails', label: 'Emails', icon: Mail },
     { path: '/admin/settings', label: 'Paramètres', icon: Settings },
   ];
