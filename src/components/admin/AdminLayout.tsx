@@ -53,7 +53,7 @@ export default function AdminLayout() {
             variant="ghost"
             size="sm"
             className="w-full justify-start text-muted-foreground hover:text-foreground"
-            onClick={() => navigate('/home')}
+            onClick={() => navigate('/etudiant/projets')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour au portail

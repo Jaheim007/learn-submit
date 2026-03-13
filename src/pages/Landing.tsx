@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, CheckCircle, Upload, BookOpen, BarChart3, Shield, Clock, Users, ChevronRight, LogIn, UserPlus, Zap, Award, MessageSquare, Globe, ChevronLeft, FileText, TrendingUp, Bell } from 'lucide-react';
+import { ArrowRight, CheckCircle, Upload, BookOpen, BarChart3, Shield, Clock, Users, ChevronRight, LogIn, UserPlus, Zap, Award, MessageSquare, Globe, ChevronLeft, FileText, TrendingUp, Bell, Moon, Sun } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
-import kelyaLogo from '@/assets/kelya-logo-red.jpg';
-import hacktualzLogo from '@/assets/hacktualiz-logo-light.jpeg';
+import kelyaLogo from '@/assets/kelya-logo-dark.png';
+import hacktualzLogo from '@/assets/hacktualiz-logo-light.png';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -40,12 +40,12 @@ const slides = [
         <div className="flex items-center gap-3 bg-background/80 rounded-lg p-3 border border-border">
           <FileText className="h-5 w-5 text-primary shrink-0" />
           <div className="flex-1"><div className="h-2.5 bg-primary/20 rounded w-3/4" /><div className="h-2 bg-muted rounded w-1/2 mt-1.5" /></div>
-          <CheckCircle className="h-4 w-4 text-green-500" />
+          <CheckCircle className="h-4 w-4 text-success" />
         </div>
         <div className="flex items-center gap-3 bg-background/80 rounded-lg p-3 border border-border">
           <Globe className="h-5 w-5 text-primary shrink-0" />
           <div className="flex-1"><div className="h-2.5 bg-primary/20 rounded w-2/3" /><div className="h-2 bg-muted rounded w-1/3 mt-1.5" /></div>
-          <CheckCircle className="h-4 w-4 text-green-500" />
+          <CheckCircle className="h-4 w-4 text-success" />
         </div>
         <div className="flex items-center gap-3 bg-background/80 rounded-lg p-3 border border-border opacity-50">
           <Upload className="h-5 w-5 text-muted-foreground shrink-0" />
@@ -59,8 +59,8 @@ const slides = [
     icon: BarChart3,
     title: 'Suivez votre progression',
     desc: 'Tableau de bord avec statuts en temps réel, classement et historique de vos soumissions.',
-    color: 'bg-blue-500/10',
-    iconColor: 'text-blue-500',
+    color: 'bg-primary/10',
+    iconColor: 'text-primary',
     visual: (
       <div className="space-y-3">
         <div className="flex gap-2 items-end h-20">
@@ -83,14 +83,14 @@ const slides = [
     icon: Bell,
     title: 'Notifications & Deadlines',
     desc: 'Soyez alerté pour chaque retour de formateur et chaque échéance de projet approchante.',
-    color: 'bg-amber-500/10',
-    iconColor: 'text-amber-500',
+    color: 'bg-warning/10',
+    iconColor: 'text-warning',
     visual: (
       <div className="space-y-2.5">
         {[
-          { t: 'Projet validé ✓', d: 'Votre soumission HTML/CSS a été validée', time: '2min', dot: 'bg-green-500' },
-          { t: 'Deadline demain', d: 'Projet React — il reste 18h', time: '1h', dot: 'bg-amber-500' },
-          { t: 'Nouveau feedback', d: 'M. Diallo a commenté votre travail', time: '3h', dot: 'bg-blue-500' },
+          { t: 'Projet validé ✓', d: 'Votre soumission HTML/CSS a été validée', time: '2min', dot: 'bg-success' },
+          { t: 'Deadline demain', d: 'Projet React — il reste 18h', time: '1h', dot: 'bg-warning' },
+          { t: 'Nouveau feedback', d: 'M. Diallo a commenté votre travail', time: '3h', dot: 'bg-primary' },
         ].map((n, i) => (
           <div key={i} className="flex items-start gap-3 bg-background/80 rounded-lg p-3 border border-border">
             <div className={`w-2 h-2 rounded-full ${n.dot} mt-1.5 shrink-0`} />
@@ -108,8 +108,8 @@ const slides = [
     icon: TrendingUp,
     title: 'Classement en direct',
     desc: 'Comparez votre progression avec vos camarades et visez le top du leaderboard.',
-    color: 'bg-emerald-500/10',
-    iconColor: 'text-emerald-500',
+    color: 'bg-success/10',
+    iconColor: 'text-success',
     visual: (
       <div className="space-y-2">
         {[
@@ -118,14 +118,14 @@ const slides = [
           { rank: '3', name: 'Fatou D.', pts: '870', bar: 'w-[89%]' },
           { rank: '4', name: 'Vous', pts: '845', bar: 'w-[86%]', highlight: true },
         ].map((s, i) => (
-          <div key={i} className={`flex items-center gap-3 rounded-lg p-2.5 ${s.highlight ? 'bg-primary/10 border border-primary/20' : 'bg-background/80 border border-border'}`}>
-            <span className={`text-xs font-bold w-5 text-center ${s.highlight ? 'text-primary' : 'text-muted-foreground'}`}>#{s.rank}</span>
+          <div key={i} className={`flex items-center gap-3 rounded-lg p-2.5 ${s.highlight ? 'bg-secondary/10 border border-secondary/20' : 'bg-background/80 border border-border'}`}>
+            <span className={`text-xs font-bold w-5 text-center ${s.highlight ? 'text-secondary' : 'text-muted-foreground'}`}>#{s.rank}</span>
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-center mb-1">
-                <span className={`text-xs font-medium ${s.highlight ? 'text-primary' : 'text-foreground'}`}>{s.name}</span>
+                <span className={`text-xs font-medium ${s.highlight ? 'text-secondary' : 'text-foreground'}`}>{s.name}</span>
                 <span className="text-[10px] text-muted-foreground">{s.pts} pts</span>
               </div>
-              <div className="h-1 bg-muted rounded-full"><div className={`h-full ${s.highlight ? 'bg-primary' : 'bg-primary/30'} rounded-full ${s.bar}`} /></div>
+              <div className="h-1 bg-muted rounded-full"><div className={`h-full ${s.highlight ? 'bg-secondary' : 'bg-primary/30'} rounded-full ${s.bar}`} /></div>
             </div>
           </div>
         ))}
@@ -222,7 +222,7 @@ const PlatformSlider = () => {
                 <button
                   key={i}
                   onClick={() => goTo(i)}
-                  className={`h-2 rounded-full transition-all duration-300 ${i === current ? 'w-8 bg-primary' : 'w-2 bg-border hover:bg-muted-foreground/30'}`}
+                  className={`h-2 rounded-full transition-all duration-300 ${i === current ? 'w-8 bg-secondary' : 'w-2 bg-border hover:bg-muted-foreground/30'}`}
                 />
               ))}
             </div>
@@ -241,6 +241,22 @@ const PlatformSlider = () => {
 
 const Landing = () => {
   const navigate = useNavigate();
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
+
+  const toggleDarkMode = () => {
+    const newDark = !isDark;
+    setIsDark(newDark);
+    document.documentElement.classList.toggle('dark', newDark);
+    localStorage.setItem('theme', newDark ? 'dark' : 'light');
+  };
+
+  useEffect(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') {
+      document.documentElement.classList.add('dark');
+      setIsDark(true);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
@@ -254,15 +270,25 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={kelyaLogo} alt="Kelya Group" className="h-9 w-9 rounded-lg object-cover" />
-            <span className="font-bold text-lg text-foreground tracking-tight">Kelya Group</span>
-            <span className="hidden sm:inline text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">× Hacktualiz</span>
+            <span className="font-heading font-bold text-lg text-foreground tracking-tight">Kelya Group</span>
+            <div className="hidden sm:flex items-center gap-1.5 bg-muted px-2.5 py-1 rounded-full">
+              <img src={hacktualzLogo} alt="Hacktualiz" className="h-4 w-4 rounded-sm object-cover" />
+              <span className="text-xs text-muted-foreground font-medium">× Hacktualiz</span>
+            </div>
           </div>
           <div className="flex items-center gap-2">
-            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleDarkMode}
+              className="rounded-full"
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
             <Button 
               size="sm"
               onClick={() => navigate('/etudiant/login')}
-              className="bg-primary hover:bg-primary-hover text-primary-foreground rounded-lg"
+              className="bg-gradient-primary hover:opacity-90 text-primary-foreground rounded-lg font-semibold"
             >
               <LogIn className="h-4 w-4 mr-1.5" />
               Connexion
@@ -273,27 +299,28 @@ const Landing = () => {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(350_80%_48%_/_0.05),_transparent_50%)]" />
-        <div className="absolute top-20 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-secondary/5 rounded-full blur-3xl" />
+        {/* Decorative blobs */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_hsl(var(--secondary)_/_0.08),_transparent_50%)]" />
+        <div className="absolute top-10 right-10 w-[500px] h-[500px] bg-secondary/5 rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[80px]" />
         
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-16 sm:pb-20 relative">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-16 sm:pb-20 relative">
           <div className="max-w-3xl">
             <motion.div 
               variants={fadeUp} initial="hidden" animate="visible" custom={0}
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/5 border border-primary/10 rounded-full mb-8"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-secondary/8 border border-secondary/15 rounded-full mb-8"
             >
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              <span className="text-primary text-xs font-medium">Plateforme de soumission de projets</span>
+              <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+              <span className="text-secondary text-xs font-semibold tracking-wide uppercase">Plateforme de soumission de projets</span>
             </motion.div>
             
             <motion.h1 
               variants={fadeUp} initial="hidden" animate="visible" custom={1}
-              className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-[1.1] tracking-tight mb-6"
+              className="text-5xl sm:text-6xl lg:text-7xl font-heading font-bold text-foreground leading-[1.05] tracking-tight mb-6"
             >
               Soumettez vos projets.
               <br />
-              <span className="text-primary">Suivez votre progression.</span>
+              <span className="text-gradient">Suivez votre progression.</span>
             </motion.h1>
             
             <motion.p 
@@ -310,22 +337,21 @@ const Landing = () => {
               <Button 
                 size="lg"
                 onClick={() => navigate('/etudiant/login')}
-                className="bg-primary hover:bg-primary-hover text-primary-foreground px-8 h-12 text-base font-semibold rounded-xl shadow-lg shadow-primary/20 group"
+                className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 h-13 text-base font-semibold rounded-xl shadow-xl shadow-primary/20 group"
               >
-                <LogIn className="mr-2 h-4 w-4" />
+                <LogIn className="mr-2 h-5 w-5" />
                 Se connecter
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-            
             </motion.div>
           </div>
 
           {/* Stats Cards */}
           <motion.div 
             variants={stagger} initial="hidden" animate="visible"
-            className="mt-16 sm:mt-20"
+            className="mt-20 sm:mt-24"
           >
-            <div className="bg-muted/50 rounded-2xl border border-border p-6 sm:p-8">
+            <div className="bg-card rounded-2xl border border-border p-6 sm:p-8 shadow-custom">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {[
                   { label: 'Projets soumis', value: '1,200+', icon: Upload },
@@ -339,8 +365,8 @@ const Landing = () => {
                     whileHover={{ scale: 1.03, y: -2 }}
                     className="bg-background rounded-xl border border-border p-4 sm:p-5 text-center cursor-default transition-shadow hover:shadow-lg"
                   >
-                    <stat.icon className="h-5 w-5 text-primary mx-auto mb-2" />
-                    <div className="text-xl sm:text-2xl font-bold text-foreground">{stat.value}</div>
+                    <stat.icon className="h-5 w-5 text-secondary mx-auto mb-2" />
+                    <div className="text-xl sm:text-2xl font-heading font-bold text-foreground">{stat.value}</div>
                     <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
                   </motion.div>
                 ))}
@@ -357,13 +383,13 @@ const Landing = () => {
             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
             className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12"
           >
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest">Propulsé par</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.2em]">Propulsé par</span>
             <div className="flex items-center gap-8">
               <motion.img 
                 whileHover={{ scale: 1.05 }}
                 src={kelyaLogo} alt="Kelya Group" className="h-10 w-10 rounded-lg object-cover" 
               />
-              <span className="text-muted-foreground text-lg">×</span>
+              <span className="text-muted-foreground text-lg font-light">×</span>
               <motion.img 
                 whileHover={{ scale: 1.05 }}
                 src={hacktualzLogo} alt="Hacktualiz" className="h-10 w-10 rounded-lg object-cover" 
@@ -380,7 +406,7 @@ const Landing = () => {
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-foreground mb-4">
               Tout ce dont vous avez besoin
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
@@ -403,13 +429,13 @@ const Landing = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08, duration: 0.5 }}
-                whileHover={{ y: -4, boxShadow: '0 12px 40px -12px hsl(350 80% 48% / 0.1)' }}
-                className="bg-background rounded-xl border border-border p-6 transition-all group cursor-default"
+                whileHover={{ y: -4 }}
+                className="bg-card rounded-xl border border-border p-6 transition-all group cursor-default hover:shadow-custom-lg hover:border-secondary/20"
               >
-                <div className="w-10 h-10 rounded-lg bg-primary/8 flex items-center justify-center mb-4 group-hover:bg-primary/12 transition-colors">
-                  <feature.icon className="h-5 w-5 text-primary" />
+                <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center mb-4 group-hover:bg-secondary/15 transition-colors">
+                  <feature.icon className="h-5 w-5 text-secondary" />
                 </div>
-                <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
+                <h3 className="font-heading font-semibold text-foreground mb-2">{feature.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
               </motion.div>
             ))}
@@ -417,14 +443,14 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* How it works - with timeline */}
+      {/* How it works */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-muted/30">
         <div className="max-w-6xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-foreground mb-4">
               Comment ça marche
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg">
@@ -433,8 +459,7 @@ const Landing = () => {
           </motion.div>
 
           <div className="grid sm:grid-cols-3 gap-8 relative">
-            {/* Connecting line */}
-            <div className="hidden sm:block absolute top-16 left-[20%] right-[20%] h-px bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20" />
+            <div className="hidden sm:block absolute top-16 left-[20%] right-[20%] h-px bg-gradient-to-r from-secondary/20 via-secondary/40 to-secondary/20" />
             
             {[
               { step: '01', title: 'Connectez-vous', desc: 'Accédez à votre compte avec vos identifiants. Nouveau ? Créez votre compte en 30 secondes.', icon: LogIn },
@@ -451,12 +476,12 @@ const Landing = () => {
               >
                 <motion.div 
                   whileHover={{ scale: 1.1, rotate: 5 }}
-                  className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-5 relative z-10"
+                  className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center mx-auto mb-5 relative z-10 shadow-lg shadow-primary/20"
                 >
-                  <item.icon className="h-6 w-6 text-primary" />
+                  <item.icon className="h-6 w-6 text-primary-foreground" />
                 </motion.div>
-                <div className="text-xs font-bold text-primary mb-2 tracking-widest">ÉTAPE {item.step}</div>
-                <h3 className="font-bold text-lg text-foreground mb-2">{item.title}</h3>
+                <div className="text-xs font-bold text-secondary mb-2 tracking-[0.2em]">ÉTAPE {item.step}</div>
+                <h3 className="font-heading font-bold text-lg text-foreground mb-2">{item.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">{item.desc}</p>
               </motion.div>
             ))}
@@ -477,7 +502,7 @@ const Landing = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
+              <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground mb-6">
                 Ce que fait notre plateforme
               </h2>
               <div className="space-y-5">
@@ -495,11 +520,11 @@ const Landing = () => {
                     transition={{ delay: i * 0.1, duration: 0.5 }}
                     className="flex gap-4 items-start"
                   >
-                    <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center shrink-0 mt-0.5">
-                      <item.icon className="h-4 w-4 text-primary" />
+                    <div className="w-9 h-9 rounded-lg bg-secondary/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <item.icon className="h-4 w-4 text-secondary" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-foreground mb-1">{item.title}</h4>
+                      <h4 className="font-heading font-semibold text-foreground mb-1">{item.title}</h4>
                       <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
                     </div>
                   </motion.div>
@@ -514,28 +539,28 @@ const Landing = () => {
               transition={{ duration: 0.6 }}
               className="relative"
             >
-              <div className="bg-secondary rounded-2xl p-8 text-secondary-foreground relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl" />
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/5 rounded-full blur-xl" />
+              <div className="bg-gradient-primary rounded-2xl p-8 text-primary-foreground relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/20 rounded-full blur-2xl" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-secondary/10 rounded-full blur-xl" />
                 <div className="relative z-10 space-y-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-primary-foreground/20 flex items-center justify-center">
                       <BarChart3 className="h-5 w-5 text-primary-foreground" />
                     </div>
                     <div>
-                      <div className="text-sm text-secondary-foreground/60">Taux de réussite</div>
-                      <div className="text-2xl font-bold">94%</div>
+                      <div className="text-sm text-primary-foreground/60">Taux de réussite</div>
+                      <div className="text-2xl font-heading font-bold">94%</div>
                     </div>
                   </div>
-                  <div className="h-px bg-secondary-foreground/10" />
+                  <div className="h-px bg-primary-foreground/10" />
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-secondary-foreground/5 rounded-xl p-4">
-                      <div className="text-2xl font-bold">340+</div>
-                      <div className="text-xs text-secondary-foreground/60 mt-1">Étudiants inscrits</div>
+                    <div className="bg-primary-foreground/10 rounded-xl p-4">
+                      <div className="text-2xl font-heading font-bold">340+</div>
+                      <div className="text-xs text-primary-foreground/60 mt-1">Étudiants inscrits</div>
                     </div>
-                    <div className="bg-secondary-foreground/5 rounded-xl p-4">
-                      <div className="text-2xl font-bold">1.2K</div>
-                      <div className="text-xs text-secondary-foreground/60 mt-1">Projets soumis</div>
+                    <div className="bg-primary-foreground/10 rounded-xl p-4">
+                      <div className="text-2xl font-heading font-bold">1.2K</div>
+                      <div className="text-xs text-primary-foreground/60 mt-1">Projets soumis</div>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -546,7 +571,7 @@ const Landing = () => {
                         whileInView={{ height: `${h * 0.6}px` }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.3 + i * 0.08, duration: 0.6, ease: 'easeOut' }}
-                        className="flex-1 bg-primary/30 rounded-t-sm"
+                        className="flex-1 bg-primary-foreground/20 rounded-t-sm"
                         style={{ maxHeight: `${h * 0.6}px` }}
                       />
                     ))}
@@ -566,27 +591,27 @@ const Landing = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="bg-secondary rounded-2xl p-8 sm:p-12 text-center relative overflow-hidden"
+            className="bg-gradient-primary rounded-2xl p-8 sm:p-12 text-center relative overflow-hidden"
           >
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-primary/10 rounded-full blur-3xl" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-secondary/20 rounded-full blur-3xl" />
             <div className="relative z-10">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-foreground mb-4">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-primary-foreground mb-4">
                 Prêt à commencer ?
               </h2>
-              <p className="text-secondary-foreground/70 text-base sm:text-lg mb-8 max-w-xl mx-auto">
+              <p className="text-primary-foreground/70 text-base sm:text-lg mb-8 max-w-xl mx-auto">
                 Connectez-vous à votre espace ou créez votre compte pour soumettre vos projets dès maintenant.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button 
                   size="lg"
                   onClick={() => navigate('/etudiant/login')}
-                  className="bg-primary hover:bg-primary-hover text-primary-foreground h-12 px-8 text-base font-semibold rounded-xl"
+                  variant="secondary"
+                  className="h-12 px-8 text-base font-semibold rounded-xl"
                 >
                   <LogIn className="mr-2 h-4 w-4" />
                   Se connecter
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-              
               </div>
             </div>
           </motion.div>
