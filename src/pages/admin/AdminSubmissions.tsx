@@ -135,147 +135,183 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
 
   if (!submission) return null;
 
+  const getStatusColor = (s: string) => {
+    switch (s) {
+      case 'Reçu': return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800';
+      case 'En révision': return 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800';
+      case 'Validé': return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800';
+      case 'Refusé': return 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800';
+      default: return '';
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            Révision de soumission - {submission.student.full_name}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-6">
-          {/* Submission Info */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-sm font-medium">Projet</Label>
-              <p className="text-sm text-muted-foreground">{submission.project.title}</p>
-            </div>
-            <div>
-              <Label className="text-sm font-medium">Classe</Label>
-              <p className="text-sm text-muted-foreground">{submission.class.code}</p>
-            </div>
-            <div>
-              <Label className="text-sm font-medium">Version</Label>
-              <p className="text-sm text-muted-foreground">#{submission.version}</p>
-            </div>
-            <div>
-              <Label className="text-sm font-medium">Soumis le</Label>
-              <p className="text-sm text-muted-foreground">
-                {new Date(submission.submitted_at).toLocaleString('fr-FR')}
-              </p>
-            </div>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+        {/* Header */}
+        <div className="bg-primary/5 border-b px-6 py-5">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold">
+              Révision de soumission
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-wrap items-center gap-2 mt-3">
+            <Badge variant="outline" className="text-xs font-medium">{submission.student.full_name || submission.student.email}</Badge>
+            <span className="text-muted-foreground text-xs">•</span>
+            <Badge variant="secondary" className="text-xs">{submission.class.code}</Badge>
+            <span className="text-muted-foreground text-xs">•</span>
+            <span className="text-xs text-muted-foreground">{submission.project.title}</span>
+            <span className="text-muted-foreground text-xs">•</span>
+            <span className="text-xs text-muted-foreground">v{submission.version}</span>
+            <span className="text-muted-foreground text-xs">•</span>
+            <span className="text-xs text-muted-foreground">
+              {new Date(submission.submitted_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            </span>
           </div>
+        </div>
 
-          {/* Description */}
-          {submission.description && (
-            <div>
-              <Label className="text-sm font-medium">Description</Label>
-              <p className="text-sm text-muted-foreground mt-1 p-3 bg-muted rounded-md">
-                {submission.description}
-              </p>
-            </div>
-          )}
-
-          {/* Links */}
-          {submission.links.length > 0 && (
-            <div>
-              <Label className="text-sm font-medium">Liens</Label>
-              <div className="space-y-2 mt-1">
-                {submission.links.map((link, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                    <a 
-                      href={link} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:underline"
-                    >
-                      {link}
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Files */}
-          {submission.files.length > 0 && (
-            <div>
-              <Label className="text-sm font-medium">Fichiers</Label>
-              <div className="space-y-2 mt-1">
-                {submission.files.map((file, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{file.split('/').pop()}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => downloadFile(file, submission.id)}
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Review Form */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-medium mb-4">Évaluation</h3>
-            
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <Label htmlFor="status">Statut</Label>
-                <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                     <SelectItem value="Reçu">Reçu</SelectItem>
-                     <SelectItem value="En révision">En révision</SelectItem>
-                     <SelectItem value="Validé">Validé</SelectItem>
-                     <SelectItem value="Refusé">Refusé</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+        {/* Scrollable content */}
+        <div className="overflow-y-auto flex-1 px-6 py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left column — Student submission content */}
+            <div className="space-y-5">
+              <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Contenu de la soumission</h4>
               
-              <div>
-                <Label htmlFor="grade">Note (0-20)</Label>
-                <Input
-                  id="grade"
-                  type="number"
-                  min="0"
-                  max="20"
-                  step="0.5"
-                  value={grade}
-                  onChange={(e) => setGrade(e.target.value)}
-                  placeholder="Note sur 20"
-                />
+              {/* Description */}
+              {submission.description ? (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Description du projet</Label>
+                  <div className="p-4 bg-muted/50 rounded-xl border text-sm leading-relaxed whitespace-pre-wrap break-words">
+                    {submission.description}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 bg-muted/30 rounded-xl border border-dashed text-sm text-muted-foreground italic text-center">
+                  Aucune description fournie
+                </div>
+              )}
+
+              {/* Links */}
+              {submission.links.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Liens soumis ({submission.links.length})</Label>
+                  <div className="space-y-2">
+                    {submission.links.map((link, index) => (
+                      <a 
+                        key={index}
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 bg-muted/40 rounded-lg border hover:bg-muted/70 transition-colors group"
+                      >
+                        <ExternalLink className="h-4 w-4 text-primary flex-shrink-0" />
+                        <span className="text-sm text-primary truncate group-hover:underline">{link}</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Files */}
+              {submission.files.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Fichiers soumis ({submission.files.length})</Label>
+                  <div className="space-y-2">
+                    {submission.files.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between gap-3 p-3 bg-muted/40 rounded-lg border">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="text-sm truncate">{file.split('/').pop()}</span>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-shrink-0 gap-1.5"
+                          onClick={() => downloadFile(file, submission.id)}
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          Télécharger
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {submission.links.length === 0 && submission.files.length === 0 && !submission.description && (
+                <div className="p-6 bg-muted/30 rounded-xl border border-dashed text-center">
+                  <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Aucun contenu soumis</p>
+                </div>
+              )}
+            </div>
+
+            {/* Right column — Evaluation */}
+            <div className="space-y-5">
+              <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Évaluation</h4>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="status" className="text-sm font-medium">Statut</Label>
+                  <Select value={status} onValueChange={setStatus}>
+                    <SelectTrigger className="h-11">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Reçu">
+                        <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-blue-500" /> Reçu</span>
+                      </SelectItem>
+                      <SelectItem value="En révision">
+                        <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-amber-500" /> En révision</span>
+                      </SelectItem>
+                      <SelectItem value="Validé">
+                        <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-emerald-500" /> Validé</span>
+                      </SelectItem>
+                      <SelectItem value="Refusé">
+                        <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-red-500" /> Refusé</span>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="grade" className="text-sm font-medium">Note (/20)</Label>
+                  <Input
+                    id="grade"
+                    type="number"
+                    min="0"
+                    max="20"
+                    step="0.5"
+                    value={grade}
+                    onChange={(e) => setGrade(e.target.value)}
+                    placeholder="Entrez la note sur 20"
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="feedback" className="text-sm font-medium">Commentaires & Feedback</Label>
+                  <Textarea
+                    id="feedback"
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value)}
+                    placeholder="Donnez un feedback détaillé à l'étudiant sur son travail, les points forts, les axes d'amélioration..."
+                    rows={8}
+                    className="resize-none"
+                  />
+                  <p className="text-xs text-muted-foreground">Ce commentaire sera visible par l'étudiant</p>
+                </div>
               </div>
             </div>
-
-            <div className="mb-4">
-              <Label htmlFor="feedback">Commentaires</Label>
-              <Textarea
-                id="feedback"
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-                placeholder="Commentaires et feedback pour l'étudiant..."
-                rows={4}
-              />
-            </div>
-
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={onClose}>
-                Annuler
-              </Button>
-              <Button onClick={handleSubmit} disabled={loading}>
-                {loading ? 'Enregistrement...' : 'Enregistrer'}
-              </Button>
-            </div>
           </div>
+        </div>
+
+        {/* Footer actions */}
+        <div className="border-t px-6 py-4 flex items-center justify-end gap-3 bg-background">
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button onClick={handleSubmit} disabled={loading}>
+            {loading ? 'Enregistrement...' : 'Enregistrer l\'évaluation'}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
