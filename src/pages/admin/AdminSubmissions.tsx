@@ -292,13 +292,11 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
 
                 <div className="space-y-2">
                   <Label htmlFor="feedback" className="text-sm font-medium">Commentaires & Feedback</Label>
-                  <Textarea
-                    id="feedback"
+                  <RichTextEditor
                     value={feedback}
-                    onChange={(e) => setFeedback(e.target.value)}
+                    onChange={setFeedback}
                     placeholder="Donnez un feedback détaillé à l'étudiant sur son travail, les points forts, les axes d'amélioration..."
-                    rows={8}
-                    className="resize-none"
+                    minHeight="180px"
                   />
                   <p className="text-xs text-muted-foreground">Ce commentaire sera visible par l'étudiant</p>
                 </div>
