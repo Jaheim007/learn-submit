@@ -105,9 +105,7 @@ const App = () => (
               <Route path="/etudiant/cours" element={<StudentGuard><StudentCourses /></StudentGuard>} />
               <Route path="/etudiant/cours/:courseId" element={<StudentGuard><CourseDetail /></StudentGuard>} />
 
-              {/* Admin auth routes */}
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/register" element={<AdminRegister />} />
+              {/* Admin auth routes removed - admin access via sidebar only */}
               
               {/* Admin dashboard routes */}
               <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>

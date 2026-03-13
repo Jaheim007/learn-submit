@@ -23,9 +23,9 @@ export default function AdminGuard({ children }: AdminGuardProps) {
     );
   }
 
-  // If not authenticated, redirect to admin login
+  // If not authenticated, redirect to home
   if (!user) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // If authenticated and is admin, allow access
