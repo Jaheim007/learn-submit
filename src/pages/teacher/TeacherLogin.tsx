@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Users } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import nysLogo from '@/assets/nys-logo.png';
+import kelyaLogo from '@/assets/kelya-logo-black.jpg';
 
 export default function TeacherLogin() {
   const [email, setEmail] = useState('');
@@ -30,13 +30,9 @@ export default function TeacherLogin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const { error } = await signIn(email.trim(), password);
-      
       if (error) {
-        console.error('Login error:', error);
-        
         if (error.message?.includes('Invalid login credentials')) {
           toast.error('Email ou mot de passe incorrect');
         } else if (error.message?.includes('Email not confirmed')) {
@@ -46,11 +42,9 @@ export default function TeacherLogin() {
         }
         return;
       }
-
       await supabase.auth.refreshSession();
       await refetchRoles();
       toast.success('Connexion réussie');
-      
     } catch (error) {
       console.error('Unexpected login error:', error);
       toast.error('Erreur inattendue lors de la connexion');
@@ -76,16 +70,10 @@ export default function TeacherLogin() {
               <Users className="h-6 w-6 text-red-600" />
             </div>
             <CardTitle className="text-2xl text-red-600">Accès non autorisé</CardTitle>
-            <CardDescription>
-              Cette zone est réservée aux formateurs.
-            </CardDescription>
+            <CardDescription>Cette zone est réservée aux formateurs.</CardDescription>
           </CardHeader>
           <CardContent className="text-center">
-            <Button 
-              onClick={() => navigate('/')}
-              variant="outline"
-              className="w-full"
-            >
+            <Button onClick={() => navigate('/')} variant="outline" className="w-full">
               Retour à l'accueil
             </Button>
           </CardContent>
@@ -97,17 +85,14 @@ export default function TeacherLogin() {
   return (
     <div className="min-h-screen w-full relative flex items-center justify-center px-4">
       <AnimatedBackground />
-      
       <Card className="w-full max-w-md relative z-10 backdrop-blur-sm bg-card/95">
         <CardHeader className="space-y-4 text-center">
           <div className="flex justify-center">
-            <img src={nysLogo} alt="NYS Africa" className="h-16 w-auto" />
+            <img src={kelyaLogo} alt="Kelya Group" className="h-16 w-16 rounded-xl object-cover" />
           </div>
           <div>
             <CardTitle className="text-2xl">Portail Formateurs</CardTitle>
-            <CardDescription>
-              Accédez à votre espace formateur
-            </CardDescription>
+            <CardDescription>Kelya Group — Espace Formateur</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
@@ -117,7 +102,7 @@ export default function TeacherLogin() {
               <Input
                 id="email"
                 type="email"
-                placeholder="votre.email@nys-africa.com"
+                placeholder="votre.email@kelyagroup.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -144,11 +129,7 @@ export default function TeacherLogin() {
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={loading}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                 </Button>
               </div>
             </div>
