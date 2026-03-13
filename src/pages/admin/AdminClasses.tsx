@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit2, Loader2, Users } from 'lucide-react';
+import { Plus, Edit2, Loader2, Users, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -21,7 +21,6 @@ interface Class {
   description: string | null;
   session_name: string | null;
   is_active: boolean;
-  is_open_for_signup: boolean | null;
   created_at: string;
   student_count?: number;
 }
@@ -33,15 +32,15 @@ export default function AdminClasses() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [classToDelete, setClassToDelete] = useState<Class | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Form state
   const [formData, setFormData] = useState({
     code: '',
     title: '',
     description: '',
     session_name: '',
     is_active: true,
-    is_open_for_signup: true,
   });
 
   useEffect(() => {
@@ -51,8 +50,6 @@ export default function AdminClasses() {
   const loadClasses = async () => {
     try {
       setLoading(true);
-      
-      // Load classes
       const { data: classesData, error: classesError } = await supabase
         .from('classes')
         .select('*')
@@ -60,7 +57,6 @@ export default function AdminClasses() {
 
       if (classesError) throw classesError;
 
-      // Get student counts per class via enrollments
       const { data: enrollments } = await supabase
         .from('enrollments')
         .select('class_id');
@@ -91,7 +87,6 @@ export default function AdminClasses() {
       description: '',
       session_name: '',
       is_active: true,
-      is_open_for_signup: true,
     });
   };
 
@@ -111,7 +106,6 @@ export default function AdminClasses() {
           description: formData.description.trim() || null,
           session_name: formData.session_name.trim() || null,
           is_active: formData.is_active,
-          is_open_for_signup: formData.is_open_for_signup,
         })
         .select()
         .single();
@@ -151,7 +145,6 @@ export default function AdminClasses() {
           description: formData.description.trim() || null,
           session_name: formData.session_name.trim() || null,
           is_active: formData.is_active,
-          is_open_for_signup: formData.is_open_for_signup,
         })
         .eq('id', selectedClass.id);
 
@@ -174,6 +167,48 @@ export default function AdminClasses() {
     }
   };
 
+  const handleDeleteClass = async () => {
+    if (!classToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      // Delete enrollments first (foreign key constraint)
+      await supabase
+        .from('enrollments')
+        .delete()
+        .eq('class_id', classToDelete.id);
+
+      // Delete class_projects
+      await supabase
+        .from('class_projects')
+        .delete()
+        .eq('class_id', classToDelete.id);
+
+      // Delete class_enrollments
+      await supabase
+        .from('class_enrollments')
+        .delete()
+        .eq('class_id', classToDelete.id);
+
+      // Delete the class
+      const { error } = await supabase
+        .from('classes')
+        .delete()
+        .eq('id', classToDelete.id);
+
+      if (error) throw error;
+
+      toast.success(`Classe "${classToDelete.title}" supprimée`);
+      setClassToDelete(null);
+      loadClasses();
+    } catch (error: any) {
+      console.error('Error deleting class:', error);
+      toast.error(error.message || 'Erreur lors de la suppression');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const openEditDialog = (classItem: Class) => {
     setSelectedClass(classItem);
     setFormData({
@@ -182,37 +217,8 @@ export default function AdminClasses() {
       description: classItem.description || '',
       session_name: classItem.session_name || '',
       is_active: classItem.is_active,
-      is_open_for_signup: classItem.is_open_for_signup ?? true,
     });
     setIsEditOpen(true);
-  };
-
-  const toggleSignupStatus = async (classItem: Class) => {
-    try {
-      const { error } = await supabase
-        .from('classes')
-        .update({ is_open_for_signup: !classItem.is_open_for_signup })
-        .eq('id', classItem.id);
-
-      if (error) throw error;
-
-      setClasses(prev => 
-        prev.map(c => 
-          c.id === classItem.id 
-            ? { ...c, is_open_for_signup: !c.is_open_for_signup } 
-            : c
-        )
-      );
-
-      toast.success(
-        !classItem.is_open_for_signup 
-          ? 'Inscriptions ouvertes' 
-          : 'Inscriptions fermées'
-      );
-    } catch (error) {
-      console.error('Error toggling signup:', error);
-      toast.error('Erreur lors de la mise à jour');
-    }
   };
 
   const toggleActiveStatus = async (classItem: Class) => {
@@ -224,17 +230,17 @@ export default function AdminClasses() {
 
       if (error) throw error;
 
-      setClasses(prev => 
-        prev.map(c => 
-          c.id === classItem.id 
-            ? { ...c, is_active: !c.is_active } 
+      setClasses(prev =>
+        prev.map(c =>
+          c.id === classItem.id
+            ? { ...c, is_active: !c.is_active }
             : c
         )
       );
 
       toast.success(
-        !classItem.is_active 
-          ? 'Classe activée' 
+        !classItem.is_active
+          ? 'Classe activée'
           : 'Classe désactivée'
       );
     } catch (error) {
@@ -263,7 +269,7 @@ export default function AdminClasses() {
             {classes.length} classe{classes.length > 1 ? 's' : ''} au total
           </p>
         </div>
-        
+
         <Dialog open={isCreateOpen} onOpenChange={(open) => {
           setIsCreateOpen(open);
           if (!open) resetForm();
@@ -325,24 +331,13 @@ export default function AdminClasses() {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="create-is_active"
-                    checked={formData.is_active}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-                  />
-                  <Label htmlFor="create-is_active">Classe active</Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="create-is_open_for_signup"
-                    checked={formData.is_open_for_signup}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_open_for_signup: checked }))}
-                  />
-                  <Label htmlFor="create-is_open_for_signup">Inscriptions ouvertes</Label>
-                </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="create-is_active"
+                  checked={formData.is_active}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                />
+                <Label htmlFor="create-is_active">Classe active</Label>
               </div>
             </div>
             <DialogFooter>
@@ -358,7 +353,6 @@ export default function AdminClasses() {
         </Dialog>
       </div>
 
-      {/* Classes Table */}
       <Card>
         <CardContent className="p-0">
           <Table>
@@ -369,7 +363,6 @@ export default function AdminClasses() {
                 <TableHead>Session</TableHead>
                 <TableHead>Étudiants</TableHead>
                 <TableHead>Active</TableHead>
-                <TableHead>Inscriptions</TableHead>
                 <TableHead>Créée</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -396,13 +389,6 @@ export default function AdminClasses() {
                       onCheckedChange={() => toggleActiveStatus(classItem)}
                     />
                   </TableCell>
-                  <TableCell>
-                    <Switch
-                      checked={classItem.is_open_for_signup ?? false}
-                      onCheckedChange={() => toggleSignupStatus(classItem)}
-                      disabled={!classItem.is_active}
-                    />
-                  </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
                     {formatDistanceToNow(new Date(classItem.created_at), {
                       addSuffix: true,
@@ -410,19 +396,29 @@ export default function AdminClasses() {
                     })}
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openEditDialog(classItem)}
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditDialog(classItem)}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => setClassToDelete(classItem)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
               {classes.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     Aucune classe trouvée
                   </TableCell>
                 </TableRow>
@@ -491,37 +487,72 @@ export default function AdminClasses() {
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="edit-is_active"
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-                />
-                <Label htmlFor="edit-is_active">Classe active</Label>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="edit-is_open_for_signup"
-                  checked={formData.is_open_for_signup}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_open_for_signup: checked }))}
-                />
-                <Label htmlFor="edit-is_open_for_signup">Inscriptions ouvertes</Label>
-              </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="edit-is_active"
+                checked={formData.is_active}
+                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+              />
+              <Label htmlFor="edit-is_active">Classe active</Label>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditOpen(false)}>
-              Annuler
+          <DialogFooter className="flex justify-between sm:justify-between">
+            <Button
+              variant="destructive"
+              onClick={() => {
+                setIsEditOpen(false);
+                if (selectedClass) setClassToDelete(selectedClass);
+              }}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Supprimer
             </Button>
-            <Button onClick={handleEditClass} disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Enregistrer
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setIsEditOpen(false)}>
+                Annuler
+              </Button>
+              <Button onClick={handleEditClass} disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Enregistrer
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!classToDelete} onOpenChange={(open) => !open && setClassToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer la classe ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. La classe « {classToDelete?.title} » sera supprimée avec toutes ses inscriptions et affectations de projets.
+              {(classToDelete?.student_count ?? 0) > 0 && (
+                <span className="block mt-2 font-semibold text-destructive">
+                  ⚠️ {classToDelete?.student_count} étudiant{(classToDelete?.student_count ?? 0) > 1 ? 's' : ''} sont inscrits dans cette classe.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteClass}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Suppression...
+                </>
+              ) : (
+                'Supprimer'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
