@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, FileText, BookOpen, Trophy, User, LogOut, X } from 'lucide-react';
-import nysLogo from '@/assets/nys-logo.png';
+import hacktualzLogo from '@/assets/hacktualiz-logo-light.jpeg';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
