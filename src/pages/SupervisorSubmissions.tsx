@@ -63,7 +63,7 @@ interface Project {
 
 export default function SupervisorSubmissions() {
   const { loading } = useAuth();
-  const { isSupervisor } = useRoles();
+  const { isSupervisor, isTeacher, isLoading: rolesLoading } = useRoles();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -77,10 +77,10 @@ export default function SupervisorSubmissions() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    if (!loading && isSupervisor) {
+    if (!loading && !rolesLoading && (isSupervisor || isTeacher)) {
       loadData();
     }
-  }, [loading, isSupervisor]);
+  }, [loading, rolesLoading, isSupervisor, isTeacher]);
 
   const loadData = async () => {
     try {
