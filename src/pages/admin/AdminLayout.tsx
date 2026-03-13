@@ -11,7 +11,7 @@ import {
   Settings,
   BookOpen,
   UserCog,
-  GraduationCap,
+  LogOut,
   LogOut,
   Mail,
   ArrowLeft,
