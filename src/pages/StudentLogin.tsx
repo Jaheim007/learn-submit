@@ -25,7 +25,33 @@ export default function StudentLogin() {
   // Route authenticated users
   useEffect(() => {
     if (!user) return;
-    const checkStudent = async () => {
+    const routeUser = async () => {
+      // Check roles first (admin, academy, supervisor)
+      try {
+        const { data: roles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id);
+
+        const roleList = (roles || []).map(r => r.role);
+
+        if (roleList.includes('admin')) {
+          navigate('/admin', { replace: true });
+          return;
+        }
+        if (roleList.includes('academy')) {
+          navigate('/academy', { replace: true });
+          return;
+        }
+        if (roleList.includes('supervisor')) {
+          navigate('/teacher', { replace: true });
+          return;
+        }
+      } catch (err) {
+        console.error('Error checking roles:', err);
+      }
+
+      // Default: student flow
       const { data: student } = await supabase
         .from('students')
         .select('id, status')
@@ -53,7 +79,7 @@ export default function StudentLogin() {
         navigate('/etudiant/pending', { replace: true });
       }
     };
-    checkStudent();
+    routeUser();
   }, [user, navigate]);
 
   // Resend cooldown timer
