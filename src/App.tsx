@@ -51,6 +51,8 @@ import AcademyGuard from "./components/academy/AcademyGuard";
 import TeacherLogin from "./pages/teacher/TeacherLogin";
 import TeacherLayout from "./pages/teacher/TeacherLayout";
 import TeacherHome from "./pages/teacher/TeacherHome";
+import TeacherStudents from "./pages/teacher/TeacherStudents";
+import TeacherMessages from "./pages/teacher/TeacherMessages";
 import TeacherGuard from "./components/teacher/TeacherGuard";
 import StudentCourses from "./pages/StudentCourses";
 import CourseDetail from "./pages/CourseDetail";
@@ -141,9 +143,10 @@ const App = () => (
               <Route path="/teacher/login" element={<TeacherLogin />} />
               <Route path="/teacher" element={<TeacherGuard><TeacherLayout /></TeacherGuard>}>
                 <Route index element={<TeacherHome />} />
-                <Route path="students" element={<AdminStudents />} />
+                <Route path="students" element={<TeacherStudents />} />
                 <Route path="submissions" element={<SupervisorSubmissions />} />
                 <Route path="courses" element={<AdminCourses />} />
+                <Route path="messages" element={<TeacherMessages />} />
               </Route>
               
               <Route path="/superviseur" element={<SupervisorDashboard />} />
