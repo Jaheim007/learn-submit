@@ -1,10 +1,10 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, BarChart3, Users, FileText, FolderOpen, UserCheck, Settings, BookOpen, GraduationCap, School } from 'lucide-react';
+import { LogOut, BarChart3, Users, FileText, FolderOpen, UserCheck, Settings, BookOpen, GraduationCap, School, ArrowLeft } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import nysLogo from '@/assets/nys-logo.png';
+import kelyaLogo from '@/assets/kelya-logo-dark.png';
+import hacktualizeLogoDark from '@/assets/hacktualiz-logo-dark.png';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
@@ -35,14 +35,29 @@ export default function AdminLayout() {
       {/* Sidebar Navigation */}
       <aside className="fixed left-0 top-0 h-screen w-64 bg-card/80 backdrop-blur-xl border-r border-border/50 z-20 flex flex-col">
         {/* Logo */}
-        <div className="p-6 border-b border-border/50">
-          <div className="flex items-center gap-3">
-            <img src={nysLogo} alt="NYS Africa" className="h-10 w-auto" />
-            <div>
-              <h2 className="font-bold text-foreground">NYS Africa</h2>
-              <p className="text-xs text-muted-foreground">Admin Dashboard</p>
+        <div className="p-5 border-b border-border/50">
+          <div className="flex items-center gap-2">
+            <img src={kelyaLogo} alt="Kelya Group" className="h-8 w-8 rounded-md object-cover" />
+            <span className="text-muted-foreground text-xs">×</span>
+            <img src={hacktualizeLogoDark} alt="Hacktualiz" className="h-8 w-8 rounded-md object-cover" />
+            <div className="ml-1">
+              <h2 className="font-heading font-bold text-sm text-foreground leading-tight">Kelya × Hacktualiz</h2>
+              <p className="text-[10px] text-muted-foreground">Administration</p>
             </div>
           </div>
+        </div>
+
+        {/* Back to Dashboard */}
+        <div className="px-4 pt-3 pb-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-muted-foreground hover:text-foreground"
+            onClick={() => navigate('/home')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour au portail
+          </Button>
         </div>
 
         {/* Navigation */}
@@ -82,7 +97,7 @@ export default function AdminLayout() {
       <div className="ml-64 relative z-10">
         {/* Top Bar */}
         <div className="h-16 border-b border-border/50 bg-background/40 backdrop-blur-xl flex items-center justify-between px-6">
-          <h1 className="text-xl font-semibold text-foreground">
+          <h1 className="text-xl font-heading font-semibold text-foreground">
             {navItems.find(item => item.path === location.pathname)?.label || 'Administration'}
           </h1>
         </div>

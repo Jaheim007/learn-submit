@@ -1,11 +1,11 @@
-import kelyaLogo from '@/assets/kelya-logo-red.jpg';
-import hacktualizeLogoDark from '@/assets/hacktualiz-logo-dark.jpeg';
-import { motion, AnimatePresence } from 'framer-motion';
+import kelyaLogo from '@/assets/kelya-logo-dark.png';
+import hacktualizeLogoDark from '@/assets/hacktualiz-logo-dark.png';
+import { motion } from 'framer-motion';
 
 export const LoadingScreen = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background overflow-hidden">
-      {/* Splash radial */}
+      {/* Splash radial with navy-red gradient */}
       <motion.div
         className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.08)_0%,transparent_70%)]"
         initial={{ scale: 0, opacity: 0 }}
@@ -50,7 +50,8 @@ export const LoadingScreen = () => {
           {[0, 1, 2].map((i) => (
             <motion.div
               key={i}
-              className="w-2.5 h-2.5 bg-primary rounded-full"
+              className="w-2.5 h-2.5 bg-gradient-primary rounded-full"
+              style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))` }}
               animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
               transition={{ duration: 1, repeat: Infinity, delay: i * 0.15 }}
             />
