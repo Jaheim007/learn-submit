@@ -38,12 +38,12 @@ export const StudentSidebar = ({ open, onClose }: StudentSidebarProps) => {
       <div className="p-5 border-b border-sidebar-border flex items-center justify-between">
         <Link to="/etudiant/projets" className="flex items-center gap-3 group" onClick={handleNavClick}>
           <img
-            src={nysLogo}
-            alt="NYS Logo"
-            className="h-9 w-9 object-contain transition-transform duration-300 group-hover:scale-110"
+            src={hacktualzLogo}
+            alt="Hacktualiz Logo"
+            className="h-9 w-9 object-cover rounded-lg transition-transform duration-300 group-hover:scale-110"
           />
           <div>
-            <h1 className="text-base font-bold text-sidebar-foreground">NYS Africa</h1>
+            <h1 className="text-base font-bold text-sidebar-foreground">Hacktualiz</h1>
             <p className="text-xs text-muted-foreground">Plateforme Étudiant</p>
           </div>
         </Link>
