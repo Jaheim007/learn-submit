@@ -41,8 +41,7 @@ export default function AdminUsers() {
 
   // Admin form
   const [isAdminDialogOpen, setIsAdminDialogOpen] = useState(false);
-  const [adminForm, setAdminForm] = useState({ email: '', full_name: '', password: '' });
-  const [showPassword, setShowPassword] = useState(false);
+  const [adminForm, setAdminForm] = useState({ email: '', full_name: '', role: 'academy' as 'admin' | 'academy' });
 
   useEffect(() => { loadData(); }, []);
 
