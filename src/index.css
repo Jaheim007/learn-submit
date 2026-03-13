@@ -1,42 +1,42 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* NYS Premium Dashboard - Professional Design System */
+/* Hacktualiz x Kelya Group — Premium Design System */
 
 @layer base {
   :root {
-    /* Dark Purple/Blue Theme */
-    --background: 250 40% 7%;
+    /* Dark Navy Base (from Hacktualiz) */
+    --background: 230 50% 6%;
     --foreground: 210 40% 98%;
 
-    --card: 250 35% 10%;
+    --card: 230 45% 9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 250 35% 10%;
+    --popover: 230 45% 9%;
     --popover-foreground: 210 40% 98%;
 
-    /* Primary - Electric Blue */
-    --primary: 217 91% 60%;
-    --primary-foreground: 255 100% 100%;
-    --primary-hover: 217 91% 50%;
-    --primary-light: 217 91% 70%;
-    --primary-glow: 217 91% 65%;
+    /* Primary - Crimson Red (from Kelya Group) */
+    --primary: 350 85% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 350 85% 42%;
+    --primary-light: 350 85% 62%;
+    --primary-glow: 350 85% 55%;
 
-    /* Secondary - Purple */
-    --secondary: 270 80% 60%;
-    --secondary-foreground: 255 100% 100%;
-    --secondary-hover: 270 80% 50%;
-    --secondary-light: 270 80% 70%;
-    --secondary-glow: 270 80% 65%;
+    /* Secondary - Deep Navy (from Hacktualiz) */
+    --secondary: 230 60% 30%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-hover: 230 60% 22%;
+    --secondary-light: 230 60% 42%;
+    --secondary-glow: 230 60% 36%;
 
     /* Neutral System */
-    --muted: 250 30% 15%;
+    --muted: 230 30% 14%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 217 91% 20%;
+    --accent: 350 85% 18%;
     --accent-foreground: 210 40% 98%;
 
     /* Status Colors */
@@ -56,65 +56,65 @@
     --destructive-glow: 0 84% 65%;
 
     /* Interface Elements */
-    --border: 250 30% 20%;
-    --input: 250 30% 12%;
-    --ring: 217 91% 60%;
+    --border: 230 30% 18%;
+    --input: 230 30% 11%;
+    --ring: 350 85% 50%;
 
     /* Layout & Spacing */
     --radius: 0.75rem;
     --content-max-width: 1600px;
 
-    /* Gradients - Blue to Purple */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(270 80% 60%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(250 40% 7%) 0%, hsl(250 50% 12%) 50%, hsl(270 60% 15%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(250 35% 10%) 0%, hsl(250 30% 13%) 100%);
+    /* Gradients - Navy to Red */
+    --gradient-primary: linear-gradient(135deg, hsl(230 60% 30%) 0%, hsl(350 85% 50%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(230 50% 6%) 0%, hsl(230 50% 10%) 50%, hsl(350 85% 12%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(230 45% 9%) 0%, hsl(230 30% 12%) 100%);
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(250 40% 7% / 0.3);
-    --shadow-md: 0 4px 6px -1px hsl(250 40% 7% / 0.4), 0 2px 4px -1px hsl(250 40% 7% / 0.3);
-    --shadow-lg: 0 10px 15px -3px hsl(250 40% 7% / 0.5), 0 4px 6px -2px hsl(250 40% 7% / 0.4);
-    --shadow-xl: 0 20px 25px -5px hsl(250 40% 7% / 0.6), 0 10px 10px -5px hsl(250 40% 7% / 0.5);
+    --shadow-sm: 0 1px 2px 0 hsl(230 50% 6% / 0.3);
+    --shadow-md: 0 4px 6px -1px hsl(230 50% 6% / 0.4), 0 2px 4px -1px hsl(230 50% 6% / 0.3);
+    --shadow-lg: 0 10px 15px -3px hsl(230 50% 6% / 0.5), 0 4px 6px -2px hsl(230 50% 6% / 0.4);
+    --shadow-xl: 0 20px 25px -5px hsl(230 50% 6% / 0.6), 0 10px 10px -5px hsl(230 50% 6% / 0.5);
 
     /* Animation easing */
     --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
     --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     /* Sidebar */
-    --sidebar-background: 250 40% 5%;
+    --sidebar-background: 230 50% 5%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 255 100% 100%;
-    --sidebar-accent: 250 30% 13%;
+    --sidebar-primary: 350 85% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 230 30% 12%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 250 30% 18%;
-    --sidebar-ring: 217 91% 60%;
-    
-    /* Submito Brand Colors */
-    --submito-cyan: 180 100% 50%;
-    --submito-pink: 320 100% 60%;
-    --submito-purple: 280 60% 40%;
+    --sidebar-border: 230 30% 16%;
+    --sidebar-ring: 350 85% 50%;
+
+    /* Brand Colors */
+    --brand-navy: 230 60% 20%;
+    --brand-red: 350 85% 50%;
+    --brand-dark: 230 50% 6%;
   }
 
   .dark {
-    --background: 250 40% 7%;
+    --background: 230 50% 6%;
     --foreground: 210 40% 98%;
-    --card: 250 35% 10%;
+    --card: 230 45% 9%;
     --card-foreground: 210 40% 98%;
-    --popover: 250 35% 10%;
+    --popover: 230 45% 9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 255 100% 100%;
-    --secondary: 270 80% 60%;
-    --secondary-foreground: 255 100% 100%;
-    --muted: 250 30% 15%;
+    --primary: 350 85% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 230 60% 30%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 230 30% 14%;
     --muted-foreground: 215 20% 65%;
-    --accent: 217 91% 20%;
+    --accent: 350 85% 18%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 250 30% 20%;
-    --input: 250 30% 12%;
-    --ring: 217 91% 60%;
+    --border: 230 30% 18%;
+    --input: 230 30% 11%;
+    --ring: 350 85% 50%;
   }
 }
 
@@ -123,7 +123,8 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground;
+    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
@@ -157,13 +158,13 @@
     backdrop-filter: blur(24px);
     border: 1px solid hsl(var(--primary) / 0.1);
     border-radius: 1rem;
-    box-shadow: 0 8px 32px hsl(217 91% 60% / 0.1);
+    box-shadow: 0 8px 32px hsl(350 85% 50% / 0.1);
     transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .premium-card:hover {
     border-color: hsl(var(--primary) / 0.3);
-    box-shadow: 0 8px 40px hsl(217 91% 60% / 0.2);
+    box-shadow: 0 8px 40px hsl(350 85% 50% / 0.2);
     transform: translateY(-2px);
   }
 

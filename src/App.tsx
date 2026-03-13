@@ -9,16 +9,6 @@ import { ConditionalClassSelectionProvider } from "@/components/ConditionalClass
 
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
-import OrganizationSignup from "./pages/OrganizationSignup";
-import OrganizationSignin from "./pages/OrganizationSignin";
-import OrganizationOnboarding from "./pages/OrganizationOnboarding";
-import OrganizationDashboard from "./pages/organization/OrganizationDashboard";
-import OrganizationStudents from "./pages/organization/OrganizationStudents";
-import OrganizationCourses from "./pages/organization/OrganizationCourses";
-import OrganizationAnalytics from "./pages/organization/OrganizationAnalytics";
-import OrganizationSettings from "./pages/organization/OrganizationSettings";
-import AcceptInvitation from "./pages/organization/AcceptInvitation";
-import AcceptInvite from "./pages/organization/AcceptInvite";
 import Auth from "./pages/Auth";
 import AuthRedirect from "./pages/AuthRedirect";
 import StudentLogin from "./pages/StudentLogin";
@@ -73,8 +63,6 @@ import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 import Forbidden from "./pages/Forbidden";
 
-
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -93,17 +81,10 @@ const App = () => (
           <ConditionalClassSelectionProvider>
             <Toaster />
             <Sonner />
-        <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/old-home" element={<Index />} />
-        <Route path="/signup" element={<OrganizationSignup />} />
-        <Route path="/signin" element={<OrganizationSignin />} />
-        <Route path="/organization/signin" element={<OrganizationSignin />} />
-        <Route path="/auth-redirect" element={<AuthRedirect />} />
-        <Route path="/onboarding" element={<OrganizationOnboarding />} />
-        <Route path="/accept-invitation" element={<AcceptInvitation />} />
-        <Route path="/accept-invite" element={<AcceptInvite />} />
-          <Route path="/organization/dashboard" element={<OrganizationDashboard />} />
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/old-home" element={<Index />} />
+              <Route path="/auth-redirect" element={<AuthRedirect />} />
               
               {/* Student setup and auth routes */}
               <Route path="/student/setup" element={<StudentSetup />} />
@@ -150,10 +131,10 @@ const App = () => (
                 <Route path="students" element={<AcademyStudents />} />
                 <Route path="submissions" element={<AcademySubmissions />} />
                 <Route path="projects" element={<AcademyProjects />} />
-              <Route path="courses" element={<AcademyCourses />} />
-              <Route path="classes" element={<AcademyClasses />} />
-              <Route path="teachers" element={<AcademyTeachers />} />
-              <Route path="settings" element={<AcademySettings />} />
+                <Route path="courses" element={<AcademyCourses />} />
+                <Route path="classes" element={<AcademyClasses />} />
+                <Route path="teachers" element={<AcademyTeachers />} />
+                <Route path="settings" element={<AcademySettings />} />
               </Route>
               
               {/* Teacher Routes */}
