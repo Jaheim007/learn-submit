@@ -358,7 +358,7 @@ const handler = async (req: Request): Promise<Response> => {
           site_url: siteUrl,
         });
 
-        const sent = await sendViaResend(emails, subject, html);
+        const sent = await sendViaResend(supabase, emails, subject, html, 'automation_deadline_reminder');
         totalSent += sent;
 
         // Also create in-app notifications for these students

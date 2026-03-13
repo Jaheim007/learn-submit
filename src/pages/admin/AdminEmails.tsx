@@ -367,6 +367,10 @@ export default function AdminEmails() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="logs">
+          <EmailLogsPanel />
+        </TabsContent>
       </Tabs>
     </div>
   );
