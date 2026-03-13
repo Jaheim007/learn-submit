@@ -1,52 +1,52 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Kelya Group × Hacktualiz — Clean Light Design System */
+/* Kelya Group × Hacktualiz — Navy/Dark/Red Design System */
 
 @layer base {
   :root {
-    /* Light Mode — Clean White Base */
-    --background: 0 0% 100%;
-    --foreground: 224 30% 12%;
+    /* Light Mode — Clean with Navy accents */
+    --background: 220 20% 97%;
+    --foreground: 230 40% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 224 30% 12%;
+    --card-foreground: 230 40% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 224 30% 12%;
+    --popover-foreground: 230 40% 10%;
 
-    /* Primary - Kelya Red */
-    --primary: 350 80% 48%;
+    /* Primary - Deep Navy (from Hacktualiz) */
+    --primary: 230 60% 22%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 350 80% 40%;
-    --primary-light: 350 80% 58%;
-    --primary-glow: 350 80% 52%;
+    --primary-hover: 230 60% 16%;
+    --primary-light: 230 50% 35%;
+    --primary-glow: 230 60% 28%;
 
-    /* Secondary - Dark Navy */
-    --secondary: 224 50% 18%;
+    /* Secondary - Crimson Red accent */
+    --secondary: 350 80% 45%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-hover: 224 50% 14%;
-    --secondary-light: 224 40% 35%;
-    --secondary-glow: 224 50% 25%;
+    --secondary-hover: 350 80% 38%;
+    --secondary-light: 350 70% 55%;
+    --secondary-glow: 350 80% 50%;
 
     /* Neutral System */
-    --muted: 220 14% 96%;
+    --muted: 220 16% 93%;
     --muted-foreground: 220 10% 46%;
 
-    --accent: 220 14% 96%;
-    --accent-foreground: 224 30% 12%;
+    --accent: 220 16% 93%;
+    --accent-foreground: 230 40% 10%;
 
     /* Status Colors */
-    --success: 152 60% 40%;
+    --success: 152 60% 36%;
     --success-foreground: 0 0% 100%;
-    --success-light: 152 60% 50%;
-    --success-glow: 152 60% 45%;
+    --success-light: 152 60% 46%;
+    --success-glow: 152 60% 40%;
 
     --warning: 38 92% 50%;
-    --warning-foreground: 224 30% 12%;
+    --warning-foreground: 230 40% 10%;
     --warning-light: 38 92% 60%;
     --warning-glow: 38 92% 55%;
 
@@ -56,42 +56,121 @@
     --destructive-glow: 0 72% 56%;
 
     /* Interface Elements */
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 350 80% 48%;
+    --border: 220 16% 88%;
+    --input: 220 16% 88%;
+    --ring: 230 60% 22%;
 
     /* Layout */
     --radius: 0.625rem;
     --content-max-width: 1400px;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(350 80% 48%) 0%, hsl(224 50% 18%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(220 14% 98%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(220 14% 98%) 100%);
+    /* Gradients — Navy to Dark with Red accent */
+    --gradient-primary: linear-gradient(135deg, hsl(230 60% 22%) 0%, hsl(350 80% 45%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220 20% 97%) 0%, hsl(230 30% 94%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(230 20% 97%) 100%);
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(224 30% 12% / 0.04);
-    --shadow-md: 0 4px 6px -1px hsl(224 30% 12% / 0.06), 0 2px 4px -2px hsl(224 30% 12% / 0.04);
-    --shadow-lg: 0 10px 15px -3px hsl(224 30% 12% / 0.08), 0 4px 6px -4px hsl(224 30% 12% / 0.04);
-    --shadow-xl: 0 20px 25px -5px hsl(224 30% 12% / 0.08), 0 8px 10px -6px hsl(224 30% 12% / 0.04);
+    --shadow-sm: 0 1px 2px 0 hsl(230 40% 10% / 0.04);
+    --shadow-md: 0 4px 6px -1px hsl(230 40% 10% / 0.06), 0 2px 4px -2px hsl(230 40% 10% / 0.04);
+    --shadow-lg: 0 10px 15px -3px hsl(230 40% 10% / 0.08), 0 4px 6px -4px hsl(230 40% 10% / 0.04);
+    --shadow-xl: 0 20px 25px -5px hsl(230 40% 10% / 0.08), 0 8px 10px -6px hsl(230 40% 10% / 0.04);
 
     /* Animation easing */
     --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
     --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     /* Sidebar - Light variant */
-    --sidebar-background: 0 0% 99%;
-    --sidebar-foreground: 224 30% 12%;
-    --sidebar-primary: 350 80% 48%;
+    --sidebar-background: 230 30% 98%;
+    --sidebar-foreground: 230 40% 10%;
+    --sidebar-primary: 230 60% 22%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 96%;
-    --sidebar-accent-foreground: 224 30% 12%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 350 80% 48%;
+    --sidebar-accent: 230 20% 94%;
+    --sidebar-accent-foreground: 230 40% 10%;
+    --sidebar-border: 220 16% 88%;
+    --sidebar-ring: 230 60% 22%;
 
     /* Brand tokens */
-    --brand-navy: 224 50% 18%;
-    --brand-red: 350 80% 48%;
+    --brand-navy: 230 60% 22%;
+    --brand-red: 350 80% 45%;
+  }
+
+  .dark {
+    /* Dark Mode — Deep Navy/Charcoal base */
+    --background: 230 30% 8%;
+    --foreground: 220 20% 92%;
+
+    --card: 230 25% 12%;
+    --card-foreground: 220 20% 92%;
+
+    --popover: 230 25% 12%;
+    --popover-foreground: 220 20% 92%;
+
+    /* Primary - Lighter Navy for contrast */
+    --primary: 230 55% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 230 55% 62%;
+    --primary-light: 230 50% 45%;
+    --primary-glow: 230 55% 50%;
+
+    /* Secondary - Bright Red */
+    --secondary: 350 75% 55%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-hover: 350 75% 62%;
+    --secondary-light: 350 65% 45%;
+    --secondary-glow: 350 75% 50%;
+
+    /* Neutral System */
+    --muted: 230 20% 16%;
+    --muted-foreground: 220 15% 58%;
+
+    --accent: 230 20% 16%;
+    --accent-foreground: 220 20% 92%;
+
+    /* Status Colors */
+    --success: 152 55% 45%;
+    --success-foreground: 0 0% 100%;
+    --success-light: 152 55% 35%;
+    --success-glow: 152 55% 40%;
+
+    --warning: 38 85% 55%;
+    --warning-foreground: 230 30% 8%;
+    --warning-light: 38 85% 45%;
+    --warning-glow: 38 85% 50%;
+
+    --destructive: 0 68% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-light: 0 68% 45%;
+    --destructive-glow: 0 68% 50%;
+
+    /* Interface Elements */
+    --border: 230 20% 20%;
+    --input: 230 20% 20%;
+    --ring: 230 55% 55%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(230 55% 55%) 0%, hsl(350 75% 55%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(230 30% 8%) 0%, hsl(230 25% 12%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(230 25% 12%) 0%, hsl(230 20% 14%) 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.2);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.3), 0 4px 6px -4px hsl(0 0% 0% / 0.2);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.3), 0 8px 10px -6px hsl(0 0% 0% / 0.2);
+
+    /* Sidebar - Dark variant */
+    --sidebar-background: 230 25% 10%;
+    --sidebar-foreground: 220 20% 92%;
+    --sidebar-primary: 230 55% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 230 20% 16%;
+    --sidebar-accent-foreground: 220 20% 92%;
+    --sidebar-border: 230 20% 20%;
+    --sidebar-ring: 230 55% 55%;
+
+    /* Brand tokens */
+    --brand-navy: 230 55% 55%;
+    --brand-red: 350 75% 55%;
   }
 }
 
@@ -105,12 +184,15 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
     overscroll-behavior-y: none;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
   }
   /* Mobile-first: larger touch targets */
   button, a, input, select, textarea {
