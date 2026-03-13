@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, ArrowRight } from 'lucide-react';
+import { Loader2, Plus, X } from 'lucide-react';
 
 interface Class {
   id: number;
@@ -29,16 +30,21 @@ interface ChangeClassDialogProps {
 }
 
 export function ChangeClassDialog({ open, onOpenChange, student, onSuccess }: ChangeClassDialogProps) {
-  const [classes, setClasses] = useState<Class[]>([]);
-  const [selectedClassId, setSelectedClassId] = useState<string>('');
+  const [allClasses, setAllClasses] = useState<Class[]>([]);
+  const [selectedClassIds, setSelectedClassIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (open) {
+    if (open && student) {
       loadClasses();
+      // Pre-select current classes
+      const currentIds = student.classes
+        .map(c => c.id)
+        .filter((id): id is number => id !== undefined);
+      setSelectedClassIds(currentIds);
     }
-  }, [open]);
+  }, [open, student]);
 
   const loadClasses = async () => {
     setLoading(true);
@@ -50,7 +56,7 @@ export function ChangeClassDialog({ open, onOpenChange, student, onSuccess }: Ch
         .order('code');
 
       if (error) throw error;
-      setClasses(data || []);
+      setAllClasses(data || []);
     } catch (error) {
       console.error('Error loading classes:', error);
       toast.error('Erreur lors du chargement des classes');
@@ -59,68 +65,77 @@ export function ChangeClassDialog({ open, onOpenChange, student, onSuccess }: Ch
     }
   };
 
-  const handleChangeClass = async () => {
-    if (!student || !selectedClassId) {
-      toast.error('Veuillez sélectionner une classe');
+  const toggleClass = (classId: number) => {
+    setSelectedClassIds(prev =>
+      prev.includes(classId)
+        ? prev.filter(id => id !== classId)
+        : [...prev, classId]
+    );
+  };
+
+  const handleSave = async () => {
+    if (!student || selectedClassIds.length === 0) {
+      toast.error('Veuillez sélectionner au moins une classe');
       return;
     }
 
-    const newClassId = parseInt(selectedClassId);
-    
     setIsSubmitting(true);
     try {
-      // First, remove old enrollment if exists
+      // Remove all current enrollments
       const { error: deleteError } = await supabase
         .from('enrollments')
         .delete()
         .eq('student_id', student.id);
 
-      if (deleteError) {
-        console.error('Error removing old enrollment:', deleteError);
-      }
+      if (deleteError) throw deleteError;
 
-      // Add new enrollment
+      // Insert new enrollments
+      const enrollments = selectedClassIds.map(classId => ({
+        student_id: student.id,
+        class_id: classId,
+      }));
+
       const { error: insertError } = await supabase
         .from('enrollments')
-        .insert({
-          student_id: student.id,
-          class_id: newClassId,
-        });
+        .insert(enrollments);
 
       if (insertError) throw insertError;
 
-      // Update primary_class_id in students table
+      // Update primary_class_id to the first selected class
       const { error: updateError } = await supabase
         .from('students')
-        .update({ primary_class_id: newClassId })
+        .update({ primary_class_id: selectedClassIds[0] })
         .eq('id', student.id);
 
       if (updateError) {
         console.error('Error updating primary_class_id:', updateError);
       }
 
-      const newClass = classes.find(c => c.id === newClassId);
-      toast.success(`${student.full_name} a été transféré(e) vers ${newClass?.title || 'la nouvelle classe'}`);
+      const classNames = allClasses
+        .filter(c => selectedClassIds.includes(c.id))
+        .map(c => c.code)
+        .join(', ');
+
+      toast.success(`${student.full_name} est maintenant inscrit(e) dans : ${classNames}`);
       onSuccess();
       onOpenChange(false);
-      setSelectedClassId('');
     } catch (error) {
-      console.error('Error changing class:', error);
-      toast.error('Erreur lors du changement de classe');
+      console.error('Error updating classes:', error);
+      toast.error('Erreur lors de la mise à jour des classes');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const currentClassCodes = student?.classes.map(c => c.code).join(', ') || 'Aucune';
+  const currentClassCodes = student?.classes.map(c => c.code) || [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
-          <DialogTitle>Changer de classe</DialogTitle>
+          <DialogTitle>Gérer les classes</DialogTitle>
           <DialogDescription>
-            Transférer l'étudiant vers une nouvelle classe
+            Sélectionnez les classes auxquelles cet étudiant doit être inscrit
           </DialogDescription>
         </DialogHeader>
 
@@ -131,35 +146,48 @@ export function ChangeClassDialog({ open, onOpenChange, student, onSuccess }: Ch
               <p className="text-sm text-muted-foreground">{student.email}</p>
             </div>
 
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">Classe actuelle:</span>
-              <Badge variant="secondary">{currentClassCodes}</Badge>
-            </div>
-
-            <div className="flex items-center justify-center">
-              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+            <div className="space-y-1">
+              <span className="text-sm text-muted-foreground">Classes actuelles :</span>
+              <div className="flex flex-wrap gap-1">
+                {currentClassCodes.length > 0 ? (
+                  currentClassCodes.map(code => (
+                    <Badge key={code} variant="secondary">{code}</Badge>
+                  ))
+                ) : (
+                  <span className="text-sm text-muted-foreground italic">Aucune</span>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Nouvelle classe</Label>
-              <Select value={selectedClassId} onValueChange={setSelectedClassId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner une classe" />
-                </SelectTrigger>
-                <SelectContent>
-                  {loading ? (
-                    <div className="p-2 text-center text-muted-foreground">
-                      Chargement...
-                    </div>
-                  ) : (
-                    classes.map((cls) => (
-                      <SelectItem key={cls.id} value={cls.id.toString()}>
-                        {cls.code} - {cls.title}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+              <Label>Sélectionner les classes</Label>
+              <ScrollArea className="h-[200px] border rounded-md p-2">
+                {loading ? (
+                  <div className="flex items-center justify-center py-8 text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Chargement...
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {allClasses.map((cls) => (
+                      <label
+                        key={cls.id}
+                        className="flex items-center gap-3 p-2 rounded-md hover:bg-accent/50 cursor-pointer transition-colors"
+                      >
+                        <Checkbox
+                          checked={selectedClassIds.includes(cls.id)}
+                          onCheckedChange={() => toggleClass(cls.id)}
+                        />
+                        <span className="text-sm font-medium">{cls.code}</span>
+                        <span className="text-sm text-muted-foreground">— {cls.title}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+              <p className="text-xs text-muted-foreground">
+                {selectedClassIds.length} classe(s) sélectionnée(s)
+              </p>
             </div>
           </div>
         )}
@@ -168,9 +196,9 @@ export function ChangeClassDialog({ open, onOpenChange, student, onSuccess }: Ch
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuler
           </Button>
-          <Button onClick={handleChangeClass} disabled={isSubmitting || !selectedClassId}>
+          <Button onClick={handleSave} disabled={isSubmitting || selectedClassIds.length === 0}>
             {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Transférer
+            Enregistrer
           </Button>
         </DialogFooter>
       </DialogContent>
