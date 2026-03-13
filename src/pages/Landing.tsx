@@ -28,6 +28,217 @@ const scaleIn = {
   })
 };
 
+const slides = [
+  {
+    icon: Upload,
+    title: 'Soumettez vos projets',
+    desc: 'Uploadez fichiers, liens GitHub et descriptions en quelques clics. Tous les champs sont optionnels.',
+    color: 'bg-primary/10',
+    iconColor: 'text-primary',
+    visual: (
+      <div className="space-y-3">
+        <div className="flex items-center gap-3 bg-background/80 rounded-lg p-3 border border-border">
+          <FileText className="h-5 w-5 text-primary shrink-0" />
+          <div className="flex-1"><div className="h-2.5 bg-primary/20 rounded w-3/4" /><div className="h-2 bg-muted rounded w-1/2 mt-1.5" /></div>
+          <CheckCircle className="h-4 w-4 text-green-500" />
+        </div>
+        <div className="flex items-center gap-3 bg-background/80 rounded-lg p-3 border border-border">
+          <Globe className="h-5 w-5 text-primary shrink-0" />
+          <div className="flex-1"><div className="h-2.5 bg-primary/20 rounded w-2/3" /><div className="h-2 bg-muted rounded w-1/3 mt-1.5" /></div>
+          <CheckCircle className="h-4 w-4 text-green-500" />
+        </div>
+        <div className="flex items-center gap-3 bg-background/80 rounded-lg p-3 border border-border opacity-50">
+          <Upload className="h-5 w-5 text-muted-foreground shrink-0" />
+          <div className="flex-1"><div className="h-2.5 bg-muted rounded w-1/2" /></div>
+          <div className="h-4 w-4 rounded-full border-2 border-muted" />
+        </div>
+      </div>
+    ),
+  },
+  {
+    icon: BarChart3,
+    title: 'Suivez votre progression',
+    desc: 'Tableau de bord avec statuts en temps réel, classement et historique de vos soumissions.',
+    color: 'bg-blue-500/10',
+    iconColor: 'text-blue-500',
+    visual: (
+      <div className="space-y-3">
+        <div className="flex gap-2 items-end h-20">
+          {[40, 60, 35, 80, 55, 90, 70].map((h, i) => (
+            <div key={i} className="flex-1 rounded-t-sm bg-gradient-to-t from-primary/40 to-primary/20" style={{ height: `${h}%` }} />
+          ))}
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {[{ l: 'Validés', v: '12' }, { l: 'En attente', v: '3' }, { l: 'Classement', v: '#4' }].map((s, i) => (
+            <div key={i} className="bg-background/80 rounded-lg p-2 text-center border border-border">
+              <div className="text-sm font-bold text-foreground">{s.v}</div>
+              <div className="text-[10px] text-muted-foreground">{s.l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    icon: Bell,
+    title: 'Notifications & Deadlines',
+    desc: 'Soyez alerté pour chaque retour de formateur et chaque échéance de projet approchante.',
+    color: 'bg-amber-500/10',
+    iconColor: 'text-amber-500',
+    visual: (
+      <div className="space-y-2.5">
+        {[
+          { t: 'Projet validé ✓', d: 'Votre soumission HTML/CSS a été validée', time: '2min', dot: 'bg-green-500' },
+          { t: 'Deadline demain', d: 'Projet React — il reste 18h', time: '1h', dot: 'bg-amber-500' },
+          { t: 'Nouveau feedback', d: 'M. Diallo a commenté votre travail', time: '3h', dot: 'bg-blue-500' },
+        ].map((n, i) => (
+          <div key={i} className="flex items-start gap-3 bg-background/80 rounded-lg p-3 border border-border">
+            <div className={`w-2 h-2 rounded-full ${n.dot} mt-1.5 shrink-0`} />
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-semibold text-foreground">{n.t}</div>
+              <div className="text-[10px] text-muted-foreground truncate">{n.d}</div>
+            </div>
+            <span className="text-[10px] text-muted-foreground shrink-0">{n.time}</span>
+          </div>
+        ))}
+      </div>
+    ),
+  },
+  {
+    icon: TrendingUp,
+    title: 'Classement en direct',
+    desc: 'Comparez votre progression avec vos camarades et visez le top du leaderboard.',
+    color: 'bg-emerald-500/10',
+    iconColor: 'text-emerald-500',
+    visual: (
+      <div className="space-y-2">
+        {[
+          { rank: '1', name: 'Aminata K.', pts: '980', bar: 'w-full' },
+          { rank: '2', name: 'Jean-Paul M.', pts: '920', bar: 'w-[94%]' },
+          { rank: '3', name: 'Fatou D.', pts: '870', bar: 'w-[89%]' },
+          { rank: '4', name: 'Vous', pts: '845', bar: 'w-[86%]', highlight: true },
+        ].map((s, i) => (
+          <div key={i} className={`flex items-center gap-3 rounded-lg p-2.5 ${s.highlight ? 'bg-primary/10 border border-primary/20' : 'bg-background/80 border border-border'}`}>
+            <span className={`text-xs font-bold w-5 text-center ${s.highlight ? 'text-primary' : 'text-muted-foreground'}`}>#{s.rank}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex justify-between items-center mb-1">
+                <span className={`text-xs font-medium ${s.highlight ? 'text-primary' : 'text-foreground'}`}>{s.name}</span>
+                <span className="text-[10px] text-muted-foreground">{s.pts} pts</span>
+              </div>
+              <div className="h-1 bg-muted rounded-full"><div className={`h-full ${s.highlight ? 'bg-primary' : 'bg-primary/30'} rounded-full ${s.bar}`} /></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
+  },
+];
+
+const PlatformSlider = () => {
+  const [current, setCurrent] = useState(0);
+  const [direction, setDirection] = useState(1);
+
+  const goTo = useCallback((idx: number) => {
+    setDirection(idx > current ? 1 : -1);
+    setCurrent(idx);
+  }, [current]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setDirection(1);
+      setCurrent(prev => (prev + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const slideVariants = {
+    enter: (dir: number) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
+  };
+
+  const slide = slides[current];
+
+  return (
+    <section className="py-16 sm:py-24 px-4 sm:px-6 bg-muted/20 overflow-hidden">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+            Découvrez la plateforme
+          </h2>
+          <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
+            Un aperçu de ce qui vous attend une fois connecté
+          </p>
+        </motion.div>
+
+        <div className="relative max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 items-center min-h-[320px]">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={`text-${current}`}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.4, ease: 'easeInOut' }}
+              >
+                <div className={`w-12 h-12 rounded-xl ${slide.color} flex items-center justify-center mb-5`}>
+                  <slide.icon className={`h-6 w-6 ${slide.iconColor}`} />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-3">{slide.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{slide.desc}</p>
+              </motion.div>
+            </AnimatePresence>
+
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={`visual-${current}`}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.4, ease: 'easeInOut', delay: 0.05 }}
+                className="bg-muted/50 rounded-2xl border border-border p-6"
+              >
+                {slide.visual}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          <div className="flex items-center justify-center gap-4 mt-10">
+            <button
+              onClick={() => goTo((current - 1 + slides.length) % slides.length)}
+              className="w-9 h-9 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <div className="flex gap-2">
+              {slides.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goTo(i)}
+                  className={`h-2 rounded-full transition-all duration-300 ${i === current ? 'w-8 bg-primary' : 'w-2 bg-border hover:bg-muted-foreground/30'}`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={() => goTo((current + 1) % slides.length)}
+              className="w-9 h-9 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const Landing = () => {
   const navigate = useNavigate();
 
