@@ -61,7 +61,8 @@ export const StudentDashboardLayout = ({ children }: StudentDashboardLayoutProps
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <ThemeToggle />
             <NotificationBell />
             <button
               onClick={() => navigate('/etudiant/profil')}
