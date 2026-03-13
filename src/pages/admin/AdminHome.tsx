@@ -312,6 +312,7 @@ export default function AdminHome() {
   );
 }
 
-function cn(...inputs: (string | boolean | undefined)[]) {
+// cn utility is already imported via components, using inline for simplicity
+function cn(...inputs: (string | boolean | undefined | null)[]) {
   return inputs.filter(Boolean).join(' ');
 }
