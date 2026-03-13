@@ -316,7 +316,11 @@ export default function AdminEmails() {
                     </div>
                     <div className="p-3 bg-white text-gray-800">
                       <p className="font-semibold mb-1">{subject || 'Sujet...'}</p>
-                      <p className="text-gray-600 whitespace-pre-wrap">{body || 'Contenu...'}</p>
+                      {body && body !== '<p></p>' ? (
+                        <RichTextRenderer content={body} className="text-gray-600 text-xs" />
+                      ) : (
+                        <p className="text-gray-400">Contenu...</p>
+                      )}
                     </div>
                     <div className="p-2 text-center text-[10px] text-gray-400 border-t">
                       Kelya Group × Hacktualiz INC
