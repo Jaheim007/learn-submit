@@ -271,11 +271,11 @@ export default function AdminEmails() {
                   {/* Body */}
                   <div className="space-y-2">
                     <Label>Contenu</Label>
-                    <Textarea
-                      placeholder="Contenu de l'email (le formatage HTML de base sera appliqué automatiquement)..."
+                    <RichTextEditor
                       value={body}
-                      onChange={(e) => setBody(e.target.value)}
-                      rows={10}
+                      onChange={setBody}
+                      placeholder="Rédigez le contenu de votre email..."
+                      minHeight="200px"
                     />
                   </div>
 
