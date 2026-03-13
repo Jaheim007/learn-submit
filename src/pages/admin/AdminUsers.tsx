@@ -149,14 +149,14 @@ export default function AdminUsers() {
     }
   };
 
-  const handleDeleteUser = async (userId: string, role: string) => {
+  const handleDeleteUser = async (userId: string, role: string, deleteAccount = false) => {
     try {
       const { data, error } = await supabase.functions.invoke('delete-user-role', {
-        body: { target_user_id: userId, role }
+        body: { target_user_id: userId, role, delete_account: deleteAccount }
       });
       if (error) throw error;
       if (data?.error) { toast.error(data.error); return; }
-      toast.success('Utilisateur supprimé avec succès');
+      toast.success(deleteAccount ? 'Compte supprimé définitivement' : 'Rôle supprimé avec succès');
       loadData();
     } catch (error) {
       console.error(error);
