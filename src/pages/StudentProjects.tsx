@@ -157,7 +157,7 @@ export default function StudentProjects() {
     return { label: new Date(deadline).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }), urgent: false, days };
   };
 
-  if (loading || authLoading) return <LoadingScreen />;
+  if (loading || authLoading || loadingProjects) return <LoadingScreen />;
 
   const selectedClass = classes.find(c => c.id === selectedClassId);
 
