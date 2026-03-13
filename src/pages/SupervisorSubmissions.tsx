@@ -204,15 +204,12 @@ export default function SupervisorSubmissions() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Soumissions - Vue Superviseur</h1>
-        <p className="text-muted-foreground mt-2">
-          Visualisation des soumissions de vos classes assignées (lecture seule)
+    <div className="space-y-6 max-w-[1400px] mx-auto">
+      <div>
+        <h1 className="text-3xl font-bold text-foreground">Soumissions</h1>
+        <p className="text-muted-foreground mt-1">
+          Soumissions de vos classes assignées
         </p>
-        <Badge variant="outline" className="mt-2">
-          Accès en lecture seule
-        </Badge>
       </div>
 
       {/* Filters */}
