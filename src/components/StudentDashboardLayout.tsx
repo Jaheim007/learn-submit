@@ -6,7 +6,8 @@ import { ProfileAvatar } from './ProfileAvatar';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Search } from 'lucide-react';
+import { Menu } from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
 
 interface StudentDashboardLayoutProps {
   children: ReactNode;
