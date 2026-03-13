@@ -231,7 +231,7 @@ export default function StudentSubmissions() {
                   {sub.grade !== null && (
                     <div className="mt-4 pt-4 border-t border-border">
                       <p className="text-sm font-semibold">Note: {sub.grade}/20</p>
-                      {sub.feedback && <p className="text-sm text-muted-foreground mt-2">{sub.feedback}</p>}
+                      {sub.feedback && <div className="text-sm text-muted-foreground mt-2"><RichTextRenderer content={sub.feedback} /></div>}
                     </div>
                   )}
                 </div>

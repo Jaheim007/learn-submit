@@ -466,12 +466,11 @@ export default function SubmitProject() {
               <CardTitle>Description</CardTitle>
             </CardHeader>
             <CardContent>
-              <Textarea
+              <RichTextEditor
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={setDescription}
                 placeholder="Ajoutez des commentaires ou notes sur votre soumission..."
-                rows={6}
-                className="resize-none"
+                minHeight="140px"
               />
             </CardContent>
           </Card>
