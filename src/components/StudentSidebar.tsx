@@ -1,18 +1,17 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, BookOpen, Trophy, User, LogOut, X, Shield, Sparkles } from 'lucide-react';
-import kelyaLogo from '@/assets/kelya-logo-red.jpg';
+import { LayoutDashboard, FileText, BookOpen, Trophy, User, LogOut, X, Shield } from 'lucide-react';
+import kelyaLogoBlack from '@/assets/kelya-logo-black.jpg';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useRoles } from '@/hooks/useRoles';
-import { motion } from 'framer-motion';
 
 const navItems = [
   { path: '/etudiant/projets', label: 'Mes Projets', icon: LayoutDashboard },
   { path: '/etudiant/soumissions', label: 'Mes Soumissions', icon: FileText },
   { path: '/etudiant/cours', label: 'Mes Cours', icon: BookOpen },
   { path: '/etudiant/classement', label: 'Classement', icon: Trophy },
-  { path: '/etudiant/profil', label: 'Mon Profil', icon: User },
+  { path: '/etudiant/profil', label: 'Mon Compte', icon: User },
 ];
 
 interface StudentSidebarProps {
@@ -37,7 +36,6 @@ export const StudentSidebar = ({ open, onClose }: StudentSidebarProps) => {
 
   const sidebarContent = (
     <div className="flex flex-col h-full relative overflow-hidden">
-      {/* Subtle gradient accent at the top */}
       <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
 
       {/* Logo Section */}
@@ -45,7 +43,7 @@ export const StudentSidebar = ({ open, onClose }: StudentSidebarProps) => {
         <Link to="/etudiant/projets" className="flex items-center gap-3 group" onClick={handleNavClick}>
           <div className="relative">
             <img
-              src={kelyaLogo}
+              src={kelyaLogoBlack}
               alt="Kelya Group"
               className="h-10 w-10 object-cover rounded-xl transition-all duration-300 group-hover:scale-105 ring-2 ring-border/50 group-hover:ring-primary/30"
             />
@@ -91,9 +89,6 @@ export const StudentSidebar = ({ open, onClose }: StudentSidebarProps) => {
             >
               <Icon className={`h-[18px] w-[18px] shrink-0 transition-transform duration-200 ${isActive ? '' : 'group-hover:scale-110'}`} />
               <span className="text-[13px] font-medium">{item.label}</span>
-              {isActive && (
-                <Sparkles className="h-3 w-3 ml-auto opacity-60" />
-              )}
             </Link>
           );
         })}
@@ -133,15 +128,9 @@ export const StudentSidebar = ({ open, onClose }: StudentSidebarProps) => {
       {open && (
         <>
           <div className="fixed inset-0 bg-foreground/30 backdrop-blur-md z-40 lg:hidden" onClick={onClose} />
-          <motion.div
-            initial={{ x: -280 }}
-            animate={{ x: 0 }}
-            exit={{ x: -280 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed left-0 top-0 h-screen w-[280px] max-w-[85vw] bg-background border-r border-border/40 flex flex-col z-50 lg:hidden shadow-2xl"
-          >
+          <div className="fixed left-0 top-0 h-screen w-[280px] max-w-[85vw] bg-background border-r border-border/40 flex flex-col z-50 lg:hidden shadow-2xl animate-in slide-in-from-left duration-200">
             {sidebarContent}
-          </motion.div>
+          </div>
         </>
       )}
     </>
