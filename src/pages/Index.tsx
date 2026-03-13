@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import nysLogo from '@/assets/nys-logo.png';
+import hacktualzLogo from '@/assets/hacktualiz-logo-light.jpeg';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -12,14 +12,14 @@ const Index = () => {
       
       <div className="relative z-10 text-center max-w-4xl px-6 w-full">
         <img 
-          src={nysLogo} 
-          alt="NYS Africa Logo" 
-          className="h-24 w-24 object-contain mx-auto mb-8 filter drop-shadow-[0_0_30px_hsl(217,91%,60%)]"
+          src={hacktualzLogo} 
+          alt="Hacktualiz Logo" 
+          className="h-24 w-24 object-cover rounded-xl mx-auto mb-8 filter drop-shadow-[0_0_30px_hsl(350,85%,50%)]"
         />
         
         <h1 className="text-5xl md:text-6xl font-bold mb-6">
           Créez des<br />
-          <span className="text-gradient bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-primary via-primary-light to-secondary-light bg-clip-text text-transparent">
             Projets Exceptionnels
           </span>
         </h1>
@@ -32,7 +32,7 @@ const Index = () => {
           <Button 
             onClick={() => navigate('/etudiant/register')}
             size="lg"
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all"
+            className="bg-primary hover:bg-primary-hover text-primary-foreground px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all"
           >
             Créer un compte
           </Button>

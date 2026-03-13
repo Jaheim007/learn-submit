@@ -19,9 +19,7 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				'mono': ['JetBrains Mono', 'monospace'],
-				'digital': ['Orbitron', 'monospace'],
-				'matrix': ['JetBrains Mono', 'monospace']
+				'sans': ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -87,10 +85,10 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				submito: {
-					cyan: 'hsl(var(--submito-cyan))',
-					pink: 'hsl(var(--submito-pink))',
-					purple: 'hsl(var(--submito-purple))'
+				brand: {
+					navy: 'hsl(var(--brand-navy))',
+					red: 'hsl(var(--brand-red))',
+					dark: 'hsl(var(--brand-dark))'
 				}
 			},
 			maxWidth: {
@@ -99,21 +97,16 @@ export default {
 			boxShadow: {
 				'custom': 'var(--shadow-md)',
 				'custom-lg': 'var(--shadow-lg)',
-				'custom-xl': 'var(--shadow-xl)',
-				'matrix': 'var(--shadow-matrix)',
-				'neon': 'var(--shadow-neon)'
+				'custom-xl': 'var(--shadow-xl)'
 			},
 			backgroundImage: {
 				'gradient-primary': 'var(--gradient-primary)',
 				'gradient-hero': 'var(--gradient-hero)',
-				'gradient-card': 'var(--gradient-card)',
-				'gradient-matrix': 'var(--gradient-matrix)',
-				'gradient-glow': 'var(--gradient-glow)'
+				'gradient-card': 'var(--gradient-card)'
 			},
 			transitionTimingFunction: {
 				'smooth': 'var(--ease-smooth)',
-				'bounce': 'var(--ease-bounce)',
-				'matrix': 'var(--ease-matrix)'
+				'bounce': 'var(--ease-bounce)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -122,24 +115,12 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
-				},
-				'float': {
-					'0%, 100%': { transform: 'translateY(0px)' },
-					'50%': { transform: 'translateY(-10px)' }
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
 				},
 				'fade-in': {
 					'0%': { opacity: '0', transform: 'translateY(20px)' },
@@ -153,37 +134,9 @@ export default {
 					'0%': { opacity: '0', transform: 'translateX(-20px)' },
 					'100%': { opacity: '1', transform: 'translateX(0)' }
 				},
-				'matrix-flow': {
-					'0%': { transform: 'translateY(-100%)' },
-					'100%': { transform: 'translateY(100%)' }
-				},
-				'matrix-scan': {
-					'0%, 100%': { left: '-100%' },
-					'50%': { left: '100%' }
-				},
-				'matrix-pulse': {
-					'0%, 100%': { opacity: '1' },
-					'50%': { opacity: '0.7' }
-				},
-				'matrix-glow': {
-					'0%, 100%': { textShadow: '0 0 5px currentColor' },
-					'50%': { textShadow: '0 0 20px currentColor, 0 0 30px currentColor' }
-				},
 				'float': {
-					'0%, 100%': {
-						transform: 'translateY(0) translateX(0)',
-						opacity: '0'
-					},
-					'10%': {
-						opacity: '1'
-					},
-					'90%': {
-						opacity: '1'
-					},
-					'100%': {
-						transform: 'translateY(-100vh) translateX(20px)',
-						opacity: '0'
-					}
+					'0%, 100%': { transform: 'translateY(0px)' },
+					'50%': { transform: 'translateY(-10px)' }
 				}
 			},
 			animation: {
@@ -192,16 +145,7 @@ export default {
 				'float': 'float 3s ease-in-out infinite',
 				'fade-in': 'fade-in 0.6s ease-out',
 				'scale-in': 'scale-in 0.5s ease-out',
-				'slide-in-right': 'slide-in-right 0.5s ease-out',
-        'float': 'float 3s ease-in-out infinite',
-        'fade-in': 'fade-in 0.6s ease-out',
-        'scale-in': 'scale-in 0.5s ease-out',
-        'slide-in-right': 'slide-in-right 0.5s ease-out',
-				'matrix-flow': 'matrix-flow 20s linear infinite',
-				'matrix-scan': 'matrix-scan 3s ease-in-out infinite',
-				'matrix-pulse': 'matrix-pulse 2s ease-in-out infinite',
-				'matrix-glow': 'matrix-glow 2s ease-in-out infinite',
-				'float': 'float linear infinite'
+				'slide-in-right': 'slide-in-right 0.5s ease-out'
 			}
 		}
 	},
