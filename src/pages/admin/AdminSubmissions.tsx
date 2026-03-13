@@ -537,11 +537,11 @@ export default function AdminSubmissions() {
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'Reçu': return 'bg-blue-100 text-blue-800';
-      case 'En révision': return 'bg-yellow-100 text-yellow-800';
-      case 'Validé': return 'bg-green-100 text-green-800';
-      case 'Refusé': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Reçu': return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800';
+      case 'En révision': return 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800';
+      case 'Validé': return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800';
+      case 'Refusé': return 'bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
