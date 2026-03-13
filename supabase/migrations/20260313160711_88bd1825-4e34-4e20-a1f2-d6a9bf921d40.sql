@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Users can view participants in their conversations" ON public.chat_participants;
