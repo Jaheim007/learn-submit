@@ -182,8 +182,8 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
               {submission.description ? (
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Description du projet</Label>
-                  <div className="p-4 bg-muted/50 rounded-xl border text-sm leading-relaxed whitespace-pre-wrap break-words">
-                    {submission.description}
+                  <div className="p-4 bg-muted/50 rounded-xl border text-sm leading-relaxed">
+                    <RichTextRenderer content={submission.description} />
                   </div>
                 </div>
               ) : (
