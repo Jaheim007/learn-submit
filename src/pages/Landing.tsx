@@ -258,15 +258,7 @@ const Landing = () => {
             <span className="hidden sm:inline text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">× Hacktualiz</span>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => navigate('/etudiant/register')}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <UserPlus className="h-4 w-4 mr-1.5" />
-              S'inscrire
-            </Button>
+            
             <Button 
               size="sm"
               onClick={() => navigate('/etudiant/login')}
@@ -324,15 +316,7 @@ const Landing = () => {
                 Se connecter
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
               </Button>
-              <Button 
-                size="lg"
-                variant="outline"
-                onClick={() => navigate('/etudiant/register')}
-                className="h-12 text-base font-medium rounded-xl border-border hover:bg-muted"
-              >
-                <UserPlus className="mr-2 h-4 w-4" />
-                Créer un compte
-              </Button>
+            
             </motion.div>
           </div>
 
@@ -602,14 +586,7 @@ const Landing = () => {
                   Se connecter
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Button 
-                  size="lg"
-                  onClick={() => navigate('/etudiant/register')}
-                  className="h-12 px-8 text-base font-medium rounded-xl bg-white text-secondary hover:bg-white/90 border-0"
-                >
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Créer un compte
-                </Button>
+              
               </div>
             </div>
           </motion.div>
