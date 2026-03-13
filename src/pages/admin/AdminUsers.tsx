@@ -1,54 +1,53 @@
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit, UserX, UserCheck } from 'lucide-react';
+import { Plus, Edit, Trash2, UserCog, ShieldCheck, RefreshCw, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
-interface Supervisor {
+interface UserEntry {
   user_id: string;
   full_name: string;
   email: string;
   created_at: string;
-  classes: { id: number; code: string; title: string }[];
+  role: 'supervisor' | 'admin' | 'academy';
+  classes?: { id: number; code: string; title: string }[];
 }
 
-interface Class {
+interface ClassItem {
   id: number;
   code: string;
   title: string;
 }
 
-interface SupervisorFormData {
-  email: string;
-  full_name: string;
-  class_ids: number[];
-}
-
 export default function AdminUsers() {
-  const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
-  const [classes, setClasses] = useState<Class[]>([]);
+  const [supervisors, setSupervisors] = useState<UserEntry[]>([]);
+  const [admins, setAdmins] = useState<UserEntry[]>([]);
+  const [classes, setClasses] = useState<ClassItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingSupervisor, setEditingSupervisor] = useState<Supervisor | null>(null);
-  const [formData, setFormData] = useState<SupervisorFormData>({
-    email: '',
-    full_name: '',
-    class_ids: [],
-  });
+  const [activeTab, setActiveTab] = useState('supervisors');
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  // Supervisor form
+  const [isSupervisorDialogOpen, setIsSupervisorDialogOpen] = useState(false);
+  const [editingSupervisor, setEditingSupervisor] = useState<UserEntry | null>(null);
+  const [supervisorForm, setSupervisorForm] = useState({ email: '', full_name: '', class_ids: [] as number[] });
+
+  // Admin form
+  const [isAdminDialogOpen, setIsAdminDialogOpen] = useState(false);
+  const [adminForm, setAdminForm] = useState({ email: '', full_name: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
+    setLoading(true);
     try {
       // Load classes
       const { data: classesData } = await supabase
@@ -56,179 +55,157 @@ export default function AdminUsers() {
         .select('id, code, title')
         .eq('is_active', true)
         .order('code');
-
       setClasses(classesData || []);
 
-      // Get supervisors via profiles + user_roles
+      // Load supervisors
       const { data: supervisorRoles } = await supabase
         .from('user_roles')
         .select('user_id')
         .eq('role', 'supervisor');
 
-      if (!supervisorRoles || supervisorRoles.length === 0) {
+      if (supervisorRoles && supervisorRoles.length > 0) {
+        const ids = supervisorRoles.map(r => r.user_id);
+        const { data: profiles } = await supabase.from('profiles').select('id, full_name, email, created_at').in('id', ids);
+        const { data: assignments } = await supabase.from('supervisor_class_assignments').select('supervisor_user_id, class_id').in('supervisor_user_id', ids);
+
+        setSupervisors((profiles || []).map(p => {
+          const assignedClasses = (assignments || [])
+            .filter(a => a.supervisor_user_id === p.id)
+            .map(a => classesData?.find(c => c.id === a.class_id))
+            .filter(Boolean) as ClassItem[];
+          return { user_id: p.id, full_name: p.full_name || '', email: p.email, created_at: p.created_at, role: 'supervisor', classes: assignedClasses };
+        }));
+      } else {
         setSupervisors([]);
-        setLoading(false);
-        return;
       }
 
-      const supervisorIds = supervisorRoles.map(r => r.user_id);
+      // Load admins (admin + academy roles)
+      const { data: adminRoles } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('role', ['admin', 'academy']);
 
-      // Get profiles for supervisors
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, full_name, email')
-        .in('id', supervisorIds);
-
-      // Get supervisors table data
-      const { data: supervisorsData } = await supabase
-        .from('supervisors')
-        .select('user_id, created_at')
-        .in('user_id', supervisorIds);
-
-      // Get class assignments
-      const { data: assignments } = await supabase
-        .from('supervisor_class_assignments')
-        .select('supervisor_user_id, class_id')
-        .in('supervisor_user_id', supervisorIds);
-
-      // Combine data
-      const formattedSupervisors = (profiles || []).map(profile => {
-        const supervisorInfo = supervisorsData?.find(s => s.user_id === profile.id);
-        const supervisorAssignments = assignments?.filter(a => a.supervisor_user_id === profile.id) || [];
-        const assignedClasses = supervisorAssignments
-          .map(a => classesData?.find(c => c.id === a.class_id))
-          .filter(Boolean) as { id: number; code: string; title: string }[];
-
-        return {
-          user_id: profile.id,
-          full_name: profile.full_name || '',
-          email: profile.email,
-          created_at: supervisorInfo?.created_at || new Date().toISOString(),
-          classes: assignedClasses,
-        };
-      });
-
-      setSupervisors(formattedSupervisors);
+      if (adminRoles && adminRoles.length > 0) {
+        const uniqueIds = [...new Set(adminRoles.map(r => r.user_id))];
+        const { data: profiles } = await supabase.from('profiles').select('id, full_name, email, created_at').in('id', uniqueIds);
+        
+        setAdmins((profiles || []).map(p => {
+          const roles = adminRoles.filter(r => r.user_id === p.id).map(r => r.role);
+          const primaryRole = roles.includes('admin') ? 'admin' : 'academy';
+          return { user_id: p.id, full_name: p.full_name || '', email: p.email, created_at: p.created_at, role: primaryRole as 'admin' | 'academy' };
+        }));
+      } else {
+        setAdmins([]);
+      }
     } catch (error) {
-      console.error('Error loading supervisors:', error);
-      toast.error('Erreur lors du chargement des formateurs');
+      console.error('Error loading data:', error);
+      toast.error('Erreur lors du chargement');
     } finally {
       setLoading(false);
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      email: '',
-      full_name: '',
-      class_ids: [],
-    });
+  // --- Supervisor CRUD ---
+  const openCreateSupervisor = () => {
+    setEditingSupervisor(null);
+    setSupervisorForm({ email: '', full_name: '', class_ids: [] });
+    setIsSupervisorDialogOpen(true);
   };
 
-  const openCreateDialog = () => {
-    resetForm();
-    setIsCreateDialogOpen(true);
+  const openEditSupervisor = (s: UserEntry) => {
+    setEditingSupervisor(s);
+    setSupervisorForm({ email: s.email, full_name: s.full_name, class_ids: s.classes?.map(c => c.id) || [] });
+    setIsSupervisorDialogOpen(true);
   };
 
-  const openEditDialog = (supervisor: Supervisor) => {
-    setEditingSupervisor(supervisor);
-    setFormData({
-      email: supervisor.email,
-      full_name: supervisor.full_name,
-      class_ids: supervisor.classes.map(c => c.id),
-    });
-    setIsEditDialogOpen(true);
-  };
-
-  const handleSubmit = async () => {
+  const handleSupervisorSubmit = async () => {
+    if (!supervisorForm.email.trim() || !supervisorForm.full_name.trim()) {
+      toast.error("L'email et le nom sont requis");
+      return;
+    }
+    if (supervisorForm.class_ids.length === 0) {
+      toast.error('Au moins une classe doit être assignée');
+      return;
+    }
     try {
-      if (!formData.email.trim() || !formData.full_name.trim()) {
-        toast.error('L\'email et le nom complet sont requis');
-        return;
-      }
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email.trim())) {
-        toast.error('Adresse email invalide');
-        return;
-      }
-
-      if (formData.class_ids.length === 0) {
-        toast.error('Au moins une classe doit être assignée');
-        return;
-      }
-
       if (editingSupervisor) {
-        // Update existing supervisor
         const { error } = await supabase.functions.invoke('update-supervisor', {
-          body: {
-            supervisor_user_id: editingSupervisor.user_id,
-            full_name: formData.full_name.trim(),
-            class_ids: formData.class_ids,
-          }
+          body: { supervisor_user_id: editingSupervisor.user_id, full_name: supervisorForm.full_name.trim(), class_ids: supervisorForm.class_ids }
         });
-
         if (error) throw error;
-
-        toast.success('Formateur mis à jour avec succès');
+        toast.success('Formateur mis à jour');
       } else {
-        // Create new supervisor
-        const { error } = await supabase.functions.invoke('create-supervisor', {
-          body: {
-            email: formData.email.trim(),
-            full_name: formData.full_name.trim(),
-            class_ids: formData.class_ids,
-          }
+        const { data, error } = await supabase.functions.invoke('create-supervisor', {
+          body: { email: supervisorForm.email.trim(), full_name: supervisorForm.full_name.trim(), class_ids: supervisorForm.class_ids }
         });
-
         if (error) throw error;
-
-        toast.success('Formateur créé avec succès');
+        if (data?.error) { toast.error(data.error); return; }
+        toast.success('Formateur créé');
       }
-
-      setIsCreateDialogOpen(false);
-      setIsEditDialogOpen(false);
-      setEditingSupervisor(null);
+      setIsSupervisorDialogOpen(false);
       loadData();
-
     } catch (error) {
-      console.error('Error saving supervisor:', error);
-      toast.error('Erreur lors de l\'enregistrement du superviseur');
+      console.error(error);
+      toast.error("Erreur lors de l'enregistrement");
     }
   };
 
-  const toggleSupervisorStatus = async (supervisorUserId: string, currentStatus: boolean) => {
+  const handleDeleteUser = async (userId: string, role: string) => {
     try {
-      const { error } = await supabase.functions.invoke('update-supervisor', {
-        body: {
-          supervisor_user_id: supervisorUserId,
-          is_active: !currentStatus
-        }
+      const { data, error } = await supabase.functions.invoke('delete-user-role', {
+        body: { target_user_id: userId, role }
       });
-
       if (error) throw error;
-
-      setSupervisors(prev => 
-        prev.map(supervisor => 
-          supervisor.user_id === supervisorUserId 
-            ? { ...supervisor, is_active: !currentStatus }
-            : supervisor
-        )
-      );
-
-      toast.success(
-        !currentStatus 
-          ? 'Formateur réactivé avec succès' 
-          : 'Formateur désactivé avec succès'
-      );
+      if (data?.error) { toast.error(data.error); return; }
+      toast.success('Utilisateur supprimé avec succès');
+      loadData();
     } catch (error) {
-      console.error('Error updating supervisor status:', error);
-      toast.error('Erreur lors de la mise à jour du statut');
+      console.error(error);
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  // --- Admin CRUD ---
+  const generatePassword = () => {
+    const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lower = 'abcdefghijklmnopqrstuvwxyz';
+    const nums = '0123456789';
+    const syms = '!@#$%^&*';
+    const all = upper + lower + nums + syms;
+    let pw = upper[Math.floor(Math.random() * upper.length)] +
+             lower[Math.floor(Math.random() * lower.length)] +
+             nums[Math.floor(Math.random() * nums.length)] +
+             syms[Math.floor(Math.random() * syms.length)];
+    for (let i = pw.length; i < 12; i++) pw += all[Math.floor(Math.random() * all.length)];
+    pw = pw.split('').sort(() => Math.random() - 0.5).join('');
+    setAdminForm(prev => ({ ...prev, password: pw }));
+    setShowPassword(true);
+  };
+
+  const handleCreateAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminForm.email.trim() || !adminForm.full_name.trim() || !adminForm.password) {
+      toast.error('Tous les champs sont requis');
+      return;
+    }
+    try {
+      const { data, error } = await supabase.functions.invoke('create-academy-user', {
+        body: { email: adminForm.email.trim(), password: adminForm.password, full_name: adminForm.full_name.trim() }
+      });
+      if (error) { toast.error(error.message); return; }
+      if (data?.error) { toast.error(data.error); return; }
+      toast.success('Compte créé avec succès');
+      setIsAdminDialogOpen(false);
+      setAdminForm({ email: '', full_name: '', password: '' });
+      loadData();
+    } catch (error) {
+      console.error(error);
+      toast.error('Erreur inattendue');
     }
   };
 
   const handleClassToggle = (classId: number) => {
-    setFormData(prev => ({
+    setSupervisorForm(prev => ({
       ...prev,
       class_ids: prev.class_ids.includes(classId)
         ? prev.class_ids.filter(id => id !== classId)
@@ -240,8 +217,8 @@ export default function AdminUsers() {
     return (
       <div className="space-y-6">
         <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-1/4 mb-4"></div>
-          <div className="h-32 bg-muted rounded"></div>
+          <div className="h-8 bg-muted rounded w-1/4 mb-4" />
+          <div className="h-64 bg-muted rounded" />
         </div>
       </div>
     );
@@ -249,153 +226,311 @@ export default function AdminUsers() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Gestion des formateurs</h1>
-          <p className="text-muted-foreground">
-            {supervisors.length} formateur{supervisors.length > 1 ? 's' : ''}
-          </p>
-        </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openCreateDialog}>
-              <Plus className="h-4 w-4 mr-2" />
-              Créer un formateur
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Créer un nouveau formateur</DialogTitle>
-            </DialogHeader>
-            <SupervisorForm />
-          </DialogContent>
-        </Dialog>
+      <div>
+        <h1 className="text-3xl font-bold text-foreground">Utilisateurs</h1>
+        <p className="text-muted-foreground mt-1">
+          Gérer les formateurs et le personnel administratif
+        </p>
       </div>
 
-      {/* Supervisors Table */}
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nom</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Classes assignées</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {supervisors.map((supervisor) => (
-                <TableRow key={supervisor.user_id}>
-                  <TableCell className="font-medium">{supervisor.full_name}</TableCell>
-                  <TableCell>{supervisor.email}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {supervisor.classes.map((classe) => (
-                        <Badge key={classe.id} variant="secondary" className="text-xs">
-                          {classe.code}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => openEditDialog(supervisor)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {supervisors.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                    Aucun superviseur trouvé
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="supervisors" className="gap-2">
+            <UserCog className="h-4 w-4" />
+            Formateurs ({supervisors.length})
+          </TabsTrigger>
+          <TabsTrigger value="admins" className="gap-2">
+            <ShieldCheck className="h-4 w-4" />
+            Administrateurs ({admins.length})
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        {/* Supervisors Tab */}
+        <TabsContent value="supervisors" className="space-y-4">
+          <div className="flex justify-end">
+            <Button onClick={openCreateSupervisor}>
+              <Plus className="h-4 w-4 mr-2" />
+              Ajouter un formateur
+            </Button>
+          </div>
+
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Classes assignées</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {supervisors.map((s) => (
+                    <TableRow key={s.user_id}>
+                      <TableCell className="font-medium">{s.full_name}</TableCell>
+                      <TableCell>{s.email}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {s.classes?.map((c) => (
+                            <Badge key={c.id} variant="secondary" className="text-xs">{c.code}</Badge>
+                          ))}
+                          {(!s.classes || s.classes.length === 0) && (
+                            <span className="text-xs text-muted-foreground">Aucune</span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => openEditSupervisor(s)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Supprimer ce formateur ?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Le rôle de formateur sera retiré à <strong>{s.full_name}</strong> ({s.email}). Cette action est irréversible.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  onClick={() => handleDeleteUser(s.user_id, 'supervisor')}
+                                >
+                                  Supprimer
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {supervisors.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                        Aucun formateur trouvé
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Admins Tab */}
+        <TabsContent value="admins" className="space-y-4">
+          <div className="flex justify-end">
+            <Button onClick={() => { setAdminForm({ email: '', full_name: '', password: '' }); setShowPassword(false); setIsAdminDialogOpen(true); }}>
+              <Plus className="h-4 w-4 mr-2" />
+              Ajouter un administrateur
+            </Button>
+          </div>
+
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Rôle</TableHead>
+                    <TableHead>Créé le</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {admins.map((a) => (
+                    <TableRow key={a.user_id}>
+                      <TableCell className="font-medium">{a.full_name}</TableCell>
+                      <TableCell>{a.email}</TableCell>
+                      <TableCell>
+                        <Badge variant={a.role === 'admin' ? 'default' : 'secondary'}>
+                          {a.role === 'admin' ? 'Admin' : 'Académique'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(a.created_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Supprimer cet utilisateur ?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Le rôle sera retiré à <strong>{a.full_name}</strong> ({a.email}). Cette action est irréversible.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Annuler</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => handleDeleteUser(a.user_id, a.role)}
+                              >
+                                Supprimer
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {admins.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        Aucun administrateur trouvé
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Supervisor Create/Edit Dialog */}
+      <Dialog open={isSupervisorDialogOpen} onOpenChange={setIsSupervisorDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Modifier le formateur</DialogTitle>
+            <DialogTitle>{editingSupervisor ? 'Modifier le formateur' : 'Ajouter un formateur'}</DialogTitle>
           </DialogHeader>
-          <SupervisorForm />
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="sup-email">Email *</Label>
+              <Input
+                id="sup-email"
+                type="email"
+                value={supervisorForm.email}
+                onChange={(e) => setSupervisorForm(prev => ({ ...prev, email: e.target.value }))}
+                placeholder="email@exemple.com"
+                disabled={!!editingSupervisor}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Quand cette personne se connectera avec cet email, elle recevra automatiquement le rôle de formateur.
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="sup-name">Nom complet *</Label>
+              <Input
+                id="sup-name"
+                value={supervisorForm.full_name}
+                onChange={(e) => setSupervisorForm(prev => ({ ...prev, full_name: e.target.value }))}
+                placeholder="Nom et prénom"
+              />
+            </div>
+            <div>
+              <Label>Classes assignées *</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {classes.map((c) => (
+                  <div key={c.id} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`sup-class-${c.id}`}
+                      checked={supervisorForm.class_ids.includes(c.id)}
+                      onChange={() => handleClassToggle(c.id)}
+                      className="rounded"
+                    />
+                    <label htmlFor={`sup-class-${c.id}`} className="text-sm">
+                      {c.code} - {c.title}
+                    </label>
+                  </div>
+                ))}
+                {classes.length === 0 && (
+                  <p className="text-sm text-muted-foreground col-span-2">Aucune classe disponible</p>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setIsSupervisorDialogOpen(false)}>Annuler</Button>
+              <Button onClick={handleSupervisorSubmit}>
+                {editingSupervisor ? 'Mettre à jour' : 'Créer'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Admin Create Dialog */}
+      <Dialog open={isAdminDialogOpen} onOpenChange={setIsAdminDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajouter un administrateur</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateAdmin} className="space-y-4">
+            <div>
+              <Label htmlFor="admin-name">Nom complet</Label>
+              <Input
+                id="admin-name"
+                value={adminForm.full_name}
+                onChange={(e) => setAdminForm(prev => ({ ...prev, full_name: e.target.value }))}
+                placeholder="Jean Dupont"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="admin-email">Email</Label>
+              <Input
+                id="admin-email"
+                type="email"
+                value={adminForm.email}
+                onChange={(e) => setAdminForm(prev => ({ ...prev, email: e.target.value }))}
+                placeholder="jean@nys-africa.com"
+                required
+              />
+            </div>
+            <div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="admin-pw">Mot de passe temporaire</Label>
+                <Button type="button" variant="outline" size="sm" onClick={generatePassword}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Générer
+                </Button>
+              </div>
+              <div className="relative mt-1">
+                <Input
+                  id="admin-pw"
+                  type={showPassword ? 'text' : 'password'}
+                  value={adminForm.password}
+                  onChange={(e) => setAdminForm(prev => ({ ...prev, password: e.target.value }))}
+                  placeholder="Minimum 6 caractères"
+                  required
+                  minLength={6}
+                />
+                {adminForm.password && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8"
+                    onClick={() => { navigator.clipboard.writeText(adminForm.password); toast.success('Copié'); }}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">L'utilisateur pourra changer ce mot de passe après connexion</p>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setIsAdminDialogOpen(false)}>Annuler</Button>
+              <Button type="submit">Créer le compte</Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
   );
-
-  function SupervisorForm() {
-    return (
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="email">Email *</Label>
-          <Input
-            id="email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-            placeholder="email@exemple.com"
-            disabled={!!editingSupervisor} // Can't change email for existing supervisor
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="full_name">Nom complet *</Label>
-          <Input
-            id="full_name"
-            value={formData.full_name}
-            onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-            placeholder="Nom et prénom"
-          />
-        </div>
-
-        <div>
-          <Label>Classes assignées *</Label>
-          <div className="grid grid-cols-2 gap-2 mt-2">
-            {classes.map((classe) => (
-              <div key={classe.id} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id={`class-${classe.id}`}
-                  checked={formData.class_ids.includes(classe.id)}
-                  onChange={() => handleClassToggle(classe.id)}
-                  className="rounded"
-                />
-                <label htmlFor={`class-${classe.id}`} className="text-sm">
-                  {classe.code} - {classe.title}
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              setIsCreateDialogOpen(false);
-              setIsEditDialogOpen(false);
-              setEditingSupervisor(null);
-            }}
-          >
-            Annuler
-          </Button>
-          <Button onClick={handleSubmit}>
-            {editingSupervisor ? 'Mettre à jour' : 'Créer'}
-          </Button>
-        </div>
-      </div>
-    );
-  }
 }

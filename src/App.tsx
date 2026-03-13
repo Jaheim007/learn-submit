@@ -118,7 +118,7 @@ const App = () => (
                 <Route path="courses" element={<AdminCourses />} />
                 <Route path="classes" element={<AdminClasses />} />
                 <Route path="users" element={<AdminUsers />} />
-                <Route path="academy-users" element={<AdminAcademyUsers />} />
+                {/* academy-users merged into users */}
                 <Route path="emails" element={<AdminEmails />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>

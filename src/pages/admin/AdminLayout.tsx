@@ -10,8 +10,6 @@ import {
   FolderOpen,
   Settings,
   BookOpen,
-  UserCog,
-  GraduationCap,
   LogOut,
   Mail,
   ArrowLeft,
@@ -26,8 +24,7 @@ const navigation = [
   { name: 'Soumissions', href: '/admin/submissions', icon: FileText },
   { name: 'Projets', href: '/admin/projects', icon: FolderOpen },
   { name: 'Cours', href: '/admin/courses', icon: BookOpen },
-  { name: 'Superviseurs', href: '/admin/users', icon: UserCog },
-  { name: 'Personnel académique', href: '/admin/academy-users', icon: GraduationCap },
+  { name: 'Utilisateurs', href: '/admin/users', icon: Users },
   { name: 'Emails', href: '/admin/emails', icon: Mail },
   { name: 'Paramètres', href: '/admin/settings', icon: Settings },
 ];
