@@ -1,5 +1,6 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { StudentSidebar } from './StudentSidebar';
+import { MobileBottomNav } from './MobileBottomNav';
 import { NotificationBell } from './NotificationBell';
 import { ProfileAvatar } from './ProfileAvatar';
 import { useAuth } from '@/hooks/useAuth';
@@ -61,11 +62,14 @@ export const StudentDashboardLayout = ({ children }: StudentDashboardLayoutProps
           </div>
         </div>
 
-        {/* Page Content */}
-        <main className="p-4 lg:p-6">
+        {/* Page Content — add bottom padding on mobile for bottom nav */}
+        <main className="p-4 lg:p-6 pb-20 lg:pb-6">
           {children}
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 };
