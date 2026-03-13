@@ -155,7 +155,7 @@ export default function StudentLogin() {
             <img src={kelyaLogo} alt="Kelya Group" className="h-12 w-12 rounded-xl object-cover mx-auto mb-4 hover:scale-105 transition-transform" />
           </Link>
           <h1 className="text-2xl font-bold text-foreground">Se connecter</h1>
-          <p className="text-sm text-muted-foreground mt-1">Accédez à votre espace étudiant</p>
+          <p className="text-sm text-muted-foreground mt-1">Accédez à votre espace</p>
         </div>
 
         <Card className="border-border shadow-lg overflow-hidden">
