@@ -1,7 +1,7 @@
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
-import kelyaLogo from '@/assets/kelya-logo-black.jpg';
+import kelyaLogoBlack from '@/assets/kelya-logo-black.jpg';
 import hacktualiz from '@/assets/hacktualiz-logo-dark.png';
 import {
   LayoutDashboard,
@@ -10,7 +10,6 @@ import {
   FolderOpen,
   Settings,
   BookOpen,
-  Clock,
   UserCog,
   GraduationCap,
   LogOut,
@@ -44,29 +43,42 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sidebar */}
-      <div className="fixed inset-y-0 left-0 w-60 bg-[hsl(230,30%,10%)] text-white flex flex-col z-30">
+      {/* Sidebar — matching student sidebar style */}
+      <div className="fixed inset-y-0 left-0 w-[220px] bg-card border-r border-border flex flex-col z-30">
+        {/* Subtle gradient overlay like student sidebar */}
+        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+
         {/* Brand */}
-        <div className="flex items-center gap-2 px-5 py-5 border-b border-white/10">
-          <img src={kelyaLogo} alt="Kelya" className="h-7 w-7 rounded object-cover" />
-          <span className="text-xs text-white/40 mx-0.5">×</span>
-          <img src={hacktualiz} alt="Hacktualiz" className="h-7 rounded object-cover" />
-          <div className="ml-auto">
-            <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full text-white/60">Admin</span>
-          </div>
+        <div className="relative p-5 border-b border-border/50">
+          <Link to="/admin" className="flex items-center gap-3 group">
+            <div className="relative">
+              <img
+                src={kelyaLogoBlack}
+                alt="Kelya"
+                className="h-10 w-10 object-cover rounded-xl transition-all duration-300 group-hover:scale-105 ring-2 ring-border/50 group-hover:ring-primary/30"
+              />
+              <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-primary border-2 border-background" />
+            </div>
+            <div>
+              <h1 className="text-sm font-bold text-foreground tracking-tight">
+                Kelya <span className="text-muted-foreground font-normal">×</span> Hacktualiz
+              </h1>
+              <p className="text-[11px] text-muted-foreground font-medium">Administration</p>
+            </div>
+          </Link>
         </div>
 
         {/* Back link */}
         <Link
           to="/"
-          className="flex items-center gap-2 px-5 py-2.5 text-xs text-white/50 hover:text-white/80 transition-colors"
+          className="flex items-center gap-2.5 mx-3 mt-3 mb-1 px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-lg transition-all"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Retour au portail
         </Link>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
           {navigation.map((item) => {
             const isActive = location.pathname === item.href ||
               (item.href !== '/admin' && location.pathname.startsWith(item.href));
@@ -78,10 +90,10 @@ export default function AdminLayout() {
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
                   active
-                    ? 'bg-primary text-white'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
                 )}
               >
                 <item.icon className="h-[18px] w-[18px]" />
@@ -92,10 +104,10 @@ export default function AdminLayout() {
         </nav>
 
         {/* Bottom */}
-        <div className="px-3 py-4 border-t border-white/10">
+        <div className="px-3 py-4 border-t border-border/50">
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all w-full"
           >
             <LogOut className="h-[18px] w-[18px]" />
             Déconnexion
@@ -103,9 +115,9 @@ export default function AdminLayout() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="ml-60">
-        <div className="p-6 lg:p-8">
+      {/* Main Content — generous padding for breathing room */}
+      <div className="ml-[220px]">
+        <div className="p-8 lg:p-10 max-w-[1400px]">
           <Outlet />
         </div>
       </div>
