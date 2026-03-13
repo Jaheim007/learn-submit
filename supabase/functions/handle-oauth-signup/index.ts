@@ -22,7 +22,6 @@ serve(async (req) => {
       }
     );
 
-    // Get the authenticated user
     const {
       data: { user },
       error: userError,
@@ -33,10 +32,39 @@ serve(async (req) => {
     }
 
     console.log('Processing OAuth signup for user:', user.id);
-    console.log('User metadata:', user.user_metadata);
+
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Check if user already has a pre-assigned role (admin, academy, supervisor, teacher)
+    const { data: existingRoles } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    const roleList = (existingRoles || []).map(r => r.role);
+    const hasNonStudentRole = roleList.some(r => ['admin', 'academy', 'supervisor', 'teacher'].includes(r));
+
+    if (hasNonStudentRole) {
+      console.log('User already has a pre-assigned role:', roleList, '- skipping student creation');
+      
+      // Ensure profile exists
+      await supabaseAdmin.from('profiles').upsert({
+        id: user.id,
+        email: user.email || '',
+        full_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+      });
+
+      return new Response(
+        JSON.stringify({ message: 'User has pre-assigned role, skipping student creation', roles: roleList }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Check if student profile already exists
-    const { data: existingStudent } = await supabaseClient
+    const { data: existingStudent } = await supabaseAdmin
       .from('students')
       .select('id')
       .eq('user_id', user.id)
@@ -65,13 +93,7 @@ serve(async (req) => {
 
     console.log('Creating student profile with:', { fullName, email, avatarUrl, githubProfile });
 
-    // Use service role to bypass RLS
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
-    // Create student profile
+    // Create student profile with pending status
     const { data: student, error: studentError } = await supabaseAdmin
       .from('students')
       .insert({
@@ -80,7 +102,8 @@ serve(async (req) => {
         full_name: fullName,
         avatar_url: avatarUrl,
         github_profile: githubProfile,
-        is_active: true,
+        is_active: false,
+        status: 'pending',
       })
       .select()
       .single();
@@ -90,44 +113,28 @@ serve(async (req) => {
       throw studentError;
     }
 
-    console.log('Student profile created:', student.id);
-
     // Create profile entry
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .insert({
-        id: user.id,
-        email: email,
-        full_name: fullName,
-      })
-      .select()
-      .single();
-
-    if (profileError) {
-      console.error('Error creating profile:', profileError);
-      // Don't throw - profile is secondary
-    }
+    await supabaseAdmin.from('profiles').upsert({
+      id: user.id,
+      email: email,
+      full_name: fullName,
+    });
 
     // Assign student role
-    const { error: roleError } = await supabaseAdmin
+    await supabaseAdmin
       .from('user_roles')
-      .insert({
-        user_id: user.id,
-        role: 'student',
-      });
+      .upsert(
+        { user_id: user.id, role: 'student' },
+        { onConflict: 'user_id,role' }
+      );
 
-    if (roleError) {
-      console.error('Error assigning student role:', roleError);
-      throw roleError;
-    }
-
-    console.log('OAuth signup completed successfully');
+    console.log('OAuth signup completed - student pending approval');
 
     return new Response(
       JSON.stringify({ 
         message: 'Student profile created successfully',
         student_id: student.id,
-        needs_class_selection: true 
+        status: 'pending'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 201 }
     );

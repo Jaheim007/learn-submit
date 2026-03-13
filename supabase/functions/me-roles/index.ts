@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
         roles,
         isAdmin: roles.includes('admin'),
         isSupervisor: roles.includes('supervisor'),
-        isTeacher: roles.includes('teacher'),
+        isTeacher: roles.includes('teacher') || roles.includes('supervisor'),
         isAcademy: roles.includes('academy')
       }),
       { 
