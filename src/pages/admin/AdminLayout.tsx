@@ -10,8 +10,6 @@ import {
   FolderOpen,
   Settings,
   BookOpen,
-  UserCog,
-  LogOut,
   LogOut,
   Mail,
   ArrowLeft,
