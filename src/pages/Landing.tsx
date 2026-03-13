@@ -258,15 +258,7 @@ const Landing = () => {
             <span className="hidden sm:inline text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">× Hacktualiz</span>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => navigate('/etudiant/register')}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <UserPlus className="h-4 w-4 mr-1.5" />
-              S'inscrire
-            </Button>
+            
             <Button 
               size="sm"
               onClick={() => navigate('/etudiant/login')}
