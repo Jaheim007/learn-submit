@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { StudentDashboardLayout } from '@/components/StudentDashboardLayout';
 import { FileText, Download, Calendar, AlertCircle } from 'lucide-react';
+import { RichTextRenderer } from '@/components/ui/rich-text-editor';
 import { toast } from 'sonner';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Badge } from '@/components/ui/badge';
