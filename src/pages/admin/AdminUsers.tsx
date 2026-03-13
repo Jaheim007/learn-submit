@@ -455,17 +455,7 @@ export default function AdminUsers() {
           </DialogHeader>
           <form onSubmit={handleCreateAdmin} className="space-y-4">
             <div>
-              <Label htmlFor="admin-name">Nom complet</Label>
-              <Input
-                id="admin-name"
-                value={adminForm.full_name}
-                onChange={(e) => setAdminForm(prev => ({ ...prev, full_name: e.target.value }))}
-                placeholder="Jean Dupont"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="admin-email">Email</Label>
+              <Label htmlFor="admin-email">Email *</Label>
               <Input
                 id="admin-email"
                 type="email"
@@ -474,42 +464,45 @@ export default function AdminUsers() {
                 placeholder="jean@nys-africa.com"
                 required
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Quand cette personne se connectera avec cet email, elle recevra automatiquement le rôle assigné.
+              </p>
             </div>
             <div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="admin-pw">Mot de passe temporaire</Label>
-                <Button type="button" variant="outline" size="sm" onClick={generatePassword}>
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Générer
-                </Button>
+              <Label htmlFor="admin-name">Nom complet (optionnel)</Label>
+              <Input
+                id="admin-name"
+                value={adminForm.full_name}
+                onChange={(e) => setAdminForm(prev => ({ ...prev, full_name: e.target.value }))}
+                placeholder="Jean Dupont"
+              />
+            </div>
+            <div>
+              <Label>Rôle</Label>
+              <div className="flex gap-3 mt-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="admin-role"
+                    checked={adminForm.role === 'academy'}
+                    onChange={() => setAdminForm(prev => ({ ...prev, role: 'academy' }))}
+                  />
+                  <span className="text-sm">Académique</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="admin-role"
+                    checked={adminForm.role === 'admin'}
+                    onChange={() => setAdminForm(prev => ({ ...prev, role: 'admin' }))}
+                  />
+                  <span className="text-sm">Admin</span>
+                </label>
               </div>
-              <div className="relative mt-1">
-                <Input
-                  id="admin-pw"
-                  type={showPassword ? 'text' : 'password'}
-                  value={adminForm.password}
-                  onChange={(e) => setAdminForm(prev => ({ ...prev, password: e.target.value }))}
-                  placeholder="Minimum 6 caractères"
-                  required
-                  minLength={6}
-                />
-                {adminForm.password && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8"
-                    onClick={() => { navigator.clipboard.writeText(adminForm.password); toast.success('Copié'); }}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">L'utilisateur pourra changer ce mot de passe après connexion</p>
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setIsAdminDialogOpen(false)}>Annuler</Button>
-              <Button type="submit">Créer le compte</Button>
+              <Button type="submit">Assigner le rôle</Button>
             </div>
           </form>
         </DialogContent>
