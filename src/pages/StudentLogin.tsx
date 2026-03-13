@@ -9,14 +9,16 @@ import { Github, Loader2, Mail, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import kelyaLogo from '@/assets/kelya-logo-black.jpg';
 import { motion, AnimatePresence } from 'framer-motion';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 
-type Step = 'methods' | 'email-input';
+type Step = 'methods' | 'email-input' | 'otp-input';
 
 export default function StudentLogin() {
   const [step, setStep] = useState<Step>('methods');
   const [email, setEmail] = useState('');
+  const [otpCode, setOtpCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [linkSent, setLinkSent] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -105,7 +107,7 @@ export default function StudentLogin() {
     }
   };
 
-  const handleSendMagicLink = async () => {
+  const handleSendOtp = async () => {
     const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail) {
       toast.error('Veuillez saisir votre email');
@@ -113,27 +115,48 @@ export default function StudentLogin() {
     }
 
     setLoading(true);
-    setLinkSent(false);
 
     try {
       const { data, error } = await supabase.functions.invoke('send-login-magic-link', {
-        body: {
-          email: normalizedEmail,
-          redirect_to: `${window.location.origin}/etudiant/login`,
-        },
+        body: { email: normalizedEmail },
       });
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast.success('Lien envoyé !', {
+      toast.success('Code envoyé !', {
         description: `Vérifiez votre boîte mail ${normalizedEmail}`,
       });
-      setLinkSent(true);
+      setStep('otp-input');
     } catch (err: any) {
-      toast.error(err?.message || 'Impossible d\'envoyer le lien de connexion');
+      toast.error(err?.message || "Impossible d'envoyer le code de connexion");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otpCode.length !== 6) {
+      toast.error('Veuillez saisir le code à 6 chiffres');
+      return;
+    }
+
+    setVerifying(true);
+
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: email.trim().toLowerCase(),
+        token: otpCode,
+        type: 'email',
+      });
+
+      if (error) throw error;
+
+      toast.success('Connexion réussie !');
+    } catch (err: any) {
+      toast.error(err?.message || 'Code invalide ou expiré');
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -235,7 +258,7 @@ export default function StudentLogin() {
 
                   <div className="text-center space-y-1">
                     <h2 className="text-lg font-semibold text-foreground">Entrez votre email</h2>
-                    <p className="text-sm text-muted-foreground">Nous vous enverrons un lien de connexion</p>
+                    <p className="text-sm text-muted-foreground">Nous vous enverrons un code de connexion</p>
                   </div>
 
                   <Input
@@ -245,24 +268,78 @@ export default function StudentLogin() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="h-12"
                     disabled={loading}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSendMagicLink()}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendOtp()}
                     autoFocus
                   />
 
                   <Button
-                    onClick={handleSendMagicLink}
+                    onClick={handleSendOtp}
                     disabled={loading || !email.trim()}
                     className="w-full h-12 bg-secondary hover:bg-secondary-hover text-secondary-foreground font-medium"
                   >
                     {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Recevoir le lien de connexion
+                    Recevoir le code
+                  </Button>
+                </motion.div>
+              )}
+
+              {step === 'otp-input' && (
+                <motion.div
+                  key="otp"
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.2 }}
+                  className="space-y-4"
+                >
+                  <button
+                    onClick={() => { setStep('email-input'); setOtpCode(''); }}
+                    className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4" /> Retour
+                  </button>
+
+                  <div className="text-center space-y-1">
+                    <h2 className="text-lg font-semibold text-foreground">Entrez le code</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Code envoyé à <span className="font-medium text-foreground">{email}</span>
+                    </p>
+                  </div>
+
+                  <div className="flex justify-center">
+                    <InputOTP
+                      maxLength={6}
+                      value={otpCode}
+                      onChange={(value) => setOtpCode(value)}
+                    >
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                        <InputOTPSlot index={1} />
+                        <InputOTPSlot index={2} />
+                        <InputOTPSlot index={3} />
+                        <InputOTPSlot index={4} />
+                        <InputOTPSlot index={5} />
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>
+
+                  <Button
+                    onClick={handleVerifyOtp}
+                    disabled={verifying || otpCode.length !== 6}
+                    className="w-full h-12 bg-secondary hover:bg-secondary-hover text-secondary-foreground font-medium"
+                  >
+                    {verifying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Se connecter
                   </Button>
 
-                  {linkSent && (
-                    <p className="text-sm text-center text-muted-foreground">
-                      Le lien est envoyé. Ouvrez votre email pour continuer.
-                    </p>
-                  )}
+                  <button
+                    onClick={handleSendOtp}
+                    disabled={loading}
+                    className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors text-center"
+                  >
+                    {loading ? 'Envoi en cours...' : 'Renvoyer le code'}
+                  </button>
                 </motion.div>
               )}
             </AnimatePresence>
