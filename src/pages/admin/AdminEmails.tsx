@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor, RichTextRenderer } from '@/components/ui/rich-text-editor';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -271,11 +271,11 @@ export default function AdminEmails() {
                   {/* Body */}
                   <div className="space-y-2">
                     <Label>Contenu</Label>
-                    <Textarea
-                      placeholder="Contenu de l'email (le formatage HTML de base sera appliqué automatiquement)..."
+                    <RichTextEditor
                       value={body}
-                      onChange={(e) => setBody(e.target.value)}
-                      rows={10}
+                      onChange={setBody}
+                      placeholder="Rédigez le contenu de votre email..."
+                      minHeight="200px"
                     />
                   </div>
 
@@ -316,7 +316,11 @@ export default function AdminEmails() {
                     </div>
                     <div className="p-3 bg-white text-gray-800">
                       <p className="font-semibold mb-1">{subject || 'Sujet...'}</p>
-                      <p className="text-gray-600 whitespace-pre-wrap">{body || 'Contenu...'}</p>
+                      {body && body !== '<p></p>' ? (
+                        <RichTextRenderer content={body} className="text-gray-600 text-xs" />
+                      ) : (
+                        <p className="text-gray-400">Contenu...</p>
+                      )}
                     </div>
                     <div className="p-2 text-center text-[10px] text-gray-400 border-t">
                       Kelya Group × Hacktualiz INC
