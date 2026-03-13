@@ -1,9 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, BookOpen, Trophy, User, LogOut, X } from 'lucide-react';
+import { LayoutDashboard, FileText, BookOpen, Trophy, User, LogOut, X, Shield } from 'lucide-react';
 import kelyaLogo from '@/assets/kelya-logo-red.jpg';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useRoles } from '@/hooks/useRoles';
 
 const navItems = [
   { path: '/etudiant/projets', label: 'Mes Projets', icon: LayoutDashboard },
@@ -21,6 +22,7 @@ interface StudentSidebarProps {
 export const StudentSidebar = ({ open, onClose }: StudentSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAdmin } = useRoles();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -84,8 +86,18 @@ export const StudentSidebar = ({ open, onClose }: StudentSidebarProps) => {
         })}
       </nav>
 
-      {/* Sign Out */}
-      <div className="p-3 border-t border-border">
+      {/* Admin Access + Sign Out */}
+      <div className="p-3 border-t border-border space-y-0.5">
+        {isAdmin && (
+          <Link
+            to="/admin"
+            onClick={handleNavClick}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200"
+          >
+            <Shield className="h-4.5 w-4.5 shrink-0" />
+            <span className="text-sm font-medium">Administration</span>
+          </Link>
+        )}
         <button
           onClick={handleSignOut}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all duration-200"
