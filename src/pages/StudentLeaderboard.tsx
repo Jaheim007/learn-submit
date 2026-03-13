@@ -221,7 +221,7 @@ export default function StudentLeaderboard() {
                         <TableCell className="hidden md:table-cell text-muted-foreground text-xs">
                           {format(new Date(entry.submitted_at), 'dd/MM/yyyy HH:mm')}
                         </TableCell>
-                        <TableCell><StatusBadge status={entry.status} /></TableCell>
+                        <TableCell><StatusBadge status={entry.status as any} /></TableCell>
                         <TableCell className="text-right">
                           {entry.grade !== null ? (
                             <span className="font-semibold">{entry.grade}/20</span>
