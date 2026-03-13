@@ -287,7 +287,7 @@ const handler = async (req: Request): Promise<Response> => {
         site_url: siteUrl,
       });
 
-      const sent = await sendViaResend(emails, subject, html);
+      const sent = await sendViaResend(supabase, emails, subject, html, 'automation_new_project');
       return new Response(JSON.stringify({ success: true, sent, total: emails.length }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
