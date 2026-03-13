@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { target_user_id, role } = await req.json();
+    const { target_user_id, role, delete_account } = await req.json();
 
     if (!target_user_id || !role) {
       return new Response(JSON.stringify({ error: 'target_user_id and role are required' }), {
@@ -80,40 +80,80 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Delete the role
-    const { error: deleteError } = await supabaseAdmin
-      .from('user_roles')
-      .delete()
-      .eq('user_id', target_user_id)
-      .eq('role', role);
+    if (delete_account) {
+      // Full account deletion: remove all related data then the auth user
+      console.log(`Full account deletion for user: ${target_user_id}`);
 
-    if (deleteError) {
-      console.error('Error deleting role:', deleteError);
-      return new Response(JSON.stringify({ error: 'Failed to delete role' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
+      // Delete student-related data
+      await supabaseAdmin.from('class_enrollments').delete().eq('user_id', target_user_id);
+      
+      // Get student id first for enrollment cleanup
+      const { data: student } = await supabaseAdmin
+        .from('students')
+        .select('id')
+        .eq('user_id', target_user_id)
+        .maybeSingle();
+      
+      if (student) {
+        await supabaseAdmin.from('enrollments').delete().eq('student_id', student.id);
+        await supabaseAdmin.from('students').delete().eq('user_id', target_user_id);
+      }
 
-    // If supervisor, also clean up class assignments
-    if (role === 'supervisor') {
-      await supabaseAdmin
-        .from('supervisor_class_assignments')
+      // Delete supervisor data
+      await supabaseAdmin.from('supervisor_class_assignments').delete().eq('supervisor_user_id', target_user_id);
+      await supabaseAdmin.from('supervisors').delete().eq('user_id', target_user_id);
+
+      // Delete admin data
+      await supabaseAdmin.from('admins').delete().eq('user_id', target_user_id);
+
+      // Delete all roles
+      await supabaseAdmin.from('user_roles').delete().eq('user_id', target_user_id);
+
+      // Delete profile
+      await supabaseAdmin.from('profiles').delete().eq('id', target_user_id);
+
+      // Delete notifications
+      await supabaseAdmin.from('notifications').delete().eq('user_id', target_user_id);
+
+      // Delete FCM tokens
+      await supabaseAdmin.from('fcm_tokens').delete().eq('user_id', target_user_id);
+
+      // Finally delete auth user
+      const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(target_user_id);
+      if (deleteAuthError) {
+        console.error('Error deleting auth user:', deleteAuthError);
+        return new Response(JSON.stringify({ error: 'Failed to delete auth user: ' + deleteAuthError.message }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      console.log(`Account fully deleted for user: ${target_user_id}`);
+    } else {
+      // Just remove the specific role
+      const { error: deleteError } = await supabaseAdmin
+        .from('user_roles')
         .delete()
-        .eq('supervisor_user_id', target_user_id);
+        .eq('user_id', target_user_id)
+        .eq('role', role);
 
-      await supabaseAdmin
-        .from('supervisors')
-        .delete()
-        .eq('user_id', target_user_id);
-    }
+      if (deleteError) {
+        console.error('Error deleting role:', deleteError);
+        return new Response(JSON.stringify({ error: 'Failed to delete role' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
 
-    // If academy, clean up admins table entry if exists
-    if (role === 'academy' || role === 'admin') {
-      await supabaseAdmin
-        .from('admins')
-        .delete()
-        .eq('user_id', target_user_id);
+      // Clean up role-specific data
+      if (role === 'supervisor') {
+        await supabaseAdmin.from('supervisor_class_assignments').delete().eq('supervisor_user_id', target_user_id);
+        await supabaseAdmin.from('supervisors').delete().eq('user_id', target_user_id);
+      }
+
+      if (role === 'academy' || role === 'admin') {
+        await supabaseAdmin.from('admins').delete().eq('user_id', target_user_id);
+      }
     }
 
     return new Response(JSON.stringify({ success: true }), {

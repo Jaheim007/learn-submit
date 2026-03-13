@@ -149,14 +149,14 @@ export default function AdminUsers() {
     }
   };
 
-  const handleDeleteUser = async (userId: string, role: string) => {
+  const handleDeleteUser = async (userId: string, role: string, deleteAccount = false) => {
     try {
       const { data, error } = await supabase.functions.invoke('delete-user-role', {
-        body: { target_user_id: userId, role }
+        body: { target_user_id: userId, role, delete_account: deleteAccount }
       });
       if (error) throw error;
       if (data?.error) { toast.error(data.error); return; }
-      toast.success('Utilisateur supprimé avec succès');
+      toast.success(deleteAccount ? 'Compte supprimé définitivement' : 'Rôle supprimé avec succès');
       loadData();
     } catch (error) {
       console.error(error);
@@ -278,16 +278,21 @@ export default function AdminUsers() {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Supprimer ce formateur ?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Le rôle de formateur sera retiré à <strong>{s.full_name}</strong> ({s.email}). Cette action est irréversible.
+                                  Choisissez une action pour <strong>{s.full_name}</strong> ({s.email}).
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
-                              <AlertDialogFooter>
+                              <AlertDialogFooter className="flex-col sm:flex-row gap-2">
                                 <AlertDialogCancel>Annuler</AlertDialogCancel>
                                 <AlertDialogAction
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  onClick={() => handleDeleteUser(s.user_id, 'supervisor')}
+                                  onClick={() => handleDeleteUser(s.user_id, 'supervisor', false)}
                                 >
-                                  Supprimer
+                                  Retirer le rôle
+                                </AlertDialogAction>
+                                <AlertDialogAction
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  onClick={() => handleDeleteUser(s.user_id, 'supervisor', true)}
+                                >
+                                  Supprimer le compte
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
@@ -354,16 +359,21 @@ export default function AdminUsers() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Supprimer cet utilisateur ?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Le rôle sera retiré à <strong>{a.full_name}</strong> ({a.email}). Cette action est irréversible.
+                                Choisissez une action pour <strong>{a.full_name}</strong> ({a.email}).
                               </AlertDialogDescription>
                             </AlertDialogHeader>
-                            <AlertDialogFooter>
+                            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
                               <AlertDialogCancel>Annuler</AlertDialogCancel>
                               <AlertDialogAction
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                onClick={() => handleDeleteUser(a.user_id, a.role)}
+                                onClick={() => handleDeleteUser(a.user_id, a.role, false)}
                               >
-                                Supprimer
+                                Retirer le rôle
+                              </AlertDialogAction>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => handleDeleteUser(a.user_id, a.role, true)}
+                              >
+                                Supprimer le compte
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
