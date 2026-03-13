@@ -25,7 +25,33 @@ export default function StudentLogin() {
   // Route authenticated users
   useEffect(() => {
     if (!user) return;
-    const checkStudent = async () => {
+    const routeUser = async () => {
+      // Check roles first (admin, academy, supervisor)
+      try {
+        const { data: roles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id);
+
+        const roleList = (roles || []).map(r => r.role);
+
+        if (roleList.includes('admin')) {
+          navigate('/admin', { replace: true });
+          return;
+        }
+        if (roleList.includes('academy')) {
+          navigate('/academy', { replace: true });
+          return;
+        }
+        if (roleList.includes('supervisor')) {
+          navigate('/teacher', { replace: true });
+          return;
+        }
+      } catch (err) {
+        console.error('Error checking roles:', err);
+      }
+
+      // Default: student flow
       const { data: student } = await supabase
         .from('students')
         .select('id, status')
@@ -53,7 +79,7 @@ export default function StudentLogin() {
         navigate('/etudiant/pending', { replace: true });
       }
     };
-    checkStudent();
+    routeUser();
   }, [user, navigate]);
 
   // Resend cooldown timer
@@ -155,7 +181,7 @@ export default function StudentLogin() {
             <img src={kelyaLogo} alt="Kelya Group" className="h-12 w-12 rounded-xl object-cover mx-auto mb-4 hover:scale-105 transition-transform" />
           </Link>
           <h1 className="text-2xl font-bold text-foreground">Se connecter</h1>
-          <p className="text-sm text-muted-foreground mt-1">Accédez à votre espace étudiant</p>
+          <p className="text-sm text-muted-foreground mt-1">Accédez à votre espace</p>
         </div>
 
         <Card className="border-border shadow-lg overflow-hidden">

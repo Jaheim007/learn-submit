@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit, Trash2, UserCog, ShieldCheck, RefreshCw, Copy } from 'lucide-react';
+import { Plus, Edit, Trash2, UserCog, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
@@ -41,8 +41,7 @@ export default function AdminUsers() {
 
   // Admin form
   const [isAdminDialogOpen, setIsAdminDialogOpen] = useState(false);
-  const [adminForm, setAdminForm] = useState({ email: '', full_name: '', password: '' });
-  const [showPassword, setShowPassword] = useState(false);
+  const [adminForm, setAdminForm] = useState({ email: '', full_name: '', role: 'academy' as 'admin' | 'academy' });
 
   useEffect(() => { loadData(); }, []);
 
@@ -166,37 +165,21 @@ export default function AdminUsers() {
   };
 
   // --- Admin CRUD ---
-  const generatePassword = () => {
-    const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const lower = 'abcdefghijklmnopqrstuvwxyz';
-    const nums = '0123456789';
-    const syms = '!@#$%^&*';
-    const all = upper + lower + nums + syms;
-    let pw = upper[Math.floor(Math.random() * upper.length)] +
-             lower[Math.floor(Math.random() * lower.length)] +
-             nums[Math.floor(Math.random() * nums.length)] +
-             syms[Math.floor(Math.random() * syms.length)];
-    for (let i = pw.length; i < 12; i++) pw += all[Math.floor(Math.random() * all.length)];
-    pw = pw.split('').sort(() => Math.random() - 0.5).join('');
-    setAdminForm(prev => ({ ...prev, password: pw }));
-    setShowPassword(true);
-  };
-
   const handleCreateAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!adminForm.email.trim() || !adminForm.full_name.trim() || !adminForm.password) {
-      toast.error('Tous les champs sont requis');
+    if (!adminForm.email.trim()) {
+      toast.error("L'email est requis");
       return;
     }
     try {
-      const { data, error } = await supabase.functions.invoke('create-academy-user', {
-        body: { email: adminForm.email.trim(), password: adminForm.password, full_name: adminForm.full_name.trim() }
+      const { data, error } = await supabase.functions.invoke('assign-user-role', {
+        body: { email: adminForm.email.trim(), full_name: adminForm.full_name.trim() || null, role: adminForm.role }
       });
       if (error) { toast.error(error.message); return; }
       if (data?.error) { toast.error(data.error); return; }
-      toast.success('Compte créé avec succès');
+      toast.success('Rôle assigné avec succès');
       setIsAdminDialogOpen(false);
-      setAdminForm({ email: '', full_name: '', password: '' });
+      setAdminForm({ email: '', full_name: '', role: 'academy' });
       loadData();
     } catch (error) {
       console.error(error);
@@ -329,7 +312,7 @@ export default function AdminUsers() {
         {/* Admins Tab */}
         <TabsContent value="admins" className="space-y-4">
           <div className="flex justify-end">
-            <Button onClick={() => { setAdminForm({ email: '', full_name: '', password: '' }); setShowPassword(false); setIsAdminDialogOpen(true); }}>
+            <Button onClick={() => { setAdminForm({ email: '', full_name: '', role: 'academy' }); setIsAdminDialogOpen(true); }}>
               <Plus className="h-4 w-4 mr-2" />
               Ajouter un administrateur
             </Button>
@@ -472,17 +455,7 @@ export default function AdminUsers() {
           </DialogHeader>
           <form onSubmit={handleCreateAdmin} className="space-y-4">
             <div>
-              <Label htmlFor="admin-name">Nom complet</Label>
-              <Input
-                id="admin-name"
-                value={adminForm.full_name}
-                onChange={(e) => setAdminForm(prev => ({ ...prev, full_name: e.target.value }))}
-                placeholder="Jean Dupont"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="admin-email">Email</Label>
+              <Label htmlFor="admin-email">Email *</Label>
               <Input
                 id="admin-email"
                 type="email"
@@ -491,42 +464,45 @@ export default function AdminUsers() {
                 placeholder="jean@nys-africa.com"
                 required
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Quand cette personne se connectera avec cet email, elle recevra automatiquement le rôle assigné.
+              </p>
             </div>
             <div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="admin-pw">Mot de passe temporaire</Label>
-                <Button type="button" variant="outline" size="sm" onClick={generatePassword}>
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Générer
-                </Button>
+              <Label htmlFor="admin-name">Nom complet (optionnel)</Label>
+              <Input
+                id="admin-name"
+                value={adminForm.full_name}
+                onChange={(e) => setAdminForm(prev => ({ ...prev, full_name: e.target.value }))}
+                placeholder="Jean Dupont"
+              />
+            </div>
+            <div>
+              <Label>Rôle</Label>
+              <div className="flex gap-3 mt-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="admin-role"
+                    checked={adminForm.role === 'academy'}
+                    onChange={() => setAdminForm(prev => ({ ...prev, role: 'academy' }))}
+                  />
+                  <span className="text-sm">Académique</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="admin-role"
+                    checked={adminForm.role === 'admin'}
+                    onChange={() => setAdminForm(prev => ({ ...prev, role: 'admin' }))}
+                  />
+                  <span className="text-sm">Admin</span>
+                </label>
               </div>
-              <div className="relative mt-1">
-                <Input
-                  id="admin-pw"
-                  type={showPassword ? 'text' : 'password'}
-                  value={adminForm.password}
-                  onChange={(e) => setAdminForm(prev => ({ ...prev, password: e.target.value }))}
-                  placeholder="Minimum 6 caractères"
-                  required
-                  minLength={6}
-                />
-                {adminForm.password && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8"
-                    onClick={() => { navigator.clipboard.writeText(adminForm.password); toast.success('Copié'); }}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">L'utilisateur pourra changer ce mot de passe après connexion</p>
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setIsAdminDialogOpen(false)}>Annuler</Button>
-              <Button type="submit">Créer le compte</Button>
+              <Button type="submit">Assigner le rôle</Button>
             </div>
           </form>
         </DialogContent>
