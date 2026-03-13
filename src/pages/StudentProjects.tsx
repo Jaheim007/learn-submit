@@ -186,7 +186,11 @@ export default function StudentProjects() {
               </div>
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-warning/10 text-warning text-xs font-semibold">
                 <Clock className="h-3.5 w-3.5" />
-                {projects.filter(p => !p.latest_submission).length} en attente
+                {projects.filter(p => p.latest_submission && ['Reçu', 'En révision'].includes(p.latest_submission.status)).length} en révision
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-xs font-semibold">
+                <AlertCircle className="h-3.5 w-3.5" />
+                {projects.filter(p => !p.latest_submission).length} non soumis
               </div>
             </div>
           </div>
