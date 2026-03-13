@@ -48,9 +48,11 @@ export default function StudentProjects() {
   const [searchParams] = useSearchParams();
   
   const [loading, setLoading] = useState(true);
+  const [loadingProjects, setLoadingProjects] = useState(false);
   const [classes, setClasses] = useState<StudentClass[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
+  const [studentId, setStudentId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -66,8 +68,10 @@ export default function StudentProjects() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (classes.length > 0) fetchProjects();
-  }, [selectedClassId, classes]);
+    if (classes.length > 0 && selectedClassId && studentId) {
+      fetchProjects();
+    }
+  }, [selectedClassId, classes, studentId]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -78,7 +82,12 @@ export default function StudentProjects() {
         .eq('user_id', user?.id)
         .single();
 
-      if (!studentData) return;
+      if (!studentData) {
+        setLoading(false);
+        return;
+      }
+
+      setStudentId(studentData.id);
 
       const { data: enrollmentsData } = await supabase
         .from('enrollments')
@@ -99,8 +108,9 @@ export default function StudentProjects() {
   };
 
   const fetchProjects = async () => {
-    if (!selectedClassId) return;
+    if (!selectedClassId || !studentId) return;
 
+    setLoadingProjects(true);
     try {
       const { data } = await supabase
         .from('class_projects')
@@ -114,15 +124,13 @@ export default function StudentProjects() {
 
       const projectsList = data?.map((cp: any) => cp.projects).filter(Boolean) || [];
       
-      const studentData = await supabase.from('students').select('id').eq('user_id', user?.id).single();
-      
       const projectsWithSubmissions = await Promise.all(
         projectsList.map(async (project: any) => {
           const { data: submissions } = await supabase
             .from('submissions')
             .select('id, status, submitted_at')
             .eq('project_id', project.id)
-            .eq('student_id', studentData.data?.id)
+            .eq('student_id', studentId)
             .order('submitted_at', { ascending: false })
             .limit(1);
 
@@ -133,6 +141,8 @@ export default function StudentProjects() {
       setProjects(projectsWithSubmissions);
     } catch (error) {
       toast.error('Erreur lors du chargement des projets');
+    } finally {
+      setLoadingProjects(false);
     }
   };
 
@@ -147,7 +157,7 @@ export default function StudentProjects() {
     return { label: new Date(deadline).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }), urgent: false, days };
   };
 
-  if (loading || authLoading) return <LoadingScreen />;
+  if (loading || authLoading || loadingProjects) return <LoadingScreen />;
 
   const selectedClass = classes.find(c => c.id === selectedClassId);
 
@@ -176,7 +186,11 @@ export default function StudentProjects() {
               </div>
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-warning/10 text-warning text-xs font-semibold">
                 <Clock className="h-3.5 w-3.5" />
-                {projects.filter(p => !p.latest_submission).length} en attente
+                {projects.filter(p => p.latest_submission && ['Reçu', 'En révision'].includes(p.latest_submission.status)).length} en révision
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-xs font-semibold">
+                <AlertCircle className="h-3.5 w-3.5" />
+                {projects.filter(p => !p.latest_submission).length} non soumis
               </div>
             </div>
           </div>
