@@ -36,6 +36,7 @@ export default function AdminEmails() {
   const [students, setStudents] = useState<StudentOption[]>([]);
   const [sending, setSending] = useState(false);
   const [lastResult, setLastResult] = useState<{ sent: number; total: number } | null>(null);
+  const [studentSelectKey, setStudentSelectKey] = useState(0);
 
   useEffect(() => {
     loadClasses();
@@ -60,12 +61,18 @@ export default function AdminEmails() {
     }
   };
 
+  const addStudentEmail = (email: string) => {
+    addEmail(email);
+    // Force re-render of Select to reset its displayed value
+    setStudentSelectKey(prev => prev + 1);
+  };
+
   const removeEmail = (email: string) => {
     setSelectedEmails(prev => prev.filter(e => e !== email));
   };
 
   const handleSend = async () => {
-    if (!subject.trim() || !body.trim()) {
+    if (!subject.trim() || !body.trim() || body === '<p></p>') {
       toast.error('Veuillez remplir le sujet et le contenu');
       return;
     }
@@ -84,14 +91,13 @@ export default function AdminEmails() {
     setLastResult(null);
 
     try {
-      // Wrap body in styled HTML
       const htmlBody = `
         <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb;">
           <div style="background: linear-gradient(135deg, #1a2744, #c7253e); padding: 24px; text-align: center;">
             <h1 style="color: white; font-size: 20px; margin: 0;">Kelya Group × Hacktualiz</h1>
           </div>
-          <div style="padding: 24px;">
-            ${body.replace(/\n/g, '<br/>')}
+          <div style="padding: 24px; line-height: 1.8; font-size: 14px; color: #333;">
+            ${body}
           </div>
           <div style="padding: 16px; text-align: center; color: #888; font-size: 12px; border-top: 1px solid #eee;">
             <p>Kelya Group × Hacktualiz INC — Plateforme d'apprentissage</p>
@@ -116,7 +122,6 @@ export default function AdminEmails() {
       setLastResult({ sent: data.sent, total: data.total });
       toast.success(`${data.sent} email(s) envoyé(s) sur ${data.total}`);
 
-      // Reset form
       setSubject('');
       setBody('');
       setSelectedEmails([]);
@@ -196,16 +201,18 @@ export default function AdminEmails() {
                     <div className="space-y-2">
                       <Label>Destinataires</Label>
                       <div className="flex gap-2">
-                        <Select onValueChange={(val) => addEmail(val)}>
+                        <Select key={studentSelectKey} onValueChange={(val) => addStudentEmail(val)} value="">
                           <SelectTrigger className="flex-1">
                             <SelectValue placeholder="Sélectionner un étudiant..." />
                           </SelectTrigger>
                           <SelectContent>
-                            {students.map(s => (
-                              <SelectItem key={s.id} value={s.email}>
-                                {s.full_name} ({s.email})
-                              </SelectItem>
-                            ))}
+                            {students
+                              .filter(s => s.email && !selectedEmails.includes(s.email.toLowerCase()))
+                              .map(s => (
+                                <SelectItem key={s.id} value={s.email}>
+                                  {s.full_name} ({s.email})
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                         <Input
@@ -315,9 +322,9 @@ export default function AdminEmails() {
                       <span className="text-white font-bold text-sm">Kelya Group × Hacktualiz</span>
                     </div>
                     <div className="p-3 bg-white text-gray-800">
-                      <p className="font-semibold mb-1">{subject || 'Sujet...'}</p>
+                      <p className="font-semibold mb-2">{subject || 'Sujet...'}</p>
                       {body && body !== '<p></p>' ? (
-                        <RichTextRenderer content={body} className="text-gray-600 text-xs" />
+                        <RichTextRenderer content={body} className="text-gray-600 text-xs [&_p]:mb-2 [&_img]:max-w-full [&_img]:rounded" />
                       ) : (
                         <p className="text-gray-400">Contenu...</p>
                       )}

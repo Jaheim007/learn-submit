@@ -3,15 +3,18 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
+import Image from '@tiptap/extension-image';
+import Link from '@tiptap/extension-link';
 import { cn } from '@/lib/utils';
 import { 
   Bold, Italic, Underline as UnderlineIcon, Strikethrough,
   List, ListOrdered, AlignLeft, AlignCenter, AlignRight,
-  Heading1, Heading2, Heading3, Quote, Minus, Undo, Redo
+  Heading1, Heading2, Heading3, Quote, Minus, Undo, Redo,
+  ImageIcon, LinkIcon
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 
 interface RichTextEditorProps {
   value: string;
@@ -30,6 +33,19 @@ export function RichTextEditor({ value, onChange, placeholder = 'Commencez à é
       Underline,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Placeholder.configure({ placeholder }),
+      Image.configure({
+        inline: false,
+        allowBase64: true,
+        HTMLAttributes: {
+          style: 'max-width: 100%; height: auto; border-radius: 8px; margin: 8px 0;',
+        },
+      }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          style: 'color: #c7253e; text-decoration: underline;',
+        },
+      }),
     ],
     content: value,
     onUpdate: ({ editor }) => {
@@ -42,6 +58,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Commencez à é
           'prose-headings:font-semibold prose-h1:text-xl prose-h2:text-lg prose-h3:text-base',
           'prose-p:text-sm prose-p:leading-relaxed prose-li:text-sm',
           'prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground',
+          'prose-img:rounded-lg prose-img:max-w-full',
         ),
         style: `min-height: ${minHeight}`,
       },
@@ -54,6 +71,26 @@ export function RichTextEditor({ value, onChange, placeholder = 'Commencez à é
       editor.commands.setContent(value || '');
     }
   }, [value, editor]);
+
+  const addImage = useCallback(() => {
+    if (!editor) return;
+    const url = window.prompt('URL de l\'image :');
+    if (url) {
+      editor.chain().focus().setImage({ src: url }).run();
+    }
+  }, [editor]);
+
+  const addLink = useCallback(() => {
+    if (!editor) return;
+    const previousUrl = editor.getAttributes('link').href;
+    const url = window.prompt('URL du lien :', previousUrl);
+    if (url === null) return;
+    if (url === '') {
+      editor.chain().focus().extendMarkRange('link').unsetLink().run();
+      return;
+    }
+    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+  }, [editor]);
 
   if (!editor) return null;
 
@@ -117,6 +154,15 @@ export function RichTextEditor({ value, onChange, placeholder = 'Commencez à é
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
+        <ToolbarButton onClick={addLink} isActive={editor.isActive('link')} title="Insérer un lien">
+          <LinkIcon className="h-4 w-4" />
+        </ToolbarButton>
+        <ToolbarButton onClick={addImage} title="Insérer une image">
+          <ImageIcon className="h-4 w-4" />
+        </ToolbarButton>
+
+        <Separator orientation="vertical" className="h-6 mx-1" />
+
         <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('left').run()} isActive={editor.isActive({ textAlign: 'left' })} title="Aligner à gauche">
           <AlignLeft className="h-4 w-4" />
         </ToolbarButton>
@@ -165,6 +211,8 @@ export function RichTextRenderer({ content, className }: { content: string; clas
         'prose-headings:font-semibold prose-h1:text-xl prose-h2:text-lg prose-h3:text-base',
         'prose-p:text-sm prose-p:leading-relaxed prose-li:text-sm',
         'prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground',
+        'prose-img:rounded-lg prose-img:max-w-full',
+        '[&_p]:mb-3 [&_br]:block [&_br]:content-[""] [&_br]:mb-2',
         className
       )}
       dangerouslySetInnerHTML={{ __html: content }} 
