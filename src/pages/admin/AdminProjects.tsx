@@ -566,102 +566,105 @@ export default function AdminProjects() {
         </Dialog>
       </div>
 
-      {/* Projects Table */}
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Titre</TableHead>
-                <TableHead>Classes</TableHead>
-                <TableHead>Échéance</TableHead>
-                <TableHead>Soumissions</TableHead>
-                <TableHead>Resoumission</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {projects.map((project) => (
-                <TableRow key={project.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{project.title}</div>
-                      {project.description && (
-                        <div className="text-sm text-muted-foreground line-clamp-2">
-                          {project.description}
+      {/* Projects List */}
+      <div className="space-y-4">
+        {projects.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <Eye className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-lg font-medium mb-1">Aucun projet trouvé</p>
+              <p className="text-sm text-muted-foreground">Créez votre premier projet pour commencer</p>
+            </CardContent>
+          </Card>
+        ) : (
+          projects.map((project) => (
+            <Card key={project.id} className="overflow-hidden hover:shadow-md transition-shadow">
+              <CardContent className="p-0">
+                <div className="flex gap-0">
+                  {/* Project image or color bar */}
+                  {project.image_url ? (
+                    <div className="w-40 min-h-full hidden lg:block flex-shrink-0">
+                      <img src={project.image_url} alt={project.title} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-1.5 min-h-full flex-shrink-0 bg-primary rounded-l-xl" />
+                  )}
+
+                  <div className="flex-1 p-5 space-y-3">
+                    {/* Header row */}
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-1">
+                          <h3 className="font-semibold text-base truncate">{project.title}</h3>
+                          <Badge variant={project.is_active ? "default" : "secondary"} className="flex-shrink-0">
+                            {project.is_active ? 'Actif' : 'Inactif'}
+                          </Badge>
                         </div>
+                        {project.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-2 whitespace-pre-wrap">
+                            {project.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(project)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={`h-8 w-8 ${project.is_active ? "text-destructive hover:text-destructive" : "text-green-600 hover:text-green-700"}`}
+                          onClick={() => toggleProjectStatus(project.id, project.is_active)}
+                        >
+                          {project.is_active ? <Trash2 className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Meta row */}
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="h-3.5 w-3.5" />
+                        <span>{formatDistanceToNow(new Date(project.deadline_at), { addSuffix: true, locale: fr })}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>{project.submissions_count} soumission{project.submissions_count !== 1 ? 's' : ''}</span>
+                      </div>
+                      {project.allow_resubmit && (
+                        <Badge variant="outline" className="text-xs font-normal">
+                          Max {project.max_resubmits || 3} resoumissions
+                        </Badge>
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {project.classes.map((classe) => (
-                        <Badge key={classe.id} variant="secondary" className="text-xs">
-                          {classe.code}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-1">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        {formatDistanceToNow(new Date(project.deadline_at), { 
-                          addSuffix: true, 
-                          locale: fr 
-                        })}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{project.submissions_count}</TableCell>
-                  <TableCell>
-                    {project.allow_resubmit ? (
-                      <Badge variant="outline">
-                        Max {project.max_resubmits || 3}
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary">Non</Badge>
+
+                    {/* Classes */}
+                    {project.classes.length > 0 && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Classes :</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {project.classes.slice(0, 6).map((classe) => (
+                            <Badge key={classe.id} variant="secondary" className="text-xs px-2 py-0.5 rounded-full">
+                              {classe.code}
+                            </Badge>
+                          ))}
+                          {project.classes.length > 6 && (
+                            <Badge variant="outline" className="text-xs px-2 py-0.5 rounded-full">
+                              +{project.classes.length - 6} autres
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
                     )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={project.is_active ? "default" : "secondary"}>
-                      {project.is_active ? 'Actif' : 'Inactif'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => openEditDialog(project)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleProjectStatus(project.id, project.is_active)}
-                        className={project.is_active ? "text-red-600" : "text-green-600"}
-                      >
-                        {project.is_active ? <Trash2 className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {projects.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    Aucun projet trouvé
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
 
       {/* Create Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
