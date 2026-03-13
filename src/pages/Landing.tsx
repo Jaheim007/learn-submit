@@ -269,7 +269,10 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Extra Benefits */}
+      {/* Platform Showcase Slider */}
+      <PlatformSlider />
+
+      {/* What our platform does */}
       <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -280,7 +283,7 @@ const Landing = () => {
               transition={{ duration: 0.6 }}
             >
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
-                Pourquoi choisir notre plateforme ?
+                Ce que fait notre plateforme
               </h2>
               <div className="space-y-5">
                 {[
