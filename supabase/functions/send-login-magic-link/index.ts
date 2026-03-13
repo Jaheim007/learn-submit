@@ -6,9 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface LoginMagicLinkRequest {
+interface LoginOtpRequest {
   email: string;
-  redirect_to?: string;
 }
 
 async function logEmailAttempt(
@@ -19,7 +18,7 @@ async function logEmailAttempt(
   resendResponse: unknown,
 ) {
   const { error } = await supabaseAdmin.from("email_send_logs").insert({
-    email_type: "login_magic_link",
+    email_type: "login_otp",
     recipient_email: recipientEmail,
     recipient_name: null,
     status,
@@ -28,47 +27,8 @@ async function logEmailAttempt(
   });
 
   if (error) {
-    console.error("Failed to log login magic link attempt:", error.message);
+    console.error("Failed to log OTP email attempt:", error.message);
   }
-}
-
-async function generateAuthLink(
-  supabaseAdmin: any,
-  email: string,
-  redirectTo: string,
-): Promise<string> {
-  const magicLink = await supabaseAdmin.auth.admin.generateLink({
-    type: "magiclink",
-    email,
-    options: { redirectTo },
-  });
-
-  const magicLinkUrl = magicLink.data?.properties?.action_link;
-  if (!magicLink.error && magicLinkUrl) {
-    return magicLinkUrl;
-  }
-
-  const shouldFallbackToSignup =
-    magicLink.error?.status === 422 ||
-    /not found|has not been registered|user/i.test(magicLink.error?.message ?? "");
-
-  if (!shouldFallbackToSignup) {
-    throw magicLink.error ?? new Error("Could not generate a login link");
-  }
-
-  const signUpLink = await supabaseAdmin.auth.admin.generateLink({
-    type: "signup",
-    email,
-    password: crypto.randomUUID(),
-    options: { redirectTo },
-  });
-
-  const signUpUrl = signUpLink.data?.properties?.action_link;
-  if (signUpLink.error || !signUpUrl) {
-    throw signUpLink.error ?? new Error("Could not generate a signup link");
-  }
-
-  return signUpUrl;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -92,7 +52,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    let payload: LoginMagicLinkRequest;
+    let payload: LoginOtpRequest;
     try {
       payload = await req.json();
     } catch {
@@ -110,13 +70,46 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    const requestOrigin = req.headers.get("origin");
-    const fallbackSiteUrl = Deno.env.get("PUBLIC_SITE_URL") || "https://learn-submit.lovable.app";
-    const baseUrl = requestOrigin && requestOrigin.startsWith("http") ? requestOrigin : fallbackSiteUrl;
-    const redirectTo = `${baseUrl}/etudiant/login`;
+    // Generate a magic link to get the OTP token
+    let otpCode: string | null = null;
 
-    const actionLink = await generateAuthLink(supabaseAdmin, email, redirectTo);
+    const magicLink = await supabaseAdmin.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+    });
 
+    if (magicLink.error) {
+      // If user doesn't exist, create via signup link
+      const shouldFallbackToSignup =
+        magicLink.error?.status === 422 ||
+        /not found|has not been registered|user/i.test(magicLink.error?.message ?? "");
+
+      if (!shouldFallbackToSignup) {
+        throw magicLink.error;
+      }
+
+      const signUpLink = await supabaseAdmin.auth.admin.generateLink({
+        type: "signup",
+        email,
+        password: crypto.randomUUID(),
+      });
+
+      if (signUpLink.error || !signUpLink.data?.properties?.email_otp) {
+        throw signUpLink.error ?? new Error("Could not generate OTP");
+      }
+
+      otpCode = signUpLink.data.properties.email_otp;
+    } else {
+      otpCode = magicLink.data?.properties?.email_otp;
+    }
+
+    if (!otpCode) {
+      throw new Error("Could not extract OTP code");
+    }
+
+    console.log("OTP generated for:", email);
+
+    // Send OTP via Resend
     const emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -126,19 +119,19 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         from: resendFrom,
         to: [email],
-        subject: "Connexion à votre espace",
+        subject: "Votre code de connexion",
         html: `
           <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #e5e7eb;">
             <div style="background: linear-gradient(135deg, #1a2744, #c7253e); padding: 24px; text-align: center;">
               <h1 style="color: white; margin: 0; font-size: 20px;">Kelya Group × Hacktualiz</h1>
             </div>
             <div style="padding: 24px; color: #1f2937;">
-              <h2 style="margin: 0 0 12px; font-size: 18px;">Votre lien de connexion</h2>
-              <p style="margin: 0 0 20px; color: #4b5563;">Cliquez sur le bouton ci-dessous pour accéder à votre espace.</p>
-              <a href="${actionLink}" style="display: inline-block; background: #c7253e; color: white; text-decoration: none; padding: 12px 22px; border-radius: 8px; font-weight: 600;">
-                Se connecter
-              </a>
-              <p style="margin: 20px 0 0; color: #6b7280; font-size: 13px;">Si vous n'avez pas demandé ce lien, vous pouvez ignorer cet email.</p>
+              <h2 style="margin: 0 0 12px; font-size: 18px;">Votre code de connexion</h2>
+              <p style="margin: 0 0 20px; color: #4b5563;">Utilisez le code ci-dessous pour accéder à votre espace :</p>
+              <div style="text-align: center; margin: 24px 0;">
+                <span style="font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #1a2744; font-family: monospace;">${otpCode}</span>
+              </div>
+              <p style="margin: 20px 0 0; color: #6b7280; font-size: 13px;">Ce code expire dans quelques minutes. Si vous n'avez pas demandé ce code, vous pouvez ignorer cet email.</p>
             </div>
           </div>
         `,
@@ -157,7 +150,7 @@ const handler = async (req: Request): Promise<Response> => {
       const errorMessage =
         typeof resendPayload === "object" && resendPayload && "message" in (resendPayload as Record<string, unknown>)
           ? String((resendPayload as Record<string, unknown>).message)
-          : "Failed to send login email";
+          : "Failed to send OTP email";
 
       await logEmailAttempt(supabaseAdmin, email, "failed", errorMessage, resendPayload);
 
@@ -172,7 +165,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Login link sent successfully",
+        message: "OTP code sent successfully",
       }),
       {
         status: 200,
