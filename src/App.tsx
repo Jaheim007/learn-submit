@@ -35,6 +35,7 @@ import AdminClasses from "./pages/admin/AdminClasses";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminRegister from "./pages/admin/AdminRegister";
 import AdminAcademyUsers from "./pages/admin/AdminAcademyUsers";
+import AdminEmails from "./pages/admin/AdminEmails";
 import AcademyLogin from "./pages/academy/AcademyLogin";
 import AcademyLayout from "./pages/academy/AcademyLayout";
 import AcademyHome from "./pages/academy/AcademyHome";
@@ -118,6 +119,7 @@ const App = () => (
                 <Route path="classes" element={<AdminClasses />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="academy-users" element={<AdminAcademyUsers />} />
+                <Route path="emails" element={<AdminEmails />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
               

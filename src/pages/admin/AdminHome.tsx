@@ -198,7 +198,7 @@ export default function AdminHome() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Tableau de bord</h1>
-        <p className="text-muted-foreground">Vue d'ensemble de la plateforme NYS</p>
+        <p className="text-muted-foreground">Vue d'ensemble de la plateforme Kelya × Hacktualiz</p>
       </div>
 
       {/* Stats Cards */}

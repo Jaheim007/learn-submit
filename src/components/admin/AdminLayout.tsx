@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, BarChart3, Users, FileText, FolderOpen, UserCheck, Settings, BookOpen, GraduationCap, School, ArrowLeft } from 'lucide-react';
+import { LogOut, BarChart3, Users, FileText, FolderOpen, UserCheck, Settings, BookOpen, GraduationCap, School, ArrowLeft, Mail } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import kelyaLogo from '@/assets/kelya-logo-dark.png';
 import hacktualizeLogoDark from '@/assets/hacktualiz-logo-dark.png';
@@ -25,6 +25,7 @@ export default function AdminLayout() {
     { path: '/admin/courses', label: 'Cours', icon: BookOpen },
     { path: '/admin/users', label: 'Superviseurs', icon: UserCheck },
     { path: '/admin/academy-users', label: 'Personnel académique', icon: GraduationCap },
+    { path: '/admin/emails', label: 'Emails', icon: Mail },
     { path: '/admin/settings', label: 'Paramètres', icon: Settings },
   ];
 
