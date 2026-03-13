@@ -17,6 +17,7 @@ import {
   ArrowLeft,
   Layers
 } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const navigation = [
   { name: 'Tableau de bord', href: '/admin', icon: LayoutDashboard },
