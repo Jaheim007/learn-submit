@@ -165,37 +165,21 @@ export default function AdminUsers() {
   };
 
   // --- Admin CRUD ---
-  const generatePassword = () => {
-    const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const lower = 'abcdefghijklmnopqrstuvwxyz';
-    const nums = '0123456789';
-    const syms = '!@#$%^&*';
-    const all = upper + lower + nums + syms;
-    let pw = upper[Math.floor(Math.random() * upper.length)] +
-             lower[Math.floor(Math.random() * lower.length)] +
-             nums[Math.floor(Math.random() * nums.length)] +
-             syms[Math.floor(Math.random() * syms.length)];
-    for (let i = pw.length; i < 12; i++) pw += all[Math.floor(Math.random() * all.length)];
-    pw = pw.split('').sort(() => Math.random() - 0.5).join('');
-    setAdminForm(prev => ({ ...prev, password: pw }));
-    setShowPassword(true);
-  };
-
   const handleCreateAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!adminForm.email.trim() || !adminForm.full_name.trim() || !adminForm.password) {
-      toast.error('Tous les champs sont requis');
+    if (!adminForm.email.trim()) {
+      toast.error("L'email est requis");
       return;
     }
     try {
-      const { data, error } = await supabase.functions.invoke('create-academy-user', {
-        body: { email: adminForm.email.trim(), password: adminForm.password, full_name: adminForm.full_name.trim() }
+      const { data, error } = await supabase.functions.invoke('assign-user-role', {
+        body: { email: adminForm.email.trim(), full_name: adminForm.full_name.trim() || null, role: adminForm.role }
       });
       if (error) { toast.error(error.message); return; }
       if (data?.error) { toast.error(data.error); return; }
-      toast.success('Compte créé avec succès');
+      toast.success('Rôle assigné avec succès');
       setIsAdminDialogOpen(false);
-      setAdminForm({ email: '', full_name: '', password: '' });
+      setAdminForm({ email: '', full_name: '', role: 'academy' });
       loadData();
     } catch (error) {
       console.error(error);
