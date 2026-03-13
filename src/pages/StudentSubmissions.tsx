@@ -204,9 +204,9 @@ export default function StudentSubmissions() {
                   </div>
 
                   {sub.description && (
-                    <p className="text-sm text-muted-foreground mb-4 pb-4 border-b border-border">
-                      {sub.description}
-                    </p>
+                    <div className="text-sm text-muted-foreground mb-4 pb-4 border-b border-border">
+                      <RichTextRenderer content={sub.description} />
+                    </div>
                   )}
 
                   <div className="grid gap-2">
