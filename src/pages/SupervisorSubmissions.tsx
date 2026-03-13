@@ -63,7 +63,7 @@ interface Project {
 
 export default function SupervisorSubmissions() {
   const { loading } = useAuth();
-  const { isSupervisor } = useRoles();
+  const { isSupervisor, isTeacher, isLoading: rolesLoading } = useRoles();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -77,10 +77,10 @@ export default function SupervisorSubmissions() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    if (!loading && isSupervisor) {
+    if (!loading && !rolesLoading && (isSupervisor || isTeacher)) {
       loadData();
     }
-  }, [loading, isSupervisor]);
+  }, [loading, rolesLoading, isSupervisor, isTeacher]);
 
   const loadData = async () => {
     try {
@@ -191,24 +191,25 @@ export default function SupervisorSubmissions() {
     return true;
   });
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-64">Chargement...</div>;
+  if (loading || rolesLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
-  if (!isSupervisor) {
+  if (!isSupervisor && !isTeacher) {
     return <Navigate to="/auth" replace />;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Soumissions - Vue Superviseur</h1>
-        <p className="text-muted-foreground mt-2">
-          Visualisation des soumissions de vos classes assignées (lecture seule)
+    <div className="space-y-6 max-w-[1400px] mx-auto">
+      <div>
+        <h1 className="text-3xl font-bold text-foreground">Soumissions</h1>
+        <p className="text-muted-foreground mt-1">
+          Soumissions de vos classes assignées
         </p>
-        <Badge variant="outline" className="mt-2">
-          Accès en lecture seule
-        </Badge>
       </div>
 
       {/* Filters */}

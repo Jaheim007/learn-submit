@@ -53,6 +53,7 @@ import TeacherLayout from "./pages/teacher/TeacherLayout";
 import TeacherHome from "./pages/teacher/TeacherHome";
 import TeacherStudents from "./pages/teacher/TeacherStudents";
 import TeacherMessages from "./pages/teacher/TeacherMessages";
+import TeacherCourses from "./pages/teacher/TeacherCourses";
 import TeacherGuard from "./components/teacher/TeacherGuard";
 import StudentCourses from "./pages/StudentCourses";
 import CourseDetail from "./pages/CourseDetail";
@@ -145,7 +146,7 @@ const App = () => (
                 <Route index element={<TeacherHome />} />
                 <Route path="students" element={<TeacherStudents />} />
                 <Route path="submissions" element={<SupervisorSubmissions />} />
-                <Route path="courses" element={<AdminCourses />} />
+                <Route path="courses" element={<TeacherCourses />} />
                 <Route path="messages" element={<TeacherMessages />} />
               </Route>
               
