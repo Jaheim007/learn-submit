@@ -186,8 +186,7 @@ export default function AdminProjects() {
       class_ids: [],
       image_url: '',
     });
-    setSelectedImage(null);
-    setImagePreview('');
+    setProjectImage(null);
     setEditingProject(null);
   };
 
