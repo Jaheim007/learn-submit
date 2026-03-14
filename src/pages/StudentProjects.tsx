@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
+import { RichTextRenderer } from '@/components/ui/rich-text-editor';
 
 interface StudentClass {
   id: number;
@@ -53,6 +54,13 @@ export default function StudentProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
   const [studentId, setStudentId] = useState<string | null>(null);
+  const [, setTick] = useState(0); // Force re-render for live countdown
+
+  // Live countdown ticker - updates every 30s
+  useEffect(() => {
+    const interval = setInterval(() => setTick(t => t + 1), 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -161,10 +169,12 @@ export default function StudentProjects() {
     if (!deadline) return null;
     const diff = new Date(deadline).getTime() - Date.now();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    if (diff <= 0) return { label: 'Expiré', urgent: true, days: 0 };
-    if (days <= 2) return { label: `${days}j restant${days > 1 ? 's' : ''}`, urgent: true, days };
-    if (days <= 7) return { label: `${days} jours`, urgent: false, days };
-    return { label: new Date(deadline).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }), urgent: false, days };
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / 1000 / 60) % 60);
+    if (diff <= 0) return { label: 'Expiré', urgent: true, days: 0, hours: 0, minutes: 0, expired: true };
+    if (days <= 2) return { label: `${days}j ${hours}h`, urgent: true, days, hours, minutes, expired: false };
+    if (days <= 7) return { label: `${days} jours`, urgent: false, days, hours, minutes, expired: false };
+    return { label: new Date(deadline).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }), urgent: false, days, hours, minutes, expired: false };
   };
 
   if (loading || authLoading || loadingProjects) return <LoadingScreen />;
@@ -321,15 +331,33 @@ export default function StudentProjects() {
                         {project.title}
                       </h3>
                       {project.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1.5 leading-relaxed">
-                          {project.description}
-                        </p>
+                        <div className="text-xs text-muted-foreground line-clamp-2 mt-1.5 leading-relaxed [&_*]:!m-0 [&_*]:!p-0 [&_*]:!inline">
+                          <RichTextRenderer content={project.description} className="[&_p]:!mb-0 [&_h2]:!text-xs [&_h2]:!inline" />
+                        </div>
                       )}
                     </div>
 
                     {/* Status */}
                     {project.latest_submission && (
                       <StatusBadge status={project.latest_submission.status} />
+                    )}
+
+                    {/* Mini Countdown - heart beating urgency */}
+                    {deadlineInfo && !deadlineInfo.expired && deadlineInfo.days <= 3 && (
+                      <div className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold ${
+                        deadlineInfo.urgent 
+                          ? 'bg-destructive/10 text-destructive animate-pulse border border-destructive/20' 
+                          : 'bg-warning/10 text-warning border border-warning/20'
+                      }`}>
+                        <span className="text-base">⏰</span>
+                        <span>{deadlineInfo.days}j {deadlineInfo.hours}h {deadlineInfo.minutes}min</span>
+                      </div>
+                    )}
+                    {deadlineInfo?.expired && (
+                      <div className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold bg-destructive/10 text-destructive border border-destructive/20 animate-pulse">
+                        <span className="text-base">⚠️</span>
+                        <span>Délai expiré</span>
+                      </div>
                     )}
 
                     {/* Action */}

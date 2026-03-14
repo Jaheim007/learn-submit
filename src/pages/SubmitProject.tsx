@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DeadlineCountdown } from '@/components/DeadlineCountdown';
 import { toast } from 'sonner';
 import { ArrowLeft, Upload, Plus, X, Link as LinkIcon, FileText } from 'lucide-react';
+import { RichTextRenderer } from '@/components/ui/rich-text-editor';
 
 interface Project {
   id: number;
@@ -395,9 +396,7 @@ export default function SubmitProject() {
             </CardHeader>
             <CardContent className="pt-6">
               <div className="prose dark:prose-invert max-w-none">
-                <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed text-lg">
-                  {project.description}
-                </p>
+                <RichTextRenderer content={project.description} className="text-muted-foreground leading-relaxed text-base" />
               </div>
             </CardContent>
           </Card>
