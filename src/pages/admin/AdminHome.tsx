@@ -68,7 +68,7 @@ export default function AdminHome() {
         studentsCount, pendingCount, submissionsToday, pendingReviews,
         upcomingDeadlines, classesCount, recentSubs, recentProjs
       ] = await Promise.all([
-        supabase.from('students').select('id', { count: 'exact' }).eq('is_active', true),
+        supabase.from('students').select('id', { count: 'exact' }).eq('status', 'active'),
         supabase.from('students').select('id', { count: 'exact' }).eq('status', 'pending'),
         supabase.from('submissions').select('id', { count: 'exact' }).gte('submitted_at', today + 'T00:00:00'),
         supabase.from('submissions').select('id', { count: 'exact' }).in('status', ['Reçu', 'En révision']),
@@ -215,7 +215,9 @@ export default function AdminHome() {
                     </div>
                   </div>
                   <span className="text-xs text-muted-foreground whitespace-nowrap ml-4 mt-0.5">
-                    {formatDistanceToNow(new Date(project.deadline_at), { addSuffix: true, locale: fr })}
+                    {project.deadline_at 
+                      ? formatDistanceToNow(new Date(project.deadline_at), { addSuffix: true, locale: fr })
+                      : 'Pas de deadline'}
                   </span>
                 </div>
               ))
