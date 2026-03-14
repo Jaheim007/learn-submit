@@ -68,8 +68,8 @@ export default function AdminHome() {
         studentsCount, pendingCount, submissionsToday, pendingReviews,
         upcomingDeadlines, classesCount, recentSubs, recentProjs
       ] = await Promise.all([
-        supabase.from('students').select('id', { count: 'exact' }).eq('is_active', true).eq('status', 'active'),
-        supabase.from('students').select('id', { count: 'exact' }).eq('status', 'pending'),
+        supabase.from('students').select('id', { count: 'exact' }).eq('is_active', true),
+        supabase.from('students').select('id', { count: 'exact' }).eq('is_active', false),
         supabase.from('submissions').select('id', { count: 'exact' }).gte('submitted_at', today + 'T00:00:00'),
         supabase.from('submissions').select('id', { count: 'exact' }).in('status', ['Reçu', 'En révision']),
         supabase.from('projects').select('id', { count: 'exact' }).gte('deadline_at', new Date().toISOString()).lte('deadline_at', weekFromNow),
