@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle, Upload, BookOpen, BarChart3, Shield, Clock, Users, ChevronRight, LogIn, UserPlus, Zap, Award, MessageSquare, Globe, ChevronLeft, FileText, TrendingUp, Bell, Moon, Sun } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
+import { usePlatformStats } from '@/hooks/usePlatformStats';
 import kelyaLogo from '@/assets/kelya-logo-dark.png';
 import hacktualzLogo from '@/assets/hacktualiz-logo-light.png';
 
