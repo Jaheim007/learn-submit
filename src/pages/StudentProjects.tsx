@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
+import { RichTextRenderer } from '@/components/ui/rich-text-editor';
 
 interface StudentClass {
   id: number;
