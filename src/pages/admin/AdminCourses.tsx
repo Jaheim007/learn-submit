@@ -331,19 +331,10 @@ export default function AdminCourses() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image">Image de couverture</Label>
-                <Input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="cursor-pointer"
-                />
-                {formData.image && (
-                  <p className="text-sm text-muted-foreground">{formData.image.name}</p>
-                )}
-              </div>
+              <ImageCropper
+                label="Image de couverture"
+                onImageReady={(file) => setFormData({ ...formData, image: file })}
+              />
 
               <div className="space-y-2">
                 <Label>Description</Label>
