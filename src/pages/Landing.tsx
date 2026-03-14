@@ -551,7 +551,7 @@ const Landing = () => {
                     </div>
                     <div>
                       <div className="text-sm text-primary-foreground/60">Taux de réussite</div>
-                      <div className="text-2xl font-heading font-bold">94%</div>
+                      <div className="text-2xl font-heading font-bold">{stats?.validationRate ?? '...'}</div>
                     </div>
                   </div>
                   <div className="h-px bg-primary-foreground/10" />
