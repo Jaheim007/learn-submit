@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, BarChart3, Users, FileText, BookOpen, MessageSquare } from 'lucide-react';
+import { LogOut, BarChart3, Users, FileText, BookOpen, MessageSquare, FolderOpen, User } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useState } from 'react';
