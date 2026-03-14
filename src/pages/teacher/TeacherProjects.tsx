@@ -286,6 +286,11 @@ export default function TeacherProjects() {
                 onChange={e => setForm({ ...form, deadline_at: e.target.value })}
               />
             </div>
+            <ImageCropper
+              label="Image du projet (optionnel)"
+              onImageReady={setProjectImage}
+              aspectRatio={16 / 9}
+            />
             <div className="space-y-2">
               <Label>Classes assignées *</Label>
               <div className="flex flex-wrap gap-2">
