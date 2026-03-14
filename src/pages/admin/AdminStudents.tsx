@@ -235,6 +235,13 @@ export default function AdminStudents() {
     });
   }, [students, debouncedSearchTerm, selectedClass, showInactive]);
 
+  // Paginate
+  const totalPages = Math.ceil(getFilteredStudents.length / PAGE_SIZE);
+  const paginatedStudents = getFilteredStudents.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  // Reset page when filters change
+  useEffect(() => { setCurrentPage(1); }, [debouncedSearchTerm, selectedClass, showInactive]);
+
   const filteredStudents = getFilteredStudents;
 
   if (loading) {
