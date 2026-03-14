@@ -65,8 +65,7 @@ export default function AdminProjects() {
     class_ids: [],
     image_url: '',
   });
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [projectImage, setProjectImage] = useState<File | null>(null);
   const [lastRefreshTime, setLastRefreshTime] = useState(new Date());
 
   const loadData = async () => {
