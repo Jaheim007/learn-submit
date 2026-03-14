@@ -438,68 +438,12 @@ export default function AdminProjects() {
         </div>
       </div>
 
-      <div>
-        <Label htmlFor="image-upload">Image du projet (optionnel)</Label>
-        <div className="space-y-4">
-          {imagePreview && (
-            <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border">
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="w-full h-full object-cover"
-              />
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                className="absolute top-2 right-2"
-                onClick={() => {
-                  setSelectedImage(null);
-                  setImagePreview('');
-                  setFormData(prev => ({ ...prev, image_url: '' }));
-                }}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-          <div className="flex items-center gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => document.getElementById('image-upload')?.click()}
-              className="gap-2"
-            >
-              <Upload className="h-4 w-4" />
-              {imagePreview ? 'Changer l\'image' : 'Choisir une image'}
-            </Button>
-            <input
-              id="image-upload"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  if (file.size > 5 * 1024 * 1024) {
-                    toast.error('L\'image ne doit pas dépasser 5 MB');
-                    return;
-                  }
-                  setSelectedImage(file);
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    setImagePreview(reader.result as string);
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }}
-            />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Ajouter une image pour rendre le projet plus attrayant (max 5 MB)
-          </p>
-        </div>
-      </div>
+      <ImageCropper
+        label="Image du projet (optionnel)"
+        currentImageUrl={formData.image_url}
+        onImageReady={setProjectImage}
+        aspectRatio={16 / 9}
+      />
 
       <div className="flex items-center space-x-2">
         <Switch
