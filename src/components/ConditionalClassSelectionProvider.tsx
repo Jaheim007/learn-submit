@@ -11,20 +11,18 @@ interface ConditionalClassSelectionProviderProps {
 export function ConditionalClassSelectionProvider({ children }: ConditionalClassSelectionProviderProps) {
   const location = useLocation();
   const { user } = useAuth();
-  const { isAdmin, isSupervisor, isLoading } = useRoles();
+  const { isAdmin, isSupervisor, isTeacher, isAcademy, isLoading } = useRoles();
   
-  // Don't show class selection on admin or supervisor routes
+  // Don't show class selection on non-student routes
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isSupervisorRoute = location.pathname.startsWith('/superviseur');
+  const isTeacherRoute = location.pathname.startsWith('/teacher');
+  const isAcademyRoute = location.pathname.startsWith('/academy');
   const isPendingRoute = location.pathname.includes('/pending');
+  const isRejectedRoute = location.pathname.includes('/rejected');
   
-  // Don't wrap with ClassSelectionProvider if:
-  // - User is not authenticated
-  // - User is admin or supervisor (they don't need class selection)
-  // - Roles are still loading (wait for role check)
-  // - On admin/supervisor routes
-  // - On pending approval page (students awaiting approval)
-  if (!user || isLoading || isAdmin || isSupervisor || isAdminRoute || isSupervisorRoute || isPendingRoute) {
+  // Don't wrap with ClassSelectionProvider if user is not a student
+  if (!user || isLoading || isAdmin || isSupervisor || isTeacher || isAcademy || isAdminRoute || isSupervisorRoute || isTeacherRoute || isAcademyRoute || isPendingRoute || isRejectedRoute) {
     return <>{children}</>;
   }
   
