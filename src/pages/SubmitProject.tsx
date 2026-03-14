@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DeadlineCountdown } from '@/components/DeadlineCountdown';
 import { toast } from 'sonner';
 import { ArrowLeft, Upload, Plus, X, Link as LinkIcon, FileText } from 'lucide-react';
+import { RichTextRenderer } from '@/components/ui/rich-text-editor';
 
 interface Project {
   id: number;
