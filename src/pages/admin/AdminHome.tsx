@@ -215,7 +215,9 @@ export default function AdminHome() {
                     </div>
                   </div>
                   <span className="text-xs text-muted-foreground whitespace-nowrap ml-4 mt-0.5">
-                    {formatDistanceToNow(new Date(project.deadline_at), { addSuffix: true, locale: fr })}
+                    {project.deadline_at 
+                      ? formatDistanceToNow(new Date(project.deadline_at), { addSuffix: true, locale: fr })
+                      : 'Pas de deadline'}
                   </span>
                 </div>
               ))

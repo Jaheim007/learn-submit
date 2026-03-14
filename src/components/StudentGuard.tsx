@@ -48,10 +48,26 @@ export default function StudentGuard({ children }: StudentGuardProps) {
         }
 
         // 2) If not found and this is an OAuth user, auto-create via edge function
+        //    IMPORTANT: Create with status='pending' so admin approval is required
         const provider = session?.user?.app_metadata?.provider;
         if (provider && provider !== 'email') {
           try {
-            // 2a) Try direct insert (works if RLS allows creating own student row)
+            // First check if user has a non-student role (admin, academy, supervisor)
+            // If so, don't create a student profile
+            const { data: existingRoles } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', user.id);
+            
+            const roleList = (existingRoles || []).map(r => r.role);
+            if (roleList.includes('admin') || roleList.includes('academy') || roleList.includes('supervisor')) {
+              // Non-student role — don't create student profile, redirect to appropriate dashboard
+              checkedForUserRef.current = user.id;
+              setStudentCheck('not_found');
+              return;
+            }
+
+            // Create student with pending status (requires admin approval)
             const { data: created, error: insertErr } = await supabase
               .from('students')
               .insert({
@@ -59,18 +75,20 @@ export default function StudentGuard({ children }: StudentGuardProps) {
                 email: user.email,
                 full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || null,
                 avatar_url: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || null,
-                is_active: true,
+                is_active: false,
+                status: 'pending',
               })
-              .select('id')
+              .select('id, status')
               .single();
 
             if (!insertErr && created) {
               checkedForUserRef.current = user.id;
-              setStudentCheck('found');
+              // Always redirect to pending since we just created with pending status
+              setStudentCheck('not_found');
               return;
             }
 
-            // 2b) Fallback to edge function with user JWT (bypasses RLS via service role)
+            // Fallback to edge function with user JWT
             const { error: fnErr } = await supabase.functions.invoke('handle-oauth-signup', {
               headers: {
                 Authorization: `Bearer ${session.access_token}`,
@@ -86,13 +104,19 @@ export default function StudentGuard({ children }: StudentGuardProps) {
           // Re-check after attempting creation
           const { data: afterData, error: afterErr } = await supabase
             .from('students')
-            .select('id')
+            .select('id, status')
             .eq('user_id', user.id)
             .maybeSingle();
 
           if (!afterErr && afterData) {
             checkedForUserRef.current = user.id;
-            setStudentCheck('found');
+            if (afterData.status === 'pending') {
+              setStudentCheck('not_found');
+            } else if (afterData.status === 'rejected') {
+              setStudentCheck('rejected');
+            } else {
+              setStudentCheck('found');
+            }
             return;
           }
         }
