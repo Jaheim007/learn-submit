@@ -48,6 +48,7 @@ export default function TeacherProjects() {
     max_resubmits: 1,
     class_ids: [] as number[],
   });
+  const [projectImage, setProjectImage] = useState<File | null>(null);
 
   useEffect(() => {
     if (user) loadData();
