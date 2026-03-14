@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Edit, Trash2, Eye, Calendar, Upload, X, FileText } from 'lucide-react';
 import { toast } from 'sonner';
+import { RichTextEditor, RichTextRenderer } from '@/components/ui/rich-text-editor';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useRefreshInterval } from '@/hooks/useRefreshInterval';
