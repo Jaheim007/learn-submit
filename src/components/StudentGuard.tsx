@@ -68,6 +68,7 @@ export default function StudentGuard({ children }: StudentGuardProps) {
               headers: {
                 Authorization: `Bearer ${session.access_token}`,
               },
+              body: { user_id: user.id },
             });
             if (fnErr) {
               console.error('handle-oauth-signup error:', fnErr);
