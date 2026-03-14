@@ -67,7 +67,28 @@ export default function SubmitProject() {
       }
 
       setStudentId(studentData.id);
-      setClassId(studentData.primary_class_id);
+
+      // Find the correct class_id: check which enrolled class has this project
+      const { data: enrollments } = await supabase
+        .from('enrollments')
+        .select('class_id')
+        .eq('student_id', studentData.id);
+
+      const enrolledClassIds = (enrollments || []).map((e: any) => e.class_id);
+      
+      if (enrolledClassIds.length > 0) {
+        const { data: classProject } = await supabase
+          .from('class_projects')
+          .select('class_id')
+          .eq('project_id', parseInt(projectId!))
+          .in('class_id', enrolledClassIds)
+          .limit(1)
+          .maybeSingle();
+        
+        setClassId(classProject?.class_id || studentData.primary_class_id);
+      } else {
+        setClassId(studentData.primary_class_id);
+      }
 
       // Get project data
       const { data: projectData } = await supabase
@@ -333,7 +354,7 @@ export default function SubmitProject() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="prose prose-invert max-w-none">
+              <div className="prose dark:prose-invert max-w-none">
                 <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed text-lg">
                   {project.description}
                 </p>

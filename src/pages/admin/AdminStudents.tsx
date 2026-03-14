@@ -51,6 +51,8 @@ export default function AdminStudents() {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [changeClassOpen, setChangeClassOpen] = useState(false);
   const [studentToChangeClass, setStudentToChangeClass] = useState<Student | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 50;
 
   // Debounce search term
   useEffect(() => {
@@ -233,7 +235,14 @@ export default function AdminStudents() {
     });
   }, [students, debouncedSearchTerm, selectedClass, showInactive]);
 
-  const filteredStudents = getFilteredStudents;
+  // Paginate
+  const totalPages = Math.ceil(getFilteredStudents.length / PAGE_SIZE);
+  const paginatedStudents = getFilteredStudents.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  // Reset page when filters change
+  useEffect(() => { setCurrentPage(1); }, [debouncedSearchTerm, selectedClass, showInactive]);
+
+  const filteredStudents = paginatedStudents;
 
   if (loading) {
     return (
@@ -248,22 +257,23 @@ export default function AdminStudents() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Gestion des étudiants</h1>
-          <p className="text-muted-foreground">
-            {filteredStudents.length} étudiant{filteredStudents.length > 1 ? 's' : ''} trouvé{filteredStudents.length > 1 ? 's' : ''}
+          <h1 className="text-xl sm:text-3xl font-bold text-foreground">Gestion des étudiants</h1>
+          <p className="text-sm text-muted-foreground">
+            {getFilteredStudents.length} étudiant{getFilteredStudents.length > 1 ? 's' : ''} trouvé{getFilteredStudents.length > 1 ? 's' : ''}
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
           <RefreshHeader 
             lastRefreshTime={lastRefreshTime} 
             onRefresh={refresh}
             isRefreshing={loading}
           />
-          <Button onClick={exportToCSV} variant="outline">
+          <Button onClick={exportToCSV} variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
-            Exporter CSV
+            <span className="hidden sm:inline">Exporter CSV</span>
+            <span className="sm:hidden">CSV</span>
           </Button>
         </div>
       </div>
@@ -429,6 +439,33 @@ export default function AdminStudents() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Page {currentPage} / {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage(p => p - 1)}
+            >
+              Précédent
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage(p => p + 1)}
+            >
+              Suivant
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Student Profile Modal */}
       <StudentProfileModal 
