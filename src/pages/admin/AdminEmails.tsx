@@ -72,7 +72,8 @@ export default function AdminEmails() {
   };
 
   const handleSend = async () => {
-    if (!subject.trim() || !body.trim() || body === '<p></p>') {
+    const strippedBody = body.replace(/<[^>]*>/g, '').trim();
+    if (!subject.trim() || !strippedBody) {
       toast.error('Veuillez remplir le sujet et le contenu');
       return;
     }
