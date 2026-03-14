@@ -54,6 +54,13 @@ export default function StudentProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
   const [studentId, setStudentId] = useState<string | null>(null);
+  const [, setTick] = useState(0); // Force re-render for live countdown
+
+  // Live countdown ticker - updates every 30s
+  useEffect(() => {
+    const interval = setInterval(() => setTick(t => t + 1), 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) {
