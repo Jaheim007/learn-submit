@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle, Upload, BookOpen, BarChart3, Shield, Clock, Users, ChevronRight, LogIn, UserPlus, Zap, Award, MessageSquare, Globe, ChevronLeft, FileText, TrendingUp, Bell, Moon, Sun } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
+import { usePlatformStats } from '@/hooks/usePlatformStats';
 import kelyaLogo from '@/assets/kelya-logo-dark.png';
 import hacktualzLogo from '@/assets/hacktualiz-logo-light.png';
 
@@ -241,6 +242,7 @@ const PlatformSlider = () => {
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { data: stats } = usePlatformStats();
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
 
   const toggleDarkMode = () => {
@@ -354,10 +356,10 @@ const Landing = () => {
             <div className="bg-card rounded-2xl border border-border p-6 sm:p-8 shadow-custom">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {[
-                  { label: 'Projets soumis', value: '1,200+', icon: Upload },
-                  { label: 'Étudiants actifs', value: '340+', icon: Users },
-                  { label: 'Taux de validation', value: '94%', icon: CheckCircle },
-                  { label: 'Cours disponibles', value: '25+', icon: BookOpen },
+                  { label: 'Projets soumis', value: stats?.submissionsCount ?? '...', icon: Upload },
+                  { label: 'Étudiants actifs', value: stats?.studentsCount ?? '...', icon: Users },
+                  { label: 'Taux de validation', value: stats?.validationRate ?? '...', icon: CheckCircle },
+                  { label: 'Cours disponibles', value: stats?.coursesCount ?? '...', icon: BookOpen },
                 ].map((stat, i) => (
                   <motion.div 
                     key={i} 
@@ -549,17 +551,17 @@ const Landing = () => {
                     </div>
                     <div>
                       <div className="text-sm text-primary-foreground/60">Taux de réussite</div>
-                      <div className="text-2xl font-heading font-bold">94%</div>
+                      <div className="text-2xl font-heading font-bold">{stats?.validationRate ?? '...'}</div>
                     </div>
                   </div>
                   <div className="h-px bg-primary-foreground/10" />
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-primary-foreground/10 rounded-xl p-4">
-                      <div className="text-2xl font-heading font-bold">340+</div>
+                      <div className="text-2xl font-heading font-bold">{stats?.studentsCount ?? '...'}</div>
                       <div className="text-xs text-primary-foreground/60 mt-1">Étudiants inscrits</div>
                     </div>
                     <div className="bg-primary-foreground/10 rounded-xl p-4">
-                      <div className="text-2xl font-heading font-bold">1.2K</div>
+                      <div className="text-2xl font-heading font-bold">{stats?.submissionsCount ?? '...'}</div>
                       <div className="text-xs text-primary-foreground/60 mt-1">Projets soumis</div>
                     </div>
                   </div>
