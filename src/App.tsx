@@ -21,7 +21,7 @@ import StudentLeaderboard from "./pages/StudentLeaderboard";
 import StudentPending from "./pages/StudentPending";
 import StudentRejected from "./pages/StudentRejected";
 import StudentGuard from "./components/StudentGuard";
-import AdminLayout from "./components/admin/AdminLayout";
+import AdminLayout from "./pages/admin/AdminLayout";
 import AdminGuard from "./components/admin/AdminGuard";
 import AdminHome from "./pages/admin/AdminHome";
 import AdminStudents from "./pages/admin/AdminStudents";
