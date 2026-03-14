@@ -202,14 +202,14 @@ export default function AdminProjects() {
       let imageUrl = formData.image_url;
 
       // Upload image if selected using edge function
-      if (selectedImage) {
-        const formData = new FormData();
-        formData.append('file', selectedImage);
+      if (projectImage) {
+        const formDataUpload = new FormData();
+        formDataUpload.append('file', projectImage);
 
         const { data: uploadData, error: uploadError } = await supabase.functions.invoke(
           'upload-project-image',
           {
-            body: formData
+            body: formDataUpload
           }
         );
 
