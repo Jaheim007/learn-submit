@@ -600,9 +600,9 @@ export default function AdminProjects() {
                           </Badge>
                         </div>
                         {project.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2 whitespace-pre-wrap">
-                            {project.description}
-                          </p>
+                          <div className="line-clamp-2">
+                            <RichTextRenderer content={project.description} className="text-muted-foreground [&_p]:!mb-0" />
+                          </div>
                         )}
                       </div>
 
