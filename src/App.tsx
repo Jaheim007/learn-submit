@@ -18,7 +18,7 @@ import TeacherGuard from "./components/teacher/TeacherGuard";
 // Lazy-loaded pages — each becomes its own chunk
 const Index = lazy(() => import("./pages/Index"));
 const Landing = lazy(() => import("./pages/Landing"));
-const Auth = lazy(() => import("./pages/Auth"));
+// Auth page removed for security — redirects to unified login
 const AuthRedirect = lazy(() => import("./pages/AuthRedirect"));
 const StudentLogin = lazy(() => import("./pages/StudentLogin"));
 const StudentRegister = lazy(() => import("./pages/StudentRegister"));
