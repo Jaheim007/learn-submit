@@ -47,18 +47,39 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Verify user is admin
+    // Verify user is admin or supervisor
     const { data: userRoles } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id);
 
     const isAdmin = userRoles?.some(r => r.role === 'admin');
-    if (!isAdmin) {
+    const isSupervisor = userRoles?.some(r => r.role === 'supervisor');
+    
+    if (!isAdmin && !isSupervisor) {
       return new Response(
-        JSON.stringify({ error: 'Accès admin requis' }),
+        JSON.stringify({ error: 'Accès admin ou formateur requis' }),
         { status: 403, headers: corsHeaders }
       );
+    }
+
+    // If supervisor, verify they're only assigning to their own classes
+    if (isSupervisor && !isAdmin) {
+      const body_check: CreateProjectRequest = await req.clone().json();
+      const { data: assignments } = await supabase
+        .from('supervisor_class_assignments')
+        .select('class_id')
+        .eq('supervisor_user_id', user.id);
+      
+      const assignedClassIds = new Set(assignments?.map(a => a.class_id) || []);
+      const allAssigned = body_check.class_ids.every(id => assignedClassIds.has(id));
+      
+      if (!allAssigned) {
+        return new Response(
+          JSON.stringify({ error: 'Vous ne pouvez créer des projets que pour vos classes assignées' }),
+          { status: 403, headers: corsHeaders }
+        );
+      }
     }
 
     if (req.method !== 'POST') {
