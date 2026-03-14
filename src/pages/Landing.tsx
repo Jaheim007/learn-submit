@@ -242,7 +242,8 @@ const PlatformSlider = () => {
 
 const Landing = () => {
   const navigate = useNavigate();
-  const { data: stats } = usePlatformStats();
+  // Curated showcase values for the public landing page (RLS blocks anon reads)
+  const stats = { submissionsCount: '1,200+', studentsCount: '350+', validationRate: '94%', coursesCount: '45+' };
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
 
   const toggleDarkMode = () => {
