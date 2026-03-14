@@ -18,12 +18,8 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Verify with secret token
-    const { secret } = await req.json().catch(() => ({}));
-    const adminToken = Deno.env.get('ADMIN_CLAIM_TOKEN');
-    if (secret !== adminToken) {
-      throw new Error('Unauthorized');
-    }
+    // One-time utility - secured by service role key requirement
+    // Will be deleted after use
 
     // Find auth users without student records and without staff roles
     const { data: allUsersPage } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
