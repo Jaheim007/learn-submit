@@ -49,8 +49,8 @@ export default function AdminEmails() {
   };
 
   const loadStudents = async () => {
-    const { data } = await supabase.from('students').select('id, email, full_name').eq('is_active', true).eq('status', 'active').order('full_name');
-    if (data) setStudents(data);
+    const { data } = await supabase.from('students').select('id, email, full_name').eq('is_active', true).eq('status', 'active').not('email', 'is', null).order('full_name');
+    if (data) setStudents(data.filter(s => s.email));
   };
 
   const addEmail = (email: string) => {
@@ -72,7 +72,8 @@ export default function AdminEmails() {
   };
 
   const handleSend = async () => {
-    if (!subject.trim() || !body.trim() || body === '<p></p>') {
+    const strippedBody = body.replace(/<[^>]*>/g, '').trim();
+    if (!subject.trim() || !strippedBody) {
       toast.error('Veuillez remplir le sujet et le contenu');
       return;
     }
@@ -201,7 +202,7 @@ export default function AdminEmails() {
                     <div className="space-y-2">
                       <Label>Destinataires</Label>
                       <div className="flex gap-2">
-                        <Select key={studentSelectKey} onValueChange={(val) => addStudentEmail(val)} value="">
+                        <Select key={studentSelectKey} onValueChange={(val) => addStudentEmail(val)}>
                           <SelectTrigger className="flex-1">
                             <SelectValue placeholder="Sélectionner un étudiant..." />
                           </SelectTrigger>

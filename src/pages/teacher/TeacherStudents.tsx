@@ -33,26 +33,50 @@ export default function TeacherStudents() {
 
   const loadStudents = async () => {
     try {
-      const { data: assignments } = await supabase
+      // Step 1: Get supervisor's assigned classes
+      const { data: assignments, error: assignError } = await supabase
         .from('supervisor_class_assignments')
-        .select('class_id, classes(id, code, title)')
+        .select('class_id')
         .eq('supervisor_user_id', user?.id);
 
-      const classIds = assignments?.map(a => a.class_id) || [];
-      setClasses(assignments?.map(a => a.classes as any) || []);
+      if (assignError) { console.error('Assignments error:', assignError); }
 
+      const classIds = assignments?.map(a => a.class_id) || [];
       if (classIds.length === 0) { setLoading(false); return; }
 
-      const { data: enrollments } = await supabase
+      // Step 2: Get class details (public read)
+      const { data: classData } = await supabase
+        .from('classes')
+        .select('id, code, title')
+        .in('id', classIds);
+      
+      setClasses(classData || []);
+      const classMap = new Map((classData || []).map(c => [c.id, c]));
+
+      // Step 3: Get enrollments for those classes
+      const { data: enrollments, error: enrollError } = await supabase
         .from('enrollments')
-        .select('class_id, student_id, students(id, full_name, email, phone, whatsapp, github_profile)')
+        .select('class_id, student_id')
         .in('class_id', classIds);
 
-      const classMap = new Map((assignments || []).map(a => [a.class_id, a.classes as any]));
+      if (enrollError) { console.error('Enrollments error:', enrollError); }
+      if (!enrollments || enrollments.length === 0) { setLoading(false); return; }
 
-      const studentList: Student[] = (enrollments || []).map(e => {
-        const s = e.students as any;
+      // Step 4: Get student details separately
+      const studentIds = [...new Set(enrollments.map(e => e.student_id))];
+      const { data: studentData, error: studentError } = await supabase
+        .from('students')
+        .select('id, full_name, email, phone, whatsapp, github_profile')
+        .in('id', studentIds);
+
+      if (studentError) { console.error('Students error:', studentError); }
+
+      const studentMap = new Map((studentData || []).map(s => [s.id, s]));
+
+      const studentList: Student[] = enrollments.map(e => {
+        const s = studentMap.get(e.student_id);
         const cls = classMap.get(e.class_id);
+        if (!s) return null;
         return {
           id: s.id,
           full_name: s.full_name || 'Sans nom',
@@ -63,7 +87,7 @@ export default function TeacherStudents() {
           className: cls?.title || '',
           classCode: cls?.code || '',
         };
-      });
+      }).filter(Boolean) as Student[];
 
       setStudents(studentList);
     } catch (error) {
