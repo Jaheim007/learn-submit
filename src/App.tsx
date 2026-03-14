@@ -54,6 +54,8 @@ import TeacherHome from "./pages/teacher/TeacherHome";
 import TeacherStudents from "./pages/teacher/TeacherStudents";
 import TeacherMessages from "./pages/teacher/TeacherMessages";
 import TeacherCourses from "./pages/teacher/TeacherCourses";
+import TeacherProjects from "./pages/teacher/TeacherProjects";
+import TeacherProfile from "./pages/teacher/TeacherProfile";
 import TeacherGuard from "./components/teacher/TeacherGuard";
 import StudentCourses from "./pages/StudentCourses";
 import CourseDetail from "./pages/CourseDetail";
