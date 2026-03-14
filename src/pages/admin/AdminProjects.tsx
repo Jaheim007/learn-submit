@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Edit, Trash2, Eye, Calendar, Upload, X, FileText } from 'lucide-react';
 import { toast } from 'sonner';
+import { RichTextEditor, RichTextRenderer } from '@/components/ui/rich-text-editor';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useRefreshInterval } from '@/hooks/useRefreshInterval';
@@ -369,13 +370,12 @@ export default function AdminProjects() {
       </div>
 
       <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
+        <Label>Description</Label>
+        <RichTextEditor
           value={formData.description}
-          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          onChange={(val) => setFormData(prev => ({ ...prev, description: val }))}
           placeholder="Description du projet (optionnel)"
-          rows={4}
+          minHeight="120px"
         />
       </div>
 
@@ -600,9 +600,9 @@ export default function AdminProjects() {
                           </Badge>
                         </div>
                         {project.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2 whitespace-pre-wrap">
-                            {project.description}
-                          </p>
+                          <div className="line-clamp-2">
+                            <RichTextRenderer content={project.description} className="text-muted-foreground [&_p]:!mb-0" />
+                          </div>
                         )}
                       </div>
 

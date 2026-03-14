@@ -3,10 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { RichTextEditor, RichTextRenderer } from '@/components/ui/rich-text-editor';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
@@ -222,7 +222,9 @@ export default function TeacherProjects() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {project.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
+                  <div className="line-clamp-2">
+                    <RichTextRenderer content={project.description} className="text-muted-foreground [&_p]:!mb-0" />
+                  </div>
                 )}
                 <div className="flex flex-wrap gap-1.5">
                   {project.classNames.map(cn => (
@@ -267,11 +269,11 @@ export default function TeacherProjects() {
             </div>
             <div className="space-y-2">
               <Label>Description</Label>
-              <Textarea
+              <RichTextEditor
                 value={form.description}
-                onChange={e => setForm({ ...form, description: e.target.value })}
+                onChange={(val) => setForm(prev => ({ ...prev, description: val }))}
                 placeholder="Description du projet..."
-                rows={3}
+                minHeight="100px"
               />
             </div>
             <div className="space-y-2">
