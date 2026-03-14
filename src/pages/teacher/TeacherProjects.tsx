@@ -270,11 +270,11 @@ export default function TeacherProjects() {
             </div>
             <div className="space-y-2">
               <Label>Description</Label>
-              <Textarea
+              <RichTextEditor
                 value={form.description}
-                onChange={e => setForm({ ...form, description: e.target.value })}
+                onChange={(val) => setForm(prev => ({ ...prev, description: val }))}
                 placeholder="Description du projet..."
-                rows={3}
+                minHeight="100px"
               />
             </div>
             <div className="space-y-2">
