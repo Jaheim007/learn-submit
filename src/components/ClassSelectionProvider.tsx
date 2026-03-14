@@ -23,7 +23,7 @@ export function ClassSelectionProvider({ children }: ClassSelectionProviderProps
         .from('students')
         .select('primary_class_id')
         .eq('user_id', user!.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error checking student class:', error);
