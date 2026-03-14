@@ -331,9 +331,9 @@ export default function StudentProjects() {
                         {project.title}
                       </h3>
                       {project.description && (
-                        <div className="text-xs text-muted-foreground line-clamp-2 mt-1.5 leading-relaxed [&_*]:!m-0 [&_*]:!p-0 [&_*]:!inline">
-                          <RichTextRenderer content={project.description} className="[&_p]:!mb-0 [&_h2]:!text-xs [&_h2]:!inline" />
-                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1.5 leading-relaxed">
+                          {project.description.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}
+                        </p>
                       )}
                     </div>
 
