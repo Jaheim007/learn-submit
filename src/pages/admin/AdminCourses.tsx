@@ -501,23 +501,11 @@ export default function AdminCourses() {
                 placeholder="Titre du cours"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-image">Nouvelle image (optionnel)</Label>
-              <Input
-                id="edit-image"
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    setEditFormData({ ...editFormData, image: e.target.files[0] });
-                  }
-                }}
-                className="cursor-pointer"
-              />
-              {editFormData.image && (
-                <p className="text-sm text-muted-foreground">{editFormData.image.name}</p>
-              )}
-            </div>
+            <ImageCropper
+              label="Nouvelle image (optionnel)"
+              currentImageUrl={editingMaterial?.image_url}
+              onImageReady={(file) => setEditFormData({ ...editFormData, image: file })}
+            />
             <div className="space-y-2">
               <Label>Description</Label>
               <RichTextEditor
