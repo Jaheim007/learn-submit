@@ -354,7 +354,7 @@ export default function SubmitProject() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="prose prose-invert max-w-none">
+              <div className="prose dark:prose-invert max-w-none">
                 <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed text-lg">
                   {project.description}
                 </p>

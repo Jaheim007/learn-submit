@@ -48,47 +48,22 @@ export default function StudentGuard({ children }: StudentGuardProps) {
         }
 
         // 2) If not found and this is an OAuth user, auto-create via edge function
-        //    IMPORTANT: Create with status='pending' so admin approval is required
+        //    Uses the secure edge function instead of client-side role queries
         const provider = session?.user?.app_metadata?.provider;
         if (provider && provider !== 'email') {
           try {
-            // First check if user has a non-student role (admin, academy, supervisor)
-            // If so, don't create a student profile
-            const { data: existingRoles } = await supabase
-              .from('user_roles')
-              .select('role')
-              .eq('user_id', user.id);
+            // Check roles via secure edge function (not direct table query)
+            const { data: rolesData } = await supabase.functions.invoke('me-roles');
+            const roleList = rolesData?.roles || [];
             
-            const roleList = (existingRoles || []).map(r => r.role);
-            if (roleList.includes('admin') || roleList.includes('academy') || roleList.includes('supervisor')) {
-              // Non-student role — don't create student profile, redirect to appropriate dashboard
+            if (roleList.includes('admin') || roleList.includes('academy') || roleList.includes('supervisor') || roleList.includes('teacher')) {
+              // Non-student role — don't create student profile
               checkedForUserRef.current = user.id;
               setStudentCheck('not_found');
               return;
             }
 
-            // Create student with pending status (requires admin approval)
-            const { data: created, error: insertErr } = await supabase
-              .from('students')
-              .insert({
-                user_id: user.id,
-                email: user.email,
-                full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || null,
-                avatar_url: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || null,
-                is_active: false,
-                status: 'pending',
-              })
-              .select('id, status')
-              .single();
-
-            if (!insertErr && created) {
-              checkedForUserRef.current = user.id;
-              // Always redirect to pending since we just created with pending status
-              setStudentCheck('not_found');
-              return;
-            }
-
-            // Fallback to edge function with user JWT
+            // Use edge function to create student profile (single source of truth)
             const { error: fnErr } = await supabase.functions.invoke('handle-oauth-signup', {
               headers: {
                 Authorization: `Bearer ${session.access_token}`,

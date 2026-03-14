@@ -124,19 +124,29 @@ export default function StudentProjects() {
 
       const projectsList = data?.map((cp: any) => cp.projects).filter(Boolean) || [];
       
-      const projectsWithSubmissions = await Promise.all(
-        projectsList.map(async (project: any) => {
-          const { data: submissions } = await supabase
+      // Batch fetch all submissions for this student in this class (fixes N+1 query)
+      const projectIds = projectsList.map((p: any) => p.id);
+      const { data: allSubmissions } = projectIds.length > 0
+        ? await supabase
             .from('submissions')
-            .select('id, status, submitted_at')
-            .eq('project_id', project.id)
+            .select('id, status, submitted_at, project_id')
             .eq('student_id', studentId)
+            .in('project_id', projectIds)
             .order('submitted_at', { ascending: false })
-            .limit(1);
+        : { data: [] };
 
-          return { ...project, latest_submission: submissions?.[0] || null };
-        })
-      );
+      // Group by project_id, keep only latest per project
+      const latestByProject: Record<number, any> = {};
+      (allSubmissions || []).forEach((sub: any) => {
+        if (!latestByProject[sub.project_id]) {
+          latestByProject[sub.project_id] = sub;
+        }
+      });
+
+      const projectsWithSubmissions = projectsList.map((project: any) => ({
+        ...project,
+        latest_submission: latestByProject[project.id] || null,
+      }));
 
       setProjects(projectsWithSubmissions);
     } catch (error) {
