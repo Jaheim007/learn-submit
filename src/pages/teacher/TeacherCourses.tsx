@@ -15,6 +15,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { RichTextEditor, RichTextRenderer } from '@/components/ui/rich-text-editor';
+import ImageCropper from '@/components/ImageCropper';
 
 interface CourseMaterial {
   id: string;
@@ -264,14 +265,10 @@ export default function TeacherCourses() {
                     onChange={(e) => e.target.files && setFormData({ ...formData, files: Array.from(e.target.files) })}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Image de couverture</Label>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => e.target.files?.[0] && setFormData({ ...formData, image: e.target.files[0] })}
-                  />
-                </div>
+                <ImageCropper
+                  label="Image de couverture"
+                  onImageReady={(file) => setFormData({ ...formData, image: file })}
+                />
               </div>
               <div className="flex gap-2">
                 <Button type="submit" disabled={uploading}>

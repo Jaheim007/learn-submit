@@ -28,6 +28,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { RichTextEditor, RichTextRenderer } from '@/components/ui/rich-text-editor';
+import ImageCropper from '@/components/ImageCropper';
 
 interface CourseMaterial {
   id: string;
@@ -330,19 +331,10 @@ export default function AdminCourses() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image">Image de couverture</Label>
-                <Input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="cursor-pointer"
-                />
-                {formData.image && (
-                  <p className="text-sm text-muted-foreground">{formData.image.name}</p>
-                )}
-              </div>
+              <ImageCropper
+                label="Image de couverture"
+                onImageReady={(file) => setFormData({ ...formData, image: file })}
+              />
 
               <div className="space-y-2">
                 <Label>Description</Label>
@@ -509,23 +501,11 @@ export default function AdminCourses() {
                 placeholder="Titre du cours"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-image">Nouvelle image (optionnel)</Label>
-              <Input
-                id="edit-image"
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    setEditFormData({ ...editFormData, image: e.target.files[0] });
-                  }
-                }}
-                className="cursor-pointer"
-              />
-              {editFormData.image && (
-                <p className="text-sm text-muted-foreground">{editFormData.image.name}</p>
-              )}
-            </div>
+            <ImageCropper
+              label="Nouvelle image (optionnel)"
+              currentImageUrl={editingMaterial?.image_url}
+              onImageReady={(file) => setEditFormData({ ...editFormData, image: file })}
+            />
             <div className="space-y-2">
               <Label>Description</Label>
               <RichTextEditor
