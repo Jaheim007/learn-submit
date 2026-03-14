@@ -49,8 +49,8 @@ export default function AdminEmails() {
   };
 
   const loadStudents = async () => {
-    const { data } = await supabase.from('students').select('id, email, full_name').eq('is_active', true).eq('status', 'active').order('full_name');
-    if (data) setStudents(data);
+    const { data } = await supabase.from('students').select('id, email, full_name').eq('is_active', true).eq('status', 'active').not('email', 'is', null).order('full_name');
+    if (data) setStudents(data.filter(s => s.email));
   };
 
   const addEmail = (email: string) => {
