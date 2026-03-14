@@ -16,6 +16,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useRefreshInterval } from '@/hooks/useRefreshInterval';
 import { RefreshHeader } from '@/components/admin/RefreshHeader';
+import ImageCropper from '@/components/ImageCropper';
 
 interface Project {
   id: number;
