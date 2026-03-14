@@ -345,13 +345,13 @@ export default function StudentProjects() {
 
                     {/* Mini Countdown - matching DeadlineCountdown style */}
                     {deadlineInfo && !deadlineInfo.expired && deadlineInfo.days <= 7 && (
-                      <div className={`rounded-xl p-3 ${
+                      <div className={`rounded-xl p-3 bg-gradient-to-br ${
                         deadlineInfo.urgent 
-                          ? 'bg-destructive/10 border border-destructive/30 animate-pulse' 
-                          : 'bg-emerald-500/10 border border-emerald-500/30'
+                          ? 'from-destructive/20 via-destructive/10 to-destructive/20 border border-destructive/50 animate-pulse' 
+                          : 'from-emerald-500/20 via-emerald-600/10 to-emerald-700/20 border border-emerald-500/50'
                       }`}>
-                        <p className={`text-[10px] font-semibold uppercase tracking-wider text-center mb-2 ${
-                          deadlineInfo.urgent ? 'text-destructive' : 'text-emerald-500'
+                        <p className={`text-[10px] font-medium uppercase tracking-wider text-center mb-2 ${
+                          deadlineInfo.urgent ? 'text-destructive' : 'text-emerald-600'
                         }`}>
                           ⏰ Temps restant
                         </p>
@@ -359,38 +359,27 @@ export default function StudentProjects() {
                           {[
                             { val: deadlineInfo.days, label: 'Jours' },
                             { val: deadlineInfo.hours, label: 'Heures' },
-                            { val: deadlineInfo.minutes, label: 'Min' },
+                            { val: deadlineInfo.minutes, label: 'Minutes' },
+                            { val: deadlineInfo.seconds, label: 'Secondes' },
                           ].map((unit) => (
                             <div key={unit.label} className="text-center">
-                              <div className={`bg-background/80 backdrop-blur-sm rounded-lg py-1.5 px-1 border ${
-                                deadlineInfo.urgent ? 'border-destructive/30 shadow-sm shadow-destructive/10' : 'border-emerald-500/30 shadow-sm shadow-emerald-500/10'
+                              <div className={`bg-background/80 backdrop-blur-sm rounded-lg py-1.5 px-1 border shadow-lg ${
+                                deadlineInfo.urgent ? 'border-destructive/30 shadow-destructive/20' : 'border-emerald-500/30 shadow-emerald-500/20'
                               }`}>
-                                <div className={`text-lg font-bold ${deadlineInfo.urgent ? 'text-destructive' : 'text-emerald-500'}`}>
+                                <div className={`text-lg font-bold ${deadlineInfo.urgent ? 'text-destructive' : 'text-emerald-600'}`}>
                                   {unit.val}
                                 </div>
-                                <div className={`text-[8px] uppercase tracking-wide font-semibold ${deadlineInfo.urgent ? 'text-destructive/70' : 'text-emerald-600/70'}`}>
+                                <div className={`text-[7px] uppercase tracking-wide font-semibold mt-0.5 ${deadlineInfo.urgent ? 'text-destructive/70' : 'text-emerald-700'}`}>
                                   {unit.label}
                                 </div>
                               </div>
                             </div>
                           ))}
-                          <div className="text-center">
-                            <div className={`bg-background/80 backdrop-blur-sm rounded-lg py-1.5 px-1 border ${
-                              deadlineInfo.urgent ? 'border-destructive/30 shadow-sm shadow-destructive/10' : 'border-emerald-500/30 shadow-sm shadow-emerald-500/10'
-                            }`}>
-                              <div className={`text-lg font-bold ${deadlineInfo.urgent ? 'text-destructive' : 'text-emerald-500'}`}>
-                                --
-                              </div>
-                              <div className={`text-[8px] uppercase tracking-wide font-semibold ${deadlineInfo.urgent ? 'text-destructive/70' : 'text-emerald-600/70'}`}>
-                                Sec
-                              </div>
-                            </div>
-                          </div>
                         </div>
                       </div>
                     )}
                     {deadlineInfo?.expired && (
-                      <div className="rounded-xl p-3 bg-destructive/10 border border-destructive/30 animate-pulse text-center">
+                      <div className="rounded-xl p-3 bg-gradient-to-br from-destructive/20 via-destructive/10 to-destructive/20 border border-destructive/50 animate-pulse text-center">
                         <p className="text-xs font-bold text-destructive uppercase tracking-wider">
                           ⚠️ Délai Expiré
                         </p>
