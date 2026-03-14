@@ -347,44 +347,77 @@ export default function AdminSubmissions() {
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
+  // Pagination state
+  const PAGE_SIZE = 50;
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+
   // Debounce search term
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(0); // Reset page on search
     }, 300);
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [selectedClass, selectedProject, selectedStatus, latestOnly]);
+
   const loadData = async () => {
     try {
+      // Build the query with filters applied server-side
+      let query = supabase
+        .from('submissions')
+        .select(`
+          id,
+          submitted_at,
+          status,
+          grade,
+          feedback,
+          version,
+          link1,
+          link2,
+          link3,
+          file1_url,
+          file2_url,
+          file3_url,
+          file_urls,
+          description,
+          is_latest,
+          student_id,
+          class_id,
+          project_id,
+          students!inner(id, full_name, email),
+          projects!inner(id, title),
+          classes!inner(id, code, title)
+        `, { count: 'exact' });
+
+      // Apply server-side filters
+      if (latestOnly) {
+        query = query.eq('is_latest', true);
+      }
+      if (selectedClass !== 'all') {
+        query = query.eq('class_id', parseInt(selectedClass));
+      }
+      if (selectedProject !== 'all') {
+        query = query.eq('project_id', parseInt(selectedProject));
+      }
+      if (selectedStatus !== 'all') {
+        const dbStatus = statusMap[selectedStatus];
+        if (dbStatus) query = query.eq('status', dbStatus);
+      }
+
+      // Apply pagination
+      const from = currentPage * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
       const [submissionsResponse, classesResponse, projectsResponse] = await Promise.all([
-        supabase
-          .from('submissions')
-          .select(`
-            id,
-            submitted_at,
-            status,
-            grade,
-            feedback,
-            version,
-            link1,
-            link2,
-            link3,
-            file1_url,
-            file2_url,
-            file3_url,
-            file_urls,
-            description,
-            is_latest,
-            student_id,
-            class_id,
-            project_id,
-            students!inner(id, full_name, email),
-            projects!inner(id, title),
-            classes!inner(id, code, title)
-          `)
-          .eq('is_latest', latestOnly)
-          .order('submitted_at', { ascending: false }),
+        query
+          .order('submitted_at', { ascending: false })
+          .range(from, to),
         
         supabase
           .from('classes')
@@ -402,16 +435,19 @@ export default function AdminSubmissions() {
       if (classesResponse.data) setClasses(classesResponse.data);
       if (projectsResponse.data) setProjects(projectsResponse.data);
 
+      if (submissionsResponse.count !== null) {
+        setTotalCount(submissionsResponse.count);
+      }
+
       if (submissionsResponse.data) {
         const formattedSubmissions = submissionsResponse.data.map((sub: any) => ({
           id: sub.id,
           submitted_at: sub.submitted_at,
-          status: reverseStatusMap[sub.status] || sub.status, // Convert English to French for display
+          status: reverseStatusMap[sub.status] || sub.status,
           grade: sub.grade,
           feedback: sub.feedback,
           version: sub.version,
           links: [sub.link1, sub.link2, sub.link3].filter(Boolean),
-          // Prefer file_urls array (unlimited), fallback to legacy columns
           files: (sub.file_urls && sub.file_urls.length > 0)
             ? sub.file_urls
             : [sub.file1_url, sub.file2_url, sub.file3_url].filter(Boolean),
@@ -431,17 +467,14 @@ export default function AdminSubmissions() {
     }
   };
 
-  // Initial load only
+  // Reload when page or filters change
   useEffect(() => {
     loadData();
-  }, []);
-
-  // Reload only when latestOnly changes
-  useEffect(() => {
-    if (!loading) loadData();
-  }, [latestOnly]);
+  }, [currentPage, selectedClass, selectedProject, selectedStatus, latestOnly]);
 
   const { lastRefreshTime, refresh } = useRefreshInterval(loadData);
+
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   const updateSubmission = async (submissionId: string, updates: { status?: string; grade?: number; feedback?: string }) => {
     try {
