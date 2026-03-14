@@ -356,10 +356,10 @@ const Landing = () => {
             <div className="bg-card rounded-2xl border border-border p-6 sm:p-8 shadow-custom">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {[
-                  { label: 'Projets soumis', value: '1,200+', icon: Upload },
-                  { label: 'Étudiants actifs', value: '340+', icon: Users },
-                  { label: 'Taux de validation', value: '94%', icon: CheckCircle },
-                  { label: 'Cours disponibles', value: '25+', icon: BookOpen },
+                  { label: 'Projets soumis', value: stats?.submissionsCount ?? '...', icon: Upload },
+                  { label: 'Étudiants actifs', value: stats?.studentsCount ?? '...', icon: Users },
+                  { label: 'Taux de validation', value: stats?.validationRate ?? '...', icon: CheckCircle },
+                  { label: 'Cours disponibles', value: stats?.coursesCount ?? '...', icon: BookOpen },
                 ].map((stat, i) => (
                   <motion.div 
                     key={i} 
