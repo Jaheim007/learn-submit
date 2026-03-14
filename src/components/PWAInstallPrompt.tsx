@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Download, X, Smartphone } from 'lucide-react';
+import { Download, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import kelyaIcon from '@/assets/kelya-icon-white.png';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
