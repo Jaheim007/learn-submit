@@ -12,30 +12,21 @@ serve(async (req) => {
   }
 
   try {
+    // Use service role directly - this is a one-time admin utility
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Verify caller is admin
-    const authClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
-    );
-    const { data: { user } } = await authClient.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
-
-    const { data: adminRole } = await supabaseAdmin
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('role', 'admin')
-      .maybeSingle();
-    if (!adminRole) throw new Error('Not admin');
+    // Verify with secret token
+    const { secret } = await req.json().catch(() => ({}));
+    const adminToken = Deno.env.get('ADMIN_CLAIM_TOKEN');
+    if (secret !== adminToken) {
+      throw new Error('Unauthorized');
+    }
 
     // Find auth users without student records and without staff roles
-    const { data: allUsers } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+    const { data: allUsersPage } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
     
     const { data: existingStudents } = await supabaseAdmin
       .from('students')
@@ -44,18 +35,19 @@ serve(async (req) => {
 
     const { data: staffRoles } = await supabaseAdmin
       .from('user_roles')
-      .select('user_id, role')
+      .select('user_id')
       .in('role', ['admin', 'academy', 'supervisor', 'teacher']);
     const staffUserIds = new Set((staffRoles || []).map(r => r.user_id));
 
-    // Filter to test-like emails to exclude
-    const excludePatterns = ['@nys-africa.com', 'student@gmail.com', 'joson@gmail.com', 'hadi@gmail.com', 'phil@gmail.com', 'fire@gmail.com', 'in@gmail.com', 'hey@gmail.com', 'assit@gmail.com'];
+    const excludePatterns = ['@nys-africa.com'];
+    const excludeExact = ['student@gmail.com', 'joson@gmail.com', 'hadi@gmail.com', 'phil@gmail.com', 'fire@gmail.com', 'in@gmail.com', 'hey@gmail.com', 'assit@gmail.com', 'jaheimkoouaho@gmail.com'];
 
-    const missingUsers = (allUsers?.users || []).filter(u => {
+    const missingUsers = (allUsersPage?.users || []).filter(u => {
       if (existingUserIds.has(u.id)) return false;
       if (staffUserIds.has(u.id)) return false;
       const email = u.email || '';
-      if (excludePatterns.some(p => email.includes(p) || email === p)) return false;
+      if (excludePatterns.some(p => email.endsWith(p))) return false;
+      if (excludeExact.includes(email)) return false;
       return true;
     });
 
@@ -79,7 +71,6 @@ serve(async (req) => {
 
       if (!error && data) {
         created.push(data);
-        // Also assign student role
         await supabaseAdmin.from('user_roles').upsert(
           { user_id: u.id, role: 'student' },
           { onConflict: 'user_id,role' }
