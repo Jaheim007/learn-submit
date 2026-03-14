@@ -51,6 +51,8 @@ export default function AdminStudents() {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [changeClassOpen, setChangeClassOpen] = useState(false);
   const [studentToChangeClass, setStudentToChangeClass] = useState<Student | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 50;
 
   // Debounce search term
   useEffect(() => {
