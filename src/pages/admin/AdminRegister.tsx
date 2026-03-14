@@ -123,7 +123,7 @@ export default function AdminRegister() {
           <div className="pt-4 text-center">
             <Button
               variant="default"
-              onClick={() => navigate('/admin/login')}
+              onClick={() => navigate('/auth')}
               className="w-full"
             >
               Retour à la connexion

@@ -110,7 +110,9 @@ const App = () => (
               <Route path="/etudiant/cours" element={<StudentGuard><StudentCourses /></StudentGuard>} />
               <Route path="/etudiant/cours/:courseId" element={<StudentGuard><CourseDetail /></StudentGuard>} />
 
-              {/* Admin auth routes removed - admin access via sidebar only */}
+              {/* Legacy admin auth URLs redirected to unified auth */}
+              <Route path="/admin/login" element={<Navigate to="/auth" replace />} />
+              <Route path="/admin/register" element={<Navigate to="/auth" replace />} />
               
               {/* Admin dashboard routes */}
               <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
