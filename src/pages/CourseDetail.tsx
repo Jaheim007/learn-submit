@@ -174,7 +174,7 @@ export default function CourseDetail() {
 
         {/* Course Image Hero */}
         {course.image_url && (
-          <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden border border-border/50 bg-gradient-to-br from-primary/5 to-secondary/5">
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-border/50 bg-gradient-to-br from-primary/5 to-secondary/5">
             <img 
               src={course.image_url} 
               alt={course.title}

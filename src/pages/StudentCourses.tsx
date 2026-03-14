@@ -134,7 +134,7 @@ export default function StudentCourses() {
               >
                 {/* Course Image */}
                 {course.image_url && (
-                  <div className="relative w-full h-48 overflow-hidden">
+                  <div className="relative w-full aspect-video overflow-hidden">
                     <img 
                       src={course.image_url} 
                       alt={course.title}
