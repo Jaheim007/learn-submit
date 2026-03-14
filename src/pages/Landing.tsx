@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle, Upload, BookOpen, BarChart3, Shield, Clock, Users, ChevronRight, LogIn, UserPlus, Zap, Award, MessageSquare, Globe, ChevronLeft, FileText, TrendingUp, Bell, Moon, Sun } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
-import { usePlatformStats } from '@/hooks/usePlatformStats';
+
 import kelyaLogo from '@/assets/kelya-logo-dark.png';
 import hacktualzLogo from '@/assets/hacktualiz-logo-light.png';
 
@@ -242,7 +242,8 @@ const PlatformSlider = () => {
 
 const Landing = () => {
   const navigate = useNavigate();
-  const { data: stats } = usePlatformStats();
+  // Curated showcase values for the public landing page (RLS blocks anon reads)
+  const stats = { submissionsCount: '1,200+', studentsCount: '350+', validationRate: '94%', coursesCount: '45+' };
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
 
   const toggleDarkMode = () => {
