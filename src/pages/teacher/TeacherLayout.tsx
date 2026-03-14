@@ -22,9 +22,11 @@ export default function TeacherLayout() {
   const navItems = [
     { path: '/teacher', label: 'Tableau de bord', icon: BarChart3 },
     { path: '/teacher/students', label: 'Étudiants', icon: Users },
+    { path: '/teacher/projects', label: 'Projets', icon: FolderOpen },
     { path: '/teacher/submissions', label: 'Soumissions', icon: FileText },
     { path: '/teacher/courses', label: 'Cours', icon: BookOpen },
     { path: '/teacher/messages', label: 'Messages', icon: MessageSquare },
+    { path: '/teacher/profile', label: 'Mon Compte', icon: User },
   ];
 
   const currentLabel = navItems.find(item => location.pathname === item.path)?.label || 'Formateur';

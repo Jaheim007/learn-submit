@@ -150,9 +150,11 @@ const App = () => (
               <Route path="/teacher" element={<TeacherGuard><TeacherLayout /></TeacherGuard>}>
                 <Route index element={<TeacherHome />} />
                 <Route path="students" element={<TeacherStudents />} />
+                <Route path="projects" element={<TeacherProjects />} />
                 <Route path="submissions" element={<SupervisorSubmissions />} />
                 <Route path="courses" element={<TeacherCourses />} />
                 <Route path="messages" element={<TeacherMessages />} />
+                <Route path="profile" element={<TeacherProfile />} />
               </Route>
               
               <Route path="/superviseur" element={<SupervisorDashboard />} />
