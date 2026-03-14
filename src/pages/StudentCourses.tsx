@@ -163,9 +163,10 @@ export default function StudentCourses() {
                   </div>
 
                   {course.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {course.description}
-                    </p>
+                    <div 
+                      className="text-sm text-muted-foreground line-clamp-2 [&_*]:!m-0 [&_*]:!p-0 [&_*]:!inline"
+                      dangerouslySetInnerHTML={{ __html: course.description }}
+                    />
                   )}
 
                   <div className="flex items-center gap-2 pt-2">
