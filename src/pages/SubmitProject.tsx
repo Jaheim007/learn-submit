@@ -129,14 +129,54 @@ export default function SubmitProject() {
   const MAX_FILE_SIZE_MB = 50;
   const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
+  // Allowed file extensions
+  const ALLOWED_EXTENSIONS = new Set([
+    // Documents
+    'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'odt', 'ods', 'odp', 'txt', 'rtf', 'csv',
+    // Images
+    'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico',
+    // Archives
+    'zip', 'rar', '7z', 'tar', 'gz',
+    // Code / Dev
+    'html', 'css', 'js', 'ts', 'jsx', 'tsx', 'json', 'xml', 'yaml', 'yml', 'md', 'py', 'java', 'c', 'cpp', 'h', 'sql',
+    // Design
+    'fig', 'sketch', 'xd', 'psd', 'ai',
+    // Video / Audio
+    'mp4', 'mov', 'avi', 'mkv', 'mp3', 'wav', 'm4a',
+  ]);
+
+  const getFileExtension = (filename: string): string => {
+    const dot = filename.lastIndexOf('.');
+    return dot > -1 ? filename.slice(dot + 1).toLowerCase() : '';
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
+
+    // Check file types
+    const invalidType = selectedFiles.filter(f => !ALLOWED_EXTENSIONS.has(getFileExtension(f.name)));
+    if (invalidType.length > 0) {
+      toast.error(
+        `Type de fichier non autorisé : ${invalidType.map(f => f.name).join(', ')}. Formats acceptés : documents, images, archives, code, média.`
+      );
+      const validTypeFiles = selectedFiles.filter(f => ALLOWED_EXTENSIONS.has(getFileExtension(f.name)));
+      if (validTypeFiles.length === 0) return;
+      // Continue with valid-type files only
+      const oversized = validTypeFiles.filter(f => f.size > MAX_FILE_SIZE_BYTES);
+      if (oversized.length > 0) {
+        toast.error(`Fichier(s) trop volumineux : ${oversized.map(f => f.name).join(', ')}. Taille max : ${MAX_FILE_SIZE_MB} MB.`);
+      }
+      const validFiles = validTypeFiles.filter(f => f.size <= MAX_FILE_SIZE_BYTES);
+      if (validFiles.length > 0) setFiles([...files, ...validFiles]);
+      return;
+    }
+
+    // Check file sizes
     const oversized = selectedFiles.filter(f => f.size > MAX_FILE_SIZE_BYTES);
     if (oversized.length > 0) {
       toast.error(
         `Fichier(s) trop volumineux : ${oversized.map(f => f.name).join(', ')}. Taille max : ${MAX_FILE_SIZE_MB} MB.`
       );
-      // Only add files that are within limit
       const validFiles = selectedFiles.filter(f => f.size <= MAX_FILE_SIZE_BYTES);
       if (validFiles.length > 0) setFiles([...files, ...validFiles]);
       return;
