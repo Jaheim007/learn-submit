@@ -242,7 +242,7 @@ export default function AdminStudents() {
   // Reset page when filters change
   useEffect(() => { setCurrentPage(1); }, [debouncedSearchTerm, selectedClass, showInactive]);
 
-  const filteredStudents = getFilteredStudents;
+  const filteredStudents = paginatedStudents;
 
   if (loading) {
     return (
