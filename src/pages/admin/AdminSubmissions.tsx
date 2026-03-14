@@ -730,6 +730,35 @@ export default function AdminSubmissions() {
         </CardContent>
       </Card>
 
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Affichage {currentPage * PAGE_SIZE + 1}–{Math.min((currentPage + 1) * PAGE_SIZE, totalCount)} sur {totalCount}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage === 0}
+              onClick={() => setCurrentPage(p => p - 1)}
+            >
+              Précédent
+            </Button>
+            <span className="text-sm font-medium px-2">
+              {currentPage + 1} / {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage >= totalPages - 1}
+              onClick={() => setCurrentPage(p => p + 1)}
+            >
+              Suivant
+            </Button>
+          </div>
+        </div>
+      )}
       <ReviewModal
         submission={selectedSubmission}
         isOpen={isReviewModalOpen}
