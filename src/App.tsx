@@ -97,6 +97,7 @@ const App = () => (
           <ConditionalClassSelectionProvider>
             <Toaster />
             <Sonner />
+            <PWAInstallPrompt />
             <Suspense fallback={<LoadingScreen />}>
             <Routes>
               <Route path="/" element={<Landing />} />
