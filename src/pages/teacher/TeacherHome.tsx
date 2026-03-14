@@ -202,7 +202,7 @@ export default function TeacherHome() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/teacher/submissions')}>
           <CardContent className="pt-6 text-center">
             <FileText className="h-8 w-8 mx-auto text-primary mb-2" />
@@ -215,6 +215,13 @@ export default function TeacherHome() {
             <Users className="h-8 w-8 mx-auto text-primary mb-2" />
             <p className="font-medium text-sm">Voir les étudiants</p>
             <p className="text-xs text-muted-foreground mt-1">{stats.myStudents} étudiants actifs</p>
+          </CardContent>
+        </Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/teacher/projects')}>
+          <CardContent className="pt-6 text-center">
+            <FolderOpen className="h-8 w-8 mx-auto text-primary mb-2" />
+            <p className="font-medium text-sm">Gérer les projets</p>
+            <p className="text-xs text-muted-foreground mt-1">Créer & assigner</p>
           </CardContent>
         </Card>
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/teacher/courses')}>
