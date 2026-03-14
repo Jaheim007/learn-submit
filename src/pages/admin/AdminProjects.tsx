@@ -370,13 +370,12 @@ export default function AdminProjects() {
       </div>
 
       <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
+        <Label>Description</Label>
+        <RichTextEditor
           value={formData.description}
-          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          onChange={(val) => setFormData(prev => ({ ...prev, description: val }))}
           placeholder="Description du projet (optionnel)"
-          rows={4}
+          minHeight="120px"
         />
       </div>
 
