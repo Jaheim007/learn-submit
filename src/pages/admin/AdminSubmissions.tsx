@@ -536,36 +536,16 @@ export default function AdminSubmissions() {
     }
   };
 
-  const getFilteredSubmissions = useMemo(() => {
-    return submissions.filter(submission => {
-      // Search filter
-      if (debouncedSearchTerm) {
-        const searchLower = debouncedSearchTerm.toLowerCase();
-        if (!submission.student.full_name.toLowerCase().includes(searchLower) &&
-            !submission.student.email.toLowerCase().includes(searchLower) &&
-            !submission.project.title.toLowerCase().includes(searchLower)) {
-          return false;
-        }
-      }
-      
-      // Class filter
-      if (selectedClass !== 'all' && submission.class.id.toString() !== selectedClass) {
-        return false;
-      }
-      
-      // Project filter
-      if (selectedProject !== 'all' && submission.project.id.toString() !== selectedProject) {
-        return false;
-      }
-      
-      // Status filter
-      if (selectedStatus !== 'all' && submission.status !== selectedStatus) {
-        return false;
-      }
-      
-      return true;
-    });
-  }, [submissions, debouncedSearchTerm, selectedClass, selectedProject, selectedStatus]);
+  // Client-side search filter only (class/project/status filters are now server-side)
+  const filteredSubmissions = useMemo(() => {
+    if (!debouncedSearchTerm) return submissions;
+    const searchLower = debouncedSearchTerm.toLowerCase();
+    return submissions.filter(submission =>
+      submission.student.full_name?.toLowerCase().includes(searchLower) ||
+      submission.student.email?.toLowerCase().includes(searchLower) ||
+      submission.project.title?.toLowerCase().includes(searchLower)
+    );
+  }, [submissions, debouncedSearchTerm]);
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -577,9 +557,7 @@ export default function AdminSubmissions() {
     }
   };
 
-  const filteredSubmissions = getFilteredSubmissions;
-
-  if (loading) {
+  if (loading && currentPage === 0) {
     return (
       <div className="space-y-6">
         <div className="animate-pulse">
@@ -592,11 +570,12 @@ export default function AdminSubmissions() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Révision des soumissions</h1>
-          <p className="text-muted-foreground">
-            {filteredSubmissions.length} soumission{filteredSubmissions.length > 1 ? 's' : ''} trouvée{filteredSubmissions.length > 1 ? 's' : ''}
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Révision des soumissions</h1>
+          <p className="text-muted-foreground text-sm">
+            {totalCount} soumission{totalCount > 1 ? 's' : ''} au total
+            {totalPages > 1 && ` — Page ${currentPage + 1}/${totalPages}`}
           </p>
         </div>
         <RefreshHeader 
