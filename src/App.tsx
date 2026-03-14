@@ -100,7 +100,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/old-home" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
+              <Route path="/auth" element={<Navigate to="/etudiant/login" replace />} />
               <Route path="/auth-redirect" element={<AuthRedirect />} />
               
               {/* Student setup and auth routes */}
