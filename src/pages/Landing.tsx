@@ -242,6 +242,7 @@ const PlatformSlider = () => {
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { data: stats } = usePlatformStats();
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
 
   const toggleDarkMode = () => {
