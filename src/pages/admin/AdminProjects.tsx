@@ -173,10 +173,6 @@ export default function AdminProjects() {
       image_url: project.image_url || '',
     });
     
-    if (project.image_url) {
-      setImagePreview(project.image_url);
-    }
-    
     setIsEditDialogOpen(true);
   };
 
