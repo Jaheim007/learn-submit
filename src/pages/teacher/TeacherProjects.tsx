@@ -223,7 +223,9 @@ export default function TeacherProjects() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {project.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
+                  <div className="line-clamp-2">
+                    <RichTextRenderer content={project.description} className="text-muted-foreground [&_p]:!mb-0" />
+                  </div>
                 )}
                 <div className="flex flex-wrap gap-1.5">
                   {project.classNames.map(cn => (
