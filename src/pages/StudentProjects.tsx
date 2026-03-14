@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
-import { RichTextRenderer } from '@/components/ui/rich-text-editor';
+
 
 interface StudentClass {
   id: number;
@@ -331,9 +331,9 @@ export default function StudentProjects() {
                         {project.title}
                       </h3>
                       {project.description && (
-                        <div className="text-xs text-muted-foreground line-clamp-2 mt-1.5 leading-relaxed [&_*]:!m-0 [&_*]:!p-0 [&_*]:!inline">
-                          <RichTextRenderer content={project.description} className="[&_p]:!mb-0 [&_h2]:!text-xs [&_h2]:!inline" />
-                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1.5 leading-relaxed">
+                          {project.description.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}
+                        </p>
                       )}
                     </div>
 
@@ -342,21 +342,58 @@ export default function StudentProjects() {
                       <StatusBadge status={project.latest_submission.status} />
                     )}
 
-                    {/* Mini Countdown - heart beating urgency */}
-                    {deadlineInfo && !deadlineInfo.expired && deadlineInfo.days <= 3 && (
-                      <div className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold ${
+                    {/* Mini Countdown - matching DeadlineCountdown style */}
+                    {deadlineInfo && !deadlineInfo.expired && deadlineInfo.days <= 7 && (
+                      <div className={`rounded-xl p-3 ${
                         deadlineInfo.urgent 
-                          ? 'bg-destructive/10 text-destructive animate-pulse border border-destructive/20' 
-                          : 'bg-warning/10 text-warning border border-warning/20'
+                          ? 'bg-destructive/10 border border-destructive/30 animate-pulse' 
+                          : 'bg-emerald-500/10 border border-emerald-500/30'
                       }`}>
-                        <span className="text-base">⏰</span>
-                        <span>{deadlineInfo.days}j {deadlineInfo.hours}h {deadlineInfo.minutes}min</span>
+                        <p className={`text-[10px] font-semibold uppercase tracking-wider text-center mb-2 ${
+                          deadlineInfo.urgent ? 'text-destructive' : 'text-emerald-500'
+                        }`}>
+                          ⏰ Temps restant
+                        </p>
+                        <div className="grid grid-cols-4 gap-1.5">
+                          {[
+                            { val: deadlineInfo.days, label: 'Jours' },
+                            { val: deadlineInfo.hours, label: 'Heures' },
+                            { val: deadlineInfo.minutes, label: 'Min' },
+                          ].map((unit) => (
+                            <div key={unit.label} className="text-center">
+                              <div className={`bg-background/80 backdrop-blur-sm rounded-lg py-1.5 px-1 border ${
+                                deadlineInfo.urgent ? 'border-destructive/30 shadow-sm shadow-destructive/10' : 'border-emerald-500/30 shadow-sm shadow-emerald-500/10'
+                              }`}>
+                                <div className={`text-lg font-bold ${deadlineInfo.urgent ? 'text-destructive' : 'text-emerald-500'}`}>
+                                  {unit.val}
+                                </div>
+                                <div className={`text-[8px] uppercase tracking-wide font-semibold ${deadlineInfo.urgent ? 'text-destructive/70' : 'text-emerald-600/70'}`}>
+                                  {unit.label}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          <div className="text-center">
+                            <div className={`bg-background/80 backdrop-blur-sm rounded-lg py-1.5 px-1 border ${
+                              deadlineInfo.urgent ? 'border-destructive/30 shadow-sm shadow-destructive/10' : 'border-emerald-500/30 shadow-sm shadow-emerald-500/10'
+                            }`}>
+                              <div className={`text-lg font-bold ${deadlineInfo.urgent ? 'text-destructive' : 'text-emerald-500'}`}>
+                                --
+                              </div>
+                              <div className={`text-[8px] uppercase tracking-wide font-semibold ${deadlineInfo.urgent ? 'text-destructive/70' : 'text-emerald-600/70'}`}>
+                                Sec
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
                     {deadlineInfo?.expired && (
-                      <div className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold bg-destructive/10 text-destructive border border-destructive/20 animate-pulse">
-                        <span className="text-base">⚠️</span>
-                        <span>Délai expiré</span>
+                      <div className="rounded-xl p-3 bg-destructive/10 border border-destructive/30 animate-pulse text-center">
+                        <p className="text-xs font-bold text-destructive uppercase tracking-wider">
+                          ⚠️ Délai Expiré
+                        </p>
+                        <p className="text-[10px] text-destructive/70 font-semibold mt-1">Le temps de soumission est écoulé</p>
                       </div>
                     )}
 
