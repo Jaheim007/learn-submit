@@ -96,6 +96,7 @@ const App = () => (
           <ConditionalClassSelectionProvider>
             <Toaster />
             <Sonner />
+            <Suspense fallback={<LoadingScreen />}>
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/old-home" element={<Index />} />
