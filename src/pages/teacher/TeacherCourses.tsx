@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { sanitizeStorageKey } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
