@@ -12,22 +12,37 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseClient.auth.getUser();
+    // Try to get user from auth header first
+    let user = null;
+    const authHeader = req.headers.get('Authorization');
+    
+    if (authHeader) {
+      const authClient = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      const { data: { user: authUser } } = await authClient.auth.getUser();
+      user = authUser;
+    }
 
-    if (userError || !user) {
+    // Fallback: check if user_id was passed in body (from StudentGuard)
+    if (!user) {
+      try {
+        const body = await req.json();
+        if (body?.user_id) {
+          const { data: { user: adminUser } } = await supabaseAdmin.auth.admin.getUserById(body.user_id);
+          user = adminUser;
+        }
+      } catch {}
+    }
+
+    if (!user) {
       throw new Error('User not authenticated');
     }
 
