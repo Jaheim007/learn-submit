@@ -81,6 +81,7 @@ const queryClient = new QueryClient({
 });
 
 const App = () => (
+  <ErrorBoundary>
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
       <AuthProvider>
