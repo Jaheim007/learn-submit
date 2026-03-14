@@ -202,7 +202,7 @@ export default function AdminEmails() {
                     <div className="space-y-2">
                       <Label>Destinataires</Label>
                       <div className="flex gap-2">
-                        <Select key={studentSelectKey} onValueChange={(val) => addStudentEmail(val)} value="">
+                        <Select key={studentSelectKey} onValueChange={(val) => addStudentEmail(val)}>
                           <SelectTrigger className="flex-1">
                             <SelectValue placeholder="Sélectionner un étudiant..." />
                           </SelectTrigger>
