@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
+import ImageCropper from '@/components/ImageCropper';
 import { Plus, FolderOpen, Calendar, Users, FileText, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
@@ -47,6 +48,7 @@ export default function TeacherProjects() {
     max_resubmits: 1,
     class_ids: [] as number[],
   });
+  const [projectImage, setProjectImage] = useState<File | null>(null);
 
   useEffect(() => {
     if (user) loadData();
@@ -284,6 +286,11 @@ export default function TeacherProjects() {
                 onChange={e => setForm({ ...form, deadline_at: e.target.value })}
               />
             </div>
+            <ImageCropper
+              label="Image du projet (optionnel)"
+              onImageReady={setProjectImage}
+              aspectRatio={16 / 9}
+            />
             <div className="space-y-2">
               <Label>Classes assignées *</Label>
               <div className="flex flex-wrap gap-2">
