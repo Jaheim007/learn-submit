@@ -130,16 +130,17 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:flex fixed inset-y-0 left-0 w-[220px] bg-card border-r border-border flex-col z-30">
+      {/* Desktop Sidebar - Hidden on mobile */}
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[220px] bg-card border-r border-border flex-col z-30">
         <SidebarContent />
-      </div>
+      </aside>
 
-      {/* Mobile Overlay */}
+      {/* Mobile Drawer Overlay */}
       {sidebarOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)}>
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
           <aside
-            className="w-[260px] h-full bg-card flex flex-col shadow-xl relative"
+            className="absolute left-0 top-0 bottom-0 w-[260px] bg-card flex flex-col shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <button
