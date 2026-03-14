@@ -396,9 +396,7 @@ export default function SubmitProject() {
             </CardHeader>
             <CardContent className="pt-6">
               <div className="prose dark:prose-invert max-w-none">
-                <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed text-lg">
-                  {project.description}
-                </p>
+                <RichTextRenderer content={project.description} className="text-muted-foreground leading-relaxed text-base" />
               </div>
             </CardContent>
           </Card>
