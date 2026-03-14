@@ -28,6 +28,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { RichTextEditor, RichTextRenderer } from '@/components/ui/rich-text-editor';
+import ImageCropper from '@/components/ImageCropper';
 
 interface CourseMaterial {
   id: string;
