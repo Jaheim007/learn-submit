@@ -80,6 +80,36 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Prevent deleting or demoting the last admin account
+    const { data: targetAdminRole } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', target_user_id)
+      .eq('role', 'admin')
+      .maybeSingle();
+
+    if (targetAdminRole && (delete_account || role === 'admin')) {
+      const { count: adminCount, error: adminCountError } = await supabaseAdmin
+        .from('user_roles')
+        .select('user_id', { count: 'exact', head: true })
+        .eq('role', 'admin');
+
+      if (adminCountError) {
+        console.error('Error counting admins:', adminCountError);
+        return new Response(JSON.stringify({ error: 'Failed to validate admin safety check' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      if ((adminCount ?? 0) <= 1) {
+        return new Response(JSON.stringify({ error: 'Cannot remove the last admin account' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
     if (delete_account) {
       // Full account deletion: remove all related data then the auth user
       console.log(`Full account deletion for user: ${target_user_id}`);

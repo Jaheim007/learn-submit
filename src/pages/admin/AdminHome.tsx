@@ -82,6 +82,22 @@ export default function AdminHome() {
           .order('created_at', { ascending: false }).limit(4)
       ]);
 
+      const queryErrors = [
+        studentsCount.error,
+        pendingCount.error,
+        submissionsToday.error,
+        pendingReviews.error,
+        upcomingDeadlines.error,
+        classesCount.error,
+        recentSubs.error,
+        recentProjs.error,
+      ].filter(Boolean);
+
+      if (queryErrors.length > 0) {
+        console.error('Admin dashboard query errors:', queryErrors);
+        throw queryErrors[0];
+      }
+
       setStats({
         totalStudents: studentsCount.count || 0,
         pendingStudents: pendingCount.count || 0,
