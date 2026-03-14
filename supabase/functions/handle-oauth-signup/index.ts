@@ -48,10 +48,7 @@ serve(async (req) => {
 
     console.log('Processing OAuth signup for user:', user.id);
 
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // supabaseAdmin already created above
 
     // Check if user already has a pre-assigned role (admin, academy, supervisor, teacher)
     const { data: existingRoles } = await supabaseAdmin
