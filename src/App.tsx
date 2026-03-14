@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ConditionalClassSelectionProvider } from "@/components/ConditionalClassSelectionProvider";
 
@@ -88,6 +88,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/old-home" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
               <Route path="/auth-redirect" element={<AuthRedirect />} />
               
               {/* Student setup and auth routes */}
@@ -109,7 +110,9 @@ const App = () => (
               <Route path="/etudiant/cours" element={<StudentGuard><StudentCourses /></StudentGuard>} />
               <Route path="/etudiant/cours/:courseId" element={<StudentGuard><CourseDetail /></StudentGuard>} />
 
-              {/* Admin auth routes removed - admin access via sidebar only */}
+              {/* Legacy admin auth URLs redirected to unified auth */}
+              <Route path="/admin/login" element={<Navigate to="/auth" replace />} />
+              <Route path="/admin/register" element={<Navigate to="/auth" replace />} />
               
               {/* Admin dashboard routes */}
               <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
