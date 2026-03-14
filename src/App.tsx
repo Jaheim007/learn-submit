@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ConditionalClassSelectionProvider } from "@/components/ConditionalClassSelectionProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 
 // Guards are kept eager (small + needed immediately)
 import StudentGuard from "./components/StudentGuard";
@@ -96,6 +97,7 @@ const App = () => (
           <ConditionalClassSelectionProvider>
             <Toaster />
             <Sonner />
+            <PWAInstallPrompt />
             <Suspense fallback={<LoadingScreen />}>
             <Routes>
               <Route path="/" element={<Landing />} />
