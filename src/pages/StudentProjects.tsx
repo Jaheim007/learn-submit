@@ -168,13 +168,14 @@ export default function StudentProjects() {
     const deadline = project.deadline_at || project.due_at;
     if (!deadline) return null;
     const diff = new Date(deadline).getTime() - Date.now();
-    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
     const minutes = Math.floor((diff / 1000 / 60) % 60);
-    if (diff <= 0) return { label: 'Expiré', urgent: true, days: 0, hours: 0, minutes: 0, expired: true };
-    if (days <= 2) return { label: `${days}j ${hours}h`, urgent: true, days, hours, minutes, expired: false };
-    if (days <= 7) return { label: `${days} jours`, urgent: false, days, hours, minutes, expired: false };
-    return { label: new Date(deadline).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }), urgent: false, days, hours, minutes, expired: false };
+    const seconds = Math.floor((diff / 1000) % 60);
+    if (diff <= 0) return { label: 'Expiré', urgent: true, days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
+    if (days <= 2) return { label: `${days}j ${hours}h`, urgent: true, days, hours, minutes, seconds, expired: false };
+    if (days <= 7) return { label: `${days} jours`, urgent: false, days, hours, minutes, seconds, expired: false };
+    return { label: new Date(deadline).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }), urgent: false, days, hours, minutes, seconds, expired: false };
   };
 
   if (loading || authLoading || loadingProjects) return <LoadingScreen />;
