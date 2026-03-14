@@ -205,11 +205,10 @@ export default function CourseDetail() {
             </div>
 
             {course.description && (
-              <div className="prose prose-sm max-w-none">
-                <p className="text-muted-foreground leading-relaxed">
-                  {course.description}
-                </p>
-              </div>
+              <div 
+                className="prose prose-sm max-w-none dark:prose-invert text-muted-foreground leading-relaxed [&_p]:mb-3 [&_strong]:text-foreground [&_a]:text-primary"
+                dangerouslySetInnerHTML={{ __html: course.description }}
+              />
             )}
           </CardContent>
         </Card>
