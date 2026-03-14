@@ -257,22 +257,23 @@ export default function AdminStudents() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Gestion des étudiants</h1>
-          <p className="text-muted-foreground">
-            {filteredStudents.length} étudiant{filteredStudents.length > 1 ? 's' : ''} trouvé{filteredStudents.length > 1 ? 's' : ''}
+          <h1 className="text-xl sm:text-3xl font-bold text-foreground">Gestion des étudiants</h1>
+          <p className="text-sm text-muted-foreground">
+            {getFilteredStudents.length} étudiant{getFilteredStudents.length > 1 ? 's' : ''} trouvé{getFilteredStudents.length > 1 ? 's' : ''}
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
           <RefreshHeader 
             lastRefreshTime={lastRefreshTime} 
             onRefresh={refresh}
             isRefreshing={loading}
           />
-          <Button onClick={exportToCSV} variant="outline">
+          <Button onClick={exportToCSV} variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
-            Exporter CSV
+            <span className="hidden sm:inline">Exporter CSV</span>
+            <span className="sm:hidden">CSV</span>
           </Button>
         </div>
       </div>
