@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { sanitizeStorageKey } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -110,7 +111,8 @@ export default function TeacherCourses() {
       for (const file of formData.files) {
         const timestamp = Date.now();
         const fileExt = file.name.split('.').pop();
-        const uniqueFileName = `${file.name.replace(/\.[^/.]+$/, '')}_${timestamp}.${fileExt}`;
+        const safeName = sanitizeStorageKey(file.name.replace(/\.[^/.]+$/, ''));
+        const uniqueFileName = `${safeName}_${timestamp}.${fileExt}`;
         const filePath = `${formData.class_id}/${uniqueFileName}`;
 
         const { error: uploadError } = await supabase.storage

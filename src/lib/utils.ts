@@ -25,3 +25,17 @@ export function generateUniqueCode(name: string): string {
   
   return `${prefix}${suffix}`;
 }
+
+/**
+ * Sanitize a filename for Supabase Storage keys.
+ * Removes accents, special chars, quotes, and replaces spaces with underscores.
+ */
+export function sanitizeStorageKey(filename: string): string {
+  return filename
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // strip accents
+    .replace(/['"\"]/g, '')          // strip quotes
+    .replace(/[^a-zA-Z0-9._-]/g, '_') // replace anything else with _
+    .replace(/_+/g, '_')             // collapse multiple underscores
+    .replace(/^_|_$/g, '');          // trim leading/trailing _
+}
