@@ -466,6 +466,7 @@ export default function SubmitProject() {
                   type="file"
                   id="file-upload"
                   multiple
+                  accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.odt,.ods,.odp,.txt,.rtf,.csv,.jpg,.jpeg,.png,.gif,.webp,.svg,.zip,.rar,.7z,.html,.css,.js,.ts,.json,.xml,.md,.py,.java,.mp4,.mov,.mp3,.wav"
                   onChange={handleFileSelect}
                   className="hidden"
                 />
