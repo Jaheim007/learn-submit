@@ -80,8 +80,8 @@ export const PWAInstallPrompt = () => {
 
         {/* Icon */}
         <div className="flex justify-center">
-          <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <Smartphone className="h-8 w-8 text-primary" />
+          <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center p-2">
+            <img src={kelyaIcon} alt="Kelya Group" className="h-12 w-12 object-contain" />
           </div>
         </div>
 
