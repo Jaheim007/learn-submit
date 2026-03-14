@@ -335,6 +335,24 @@ export default function StudentProjects() {
                       <StatusBadge status={project.latest_submission.status} />
                     )}
 
+                    {/* Mini Countdown - heart beating urgency */}
+                    {deadlineInfo && !deadlineInfo.expired && deadlineInfo.days <= 3 && (
+                      <div className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold ${
+                        deadlineInfo.urgent 
+                          ? 'bg-destructive/10 text-destructive animate-pulse border border-destructive/20' 
+                          : 'bg-warning/10 text-warning border border-warning/20'
+                      }`}>
+                        <span className="text-base">⏰</span>
+                        <span>{deadlineInfo.days}j {deadlineInfo.hours}h {deadlineInfo.minutes}min</span>
+                      </div>
+                    )}
+                    {deadlineInfo?.expired && (
+                      <div className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold bg-destructive/10 text-destructive border border-destructive/20 animate-pulse">
+                        <span className="text-base">⚠️</span>
+                        <span>Délai expiré</span>
+                      </div>
+                    )}
+
                     {/* Action */}
                     <Button
                       onClick={() => navigate(`/etudiant/soumettre/${project.id}`)}
