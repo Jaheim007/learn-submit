@@ -1,11 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, BookOpen, Trophy, User } from 'lucide-react';
+import { LayoutDashboard, FileText, BookOpen, Video, User } from 'lucide-react';
 
 const navItems = [
   { path: '/etudiant/projets', label: 'Projets', icon: LayoutDashboard },
   { path: '/etudiant/soumissions', label: 'Soumissions', icon: FileText },
+  { path: '/etudiant/tutoriels', label: 'Tutoriels', icon: Video },
   { path: '/etudiant/cours', label: 'Cours', icon: BookOpen },
-  { path: '/etudiant/classement', label: 'Rang', icon: Trophy },
   { path: '/etudiant/profil', label: 'Profil', icon: User },
 ];
 
