@@ -34,6 +34,7 @@ const StudentCourses = lazy(() => import("./pages/StudentCourses"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail"));
 const StudentSetup = lazy(() => import("./pages/StudentSetup"));
 const StudentSignin = lazy(() => import("./pages/StudentSignin"));
+const StudentTutorials = lazy(() => import("./pages/StudentTutorials"));
 
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const AdminHome = lazy(() => import("./pages/admin/AdminHome"));
@@ -70,6 +71,7 @@ const TeacherMessages = lazy(() => import("./pages/teacher/TeacherMessages"));
 const TeacherCourses = lazy(() => import("./pages/teacher/TeacherCourses"));
 const TeacherProjects = lazy(() => import("./pages/teacher/TeacherProjects"));
 const TeacherProfile = lazy(() => import("./pages/teacher/TeacherProfile"));
+const TeacherTutorials = lazy(() => import("./pages/teacher/TeacherTutorials"));
 
 const SupervisorDashboard = lazy(() => import("./pages/SupervisorDashboard"));
 const SupervisorSubmissions = lazy(() => import("./pages/SupervisorSubmissions"));
@@ -123,6 +125,7 @@ const App = () => (
               <Route path="/etudiant/classement" element={<StudentGuard><StudentLeaderboard /></StudentGuard>} />
               <Route path="/etudiant/cours" element={<StudentGuard><StudentCourses /></StudentGuard>} />
               <Route path="/etudiant/cours/:courseId" element={<StudentGuard><CourseDetail /></StudentGuard>} />
+              <Route path="/etudiant/tutoriels" element={<StudentGuard><StudentTutorials /></StudentGuard>} />
 
               {/* Legacy admin auth URLs redirected to unified auth */}
               <Route path="/admin/login" element={<Navigate to="/auth" replace />} />
@@ -165,6 +168,7 @@ const App = () => (
                 <Route path="projects" element={<TeacherProjects />} />
                 <Route path="submissions" element={<SupervisorSubmissions />} />
                 <Route path="courses" element={<TeacherCourses />} />
+                <Route path="tutorials" element={<TeacherTutorials />} />
                 <Route path="messages" element={<TeacherMessages />} />
                 <Route path="profile" element={<TeacherProfile />} />
               </Route>

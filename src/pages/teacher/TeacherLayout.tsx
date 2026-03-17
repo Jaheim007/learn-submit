@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, BarChart3, Users, FileText, BookOpen, MessageSquare, FolderOpen, User } from 'lucide-react';
+import { LogOut, BarChart3, Users, FileText, BookOpen, MessageSquare, FolderOpen, User, Video } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useState } from 'react';
@@ -25,6 +25,7 @@ export default function TeacherLayout() {
     { path: '/teacher/projects', label: 'Projets', icon: FolderOpen },
     { path: '/teacher/submissions', label: 'Soumissions', icon: FileText },
     { path: '/teacher/courses', label: 'Cours', icon: BookOpen },
+    { path: '/teacher/tutorials', label: 'Tutoriels', icon: Video },
     { path: '/teacher/messages', label: 'Messages', icon: MessageSquare },
     { path: '/teacher/profile', label: 'Mon Compte', icon: User },
   ];

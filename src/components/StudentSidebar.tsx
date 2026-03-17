@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, BookOpen, Trophy, User, LogOut, X, Shield } from 'lucide-react';
+import { LayoutDashboard, FileText, BookOpen, Trophy, User, LogOut, X, Shield, Video } from 'lucide-react';
 import kelyaLogoBlack from '@/assets/kelya-logo-black.jpg';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ const navItems = [
   { path: '/etudiant/projets', label: 'Mes Projets', icon: LayoutDashboard },
   { path: '/etudiant/soumissions', label: 'Mes Soumissions', icon: FileText },
   { path: '/etudiant/cours', label: 'Mes Cours', icon: BookOpen },
+  { path: '/etudiant/tutoriels', label: 'Tutoriels', icon: Video },
   { path: '/etudiant/classement', label: 'Classement', icon: Trophy },
   { path: '/etudiant/profil', label: 'Mon Compte', icon: User },
 ];
