@@ -71,6 +71,7 @@ const TeacherMessages = lazy(() => import("./pages/teacher/TeacherMessages"));
 const TeacherCourses = lazy(() => import("./pages/teacher/TeacherCourses"));
 const TeacherProjects = lazy(() => import("./pages/teacher/TeacherProjects"));
 const TeacherProfile = lazy(() => import("./pages/teacher/TeacherProfile"));
+const TeacherTutorials = lazy(() => import("./pages/teacher/TeacherTutorials"));
 
 const SupervisorDashboard = lazy(() => import("./pages/SupervisorDashboard"));
 const SupervisorSubmissions = lazy(() => import("./pages/SupervisorSubmissions"));
