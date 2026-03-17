@@ -125,6 +125,7 @@ const App = () => (
               <Route path="/etudiant/classement" element={<StudentGuard><StudentLeaderboard /></StudentGuard>} />
               <Route path="/etudiant/cours" element={<StudentGuard><StudentCourses /></StudentGuard>} />
               <Route path="/etudiant/cours/:courseId" element={<StudentGuard><CourseDetail /></StudentGuard>} />
+              <Route path="/etudiant/tutoriels" element={<StudentGuard><StudentTutorials /></StudentGuard>} />
 
               {/* Legacy admin auth URLs redirected to unified auth */}
               <Route path="/admin/login" element={<Navigate to="/auth" replace />} />
