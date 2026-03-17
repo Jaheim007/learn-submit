@@ -168,6 +168,7 @@ const App = () => (
                 <Route path="projects" element={<TeacherProjects />} />
                 <Route path="submissions" element={<SupervisorSubmissions />} />
                 <Route path="courses" element={<TeacherCourses />} />
+                <Route path="tutorials" element={<TeacherTutorials />} />
                 <Route path="messages" element={<TeacherMessages />} />
                 <Route path="profile" element={<TeacherProfile />} />
               </Route>

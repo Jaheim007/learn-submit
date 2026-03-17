@@ -10,6 +10,7 @@ const navItems = [
   { path: '/etudiant/projets', label: 'Mes Projets', icon: LayoutDashboard },
   { path: '/etudiant/soumissions', label: 'Mes Soumissions', icon: FileText },
   { path: '/etudiant/cours', label: 'Mes Cours', icon: BookOpen },
+  { path: '/etudiant/tutoriels', label: 'Tutoriels', icon: Video },
   { path: '/etudiant/classement', label: 'Classement', icon: Trophy },
   { path: '/etudiant/profil', label: 'Mon Compte', icon: User },
 ];

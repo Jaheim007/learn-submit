@@ -25,6 +25,7 @@ export default function TeacherLayout() {
     { path: '/teacher/projects', label: 'Projets', icon: FolderOpen },
     { path: '/teacher/submissions', label: 'Soumissions', icon: FileText },
     { path: '/teacher/courses', label: 'Cours', icon: BookOpen },
+    { path: '/teacher/tutorials', label: 'Tutoriels', icon: Video },
     { path: '/teacher/messages', label: 'Messages', icon: MessageSquare },
     { path: '/teacher/profile', label: 'Mon Compte', icon: User },
   ];
