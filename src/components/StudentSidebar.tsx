@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, BookOpen, Trophy, User, LogOut, X, Shield } from 'lucide-react';
+import { LayoutDashboard, FileText, BookOpen, Trophy, User, LogOut, X, Shield, Video } from 'lucide-react';
 import kelyaLogoBlack from '@/assets/kelya-logo-black.jpg';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
