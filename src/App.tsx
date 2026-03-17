@@ -34,6 +34,7 @@ const StudentCourses = lazy(() => import("./pages/StudentCourses"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail"));
 const StudentSetup = lazy(() => import("./pages/StudentSetup"));
 const StudentSignin = lazy(() => import("./pages/StudentSignin"));
+const StudentTutorials = lazy(() => import("./pages/StudentTutorials"));
 
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const AdminHome = lazy(() => import("./pages/admin/AdminHome"));
