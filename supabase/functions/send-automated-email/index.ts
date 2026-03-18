@@ -180,6 +180,70 @@ async function sendViaResend(
   return sent;
 }
 
+async function sendViaResendWithMeta(
+  supabase: any,
+  to: string[],
+  subject: string,
+  html: string,
+  emailType: string,
+  meta: Record<string, any>,
+) {
+  const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+  const RESEND_FROM = Deno.env.get('RESEND_FROM') || 'Kelya Group <info@genessible.com>';
+  if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY not configured');
+
+  let sent = 0;
+  for (const email of to) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ from: RESEND_FROM, to: [email], subject, html }),
+      });
+
+      const rawBody = await res.text();
+      let parsedBody: unknown = null;
+      try {
+        parsedBody = rawBody ? JSON.parse(rawBody) : null;
+      } catch {
+        parsedBody = rawBody;
+      }
+
+      const errorMessage = res.ok
+        ? null
+        : typeof parsedBody === 'object' && parsedBody && 'message' in (parsedBody as Record<string, unknown>)
+          ? String((parsedBody as Record<string, unknown>).message)
+          : 'Resend request failed';
+
+      // Store meta (project_id) in resend_response for dedup tracking
+      const responseWithMeta = { ...(typeof parsedBody === 'object' ? parsedBody : {}), ...meta };
+
+      await logEmailAttempt(
+        supabase,
+        emailType,
+        email,
+        res.ok ? 'success' : 'failed',
+        errorMessage,
+        responseWithMeta,
+      );
+
+      if (res.ok) {
+        sent++;
+      } else {
+        console.error(`Resend error for ${email}:`, parsedBody);
+      }
+    } catch (e: any) {
+      const errorMessage = e?.message || 'Unexpected send error';
+      console.error(`Send failed for ${email}:`, errorMessage);
+      await logEmailAttempt(supabase, emailType, email, 'failed', errorMessage, meta);
+    }
+  }
+  return sent;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
