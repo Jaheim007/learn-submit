@@ -180,6 +180,70 @@ async function sendViaResend(
   return sent;
 }
 
+async function sendViaResendWithMeta(
+  supabase: any,
+  to: string[],
+  subject: string,
+  html: string,
+  emailType: string,
+  meta: Record<string, any>,
+) {
+  const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+  const RESEND_FROM = Deno.env.get('RESEND_FROM') || 'Kelya Group <info@genessible.com>';
+  if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY not configured');
+
+  let sent = 0;
+  for (const email of to) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ from: RESEND_FROM, to: [email], subject, html }),
+      });
+
+      const rawBody = await res.text();
+      let parsedBody: unknown = null;
+      try {
+        parsedBody = rawBody ? JSON.parse(rawBody) : null;
+      } catch {
+        parsedBody = rawBody;
+      }
+
+      const errorMessage = res.ok
+        ? null
+        : typeof parsedBody === 'object' && parsedBody && 'message' in (parsedBody as Record<string, unknown>)
+          ? String((parsedBody as Record<string, unknown>).message)
+          : 'Resend request failed';
+
+      // Store meta (project_id) in resend_response for dedup tracking
+      const responseWithMeta = { ...(typeof parsedBody === 'object' ? parsedBody : {}), ...meta };
+
+      await logEmailAttempt(
+        supabase,
+        emailType,
+        email,
+        res.ok ? 'success' : 'failed',
+        errorMessage,
+        responseWithMeta,
+      );
+
+      if (res.ok) {
+        sent++;
+      } else {
+        console.error(`Resend error for ${email}:`, parsedBody);
+      }
+    } catch (e: any) {
+      const errorMessage = e?.message || 'Unexpected send error';
+      console.error(`Send failed for ${email}:`, errorMessage);
+      await logEmailAttempt(supabase, emailType, email, 'failed', errorMessage, meta);
+    }
+  }
+  return sent;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -311,6 +375,27 @@ const handler = async (req: Request): Promise<Response> => {
         });
       }
 
+      // Dedup: check which reminder emails were already sent today
+      const todayStart = new Date();
+      todayStart.setUTCHours(0, 0, 0, 0);
+
+      const { data: alreadySentLogs } = await supabase
+        .from('email_send_logs')
+        .select('recipient_email, resend_response')
+        .eq('email_type', 'automation_deadline_reminder')
+        .eq('status', 'success')
+        .gte('created_at', todayStart.toISOString());
+
+      // Build a set of "email::project_id" keys already sent today
+      const alreadySentKeys = new Set<string>();
+      for (const log of alreadySentLogs || []) {
+        // We store project_id in resend_response metadata
+        const projectId = (log.resend_response as any)?.project_id;
+        if (projectId) {
+          alreadySentKeys.add(`${log.recipient_email}::${projectId}`);
+        }
+      }
+
       let totalSent = 0;
 
       for (const project of projects) {
@@ -341,9 +426,15 @@ const handler = async (req: Request): Promise<Response> => {
 
         const submittedIds = new Set((submissions || []).map((s: any) => s.student_id));
 
+        // Filter out students who submitted OR already received this reminder today
         const emails = [...new Set(
           enrollments
-            .filter((e: any) => !submittedIds.has(e.students.id))
+            .filter((e: any) => {
+              if (submittedIds.has(e.students.id)) return false;
+              const key = `${e.students.email}::${project.id}`;
+              if (alreadySentKeys.has(key)) return false;
+              return true;
+            })
             .map((e: any) => e.students.email)
             .filter(Boolean)
         )];
@@ -358,12 +449,18 @@ const handler = async (req: Request): Promise<Response> => {
           site_url: siteUrl,
         });
 
-        const sent = await sendViaResend(supabase, emails, subject, html, 'automation_deadline_reminder');
+        // Send with project_id metadata for dedup tracking
+        const sent = await sendViaResendWithMeta(supabase, emails, subject, html, 'automation_deadline_reminder', { project_id: project.id });
         totalSent += sent;
 
-        // Also create in-app notifications for these students
+        // Create in-app notifications only for students not yet notified today
         const studentsToNotify = enrollments
-          .filter((e: any) => !submittedIds.has(e.students.id))
+          .filter((e: any) => {
+            if (submittedIds.has(e.students.id)) return false;
+            const key = `${e.students.email}::${project.id}`;
+            if (alreadySentKeys.has(key)) return false;
+            return true;
+          })
           .map((e: any) => e.students);
 
         for (const student of studentsToNotify) {
