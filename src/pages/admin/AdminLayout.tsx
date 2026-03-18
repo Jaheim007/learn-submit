@@ -16,7 +16,8 @@ import {
   Layers,
   Menu,
   X,
-  Clock
+  Clock,
+  Video
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
