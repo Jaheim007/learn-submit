@@ -139,6 +139,7 @@ const App = () => (
                 <Route path="submissions" element={<AdminSubmissions />} />
                 <Route path="projects" element={<AdminProjects />} />
                 <Route path="courses" element={<AdminCourses />} />
+                <Route path="tutorials" element={<TeacherTutorials />} />
                 <Route path="classes" element={<AdminClasses />} />
                 <Route path="users" element={<AdminUsers />} />
                 {/* academy-users merged into users */}
