@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { StudentDashboardLayout } from '@/components/StudentDashboardLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Video, Play } from 'lucide-react';
+import { Video, Play, Calendar } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface Tutorial {
@@ -60,17 +60,23 @@ export default function StudentTutorials() {
     return url;
   };
 
+  const getYoutubeThumbnail = (url: string): string | null => {
+    const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (ytMatch) return `https://img.youtube.com/vi/${ytMatch[1]}/mqdefault.jpg`;
+    return null;
+  };
+
   const getSignedUrl = async (filePath: string) => {
     const { data } = await supabase.storage.from('tutorials').createSignedUrl(filePath, 3600);
     return data?.signedUrl;
   };
 
-  const handlePlayUpload = async (tutorial: Tutorial) => {
-    if (tutorial.file_path) {
+  const handlePlay = async (tutorial: Tutorial) => {
+    if (tutorial.video_type === 'upload' && tutorial.file_path) {
       const url = await getSignedUrl(tutorial.file_path);
-      if (url) {
-        setPlayingVideo({ ...tutorial, video_url: url });
-      }
+      if (url) setPlayingVideo({ ...tutorial, video_url: url });
+    } else {
+      setPlayingVideo(tutorial);
     }
   };
 
@@ -112,56 +118,64 @@ export default function StudentTutorials() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {filtered.map(t => (
-              <Card key={t.id} className="group overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => {
-                if (t.video_type === 'upload') {
-                  handlePlayUpload(t);
-                } else {
-                  setPlayingVideo(t);
-                }
-              }}>
-                <div className="aspect-video bg-muted relative flex items-center justify-center">
-                  {t.video_type === 'url' && t.video_url ? (
-                    <>
-                      {t.video_url.includes('youtube') || t.video_url.includes('youtu.be') ? (
-                        <img
-                          src={`https://img.youtube.com/vi/${t.video_url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1]}/mqdefault.jpg`}
-                          alt={t.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <Video className="h-12 w-12 text-muted-foreground/30" />
-                      )}
-                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                        <div className="h-14 w-14 rounded-full bg-primary/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                          <Play className="h-6 w-6 text-primary-foreground ml-0.5" />
+          <>
+            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <Video className="h-5 w-5 text-primary" />
+              Tutoriels disponibles
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              {filtered.map(t => {
+                const thumbnail = t.video_type === 'url' && t.video_url ? getYoutubeThumbnail(t.video_url) : null;
+
+                return (
+                  <Card
+                    key={t.id}
+                    className="group overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer border-border/50"
+                    onClick={() => handlePlay(t)}
+                  >
+                    <div className="flex flex-col sm:flex-row">
+                      {/* Thumbnail */}
+                      <div className="relative w-full sm:w-48 h-36 sm:h-auto shrink-0 bg-muted overflow-hidden">
+                        {thumbnail ? (
+                          <img
+                            src={thumbnail}
+                            alt={t.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted-foreground/10">
+                            <Video className="h-10 w-10 text-muted-foreground/30" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                          <div className="h-12 w-12 rounded-full bg-primary/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                            <Play className="h-5 w-5 text-primary-foreground ml-0.5" />
+                          </div>
                         </div>
                       </div>
-                    </>
-                  ) : (
-                    <>
-                      <Video className="h-12 w-12 text-muted-foreground/30" />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
-                        <div className="h-14 w-14 rounded-full bg-primary/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                          <Play className="h-6 w-6 text-primary-foreground ml-0.5" />
+
+                      {/* Content */}
+                      <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
+                        <div>
+                          <h3 className="font-semibold text-foreground leading-tight line-clamp-2">{t.title}</h3>
+                          <Badge variant="secondary" className="mt-2 text-xs bg-primary/10 text-primary border-0">
+                            {t.classes?.title}
+                          </Badge>
+                          {t.description && (
+                            <p className="text-sm text-muted-foreground line-clamp-2 mt-2">{t.description}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground/60">
+                          <Calendar className="h-3 w-3" />
+                          <span>{new Date(t.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                         </div>
                       </div>
-                    </>
-                  )}
-                </div>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base leading-tight">{t.title}</CardTitle>
-                  <Badge variant="secondary" className="w-fit text-xs">{t.classes?.title}</Badge>
-                </CardHeader>
-                {t.description && (
-                  <CardContent className="pt-0">
-                    <p className="text-sm text-muted-foreground line-clamp-2">{t.description}</p>
-                  </CardContent>
-                )}
-              </Card>
-            ))}
-          </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </>
         )}
 
         {/* Video Player Dialog */}

@@ -16,7 +16,8 @@ import {
   Layers,
   Menu,
   X,
-  Clock
+  Clock,
+  Video
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -28,6 +29,7 @@ const navigation = [
   { name: 'Soumissions', href: '/admin/submissions', icon: FileText },
   { name: 'Projets', href: '/admin/projects', icon: FolderOpen },
   { name: 'Cours', href: '/admin/courses', icon: BookOpen },
+  { name: 'Tutoriels', href: '/admin/tutorials', icon: Video },
   { name: 'Utilisateurs', href: '/admin/users', icon: Users },
   { name: 'Emails', href: '/admin/emails', icon: Mail },
   { name: 'Paramètres', href: '/admin/settings', icon: Settings },
