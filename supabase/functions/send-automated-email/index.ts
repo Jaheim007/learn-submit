@@ -311,6 +311,27 @@ const handler = async (req: Request): Promise<Response> => {
         });
       }
 
+      // Dedup: check which reminder emails were already sent today
+      const todayStart = new Date();
+      todayStart.setUTCHours(0, 0, 0, 0);
+
+      const { data: alreadySentLogs } = await supabase
+        .from('email_send_logs')
+        .select('recipient_email, resend_response')
+        .eq('email_type', 'automation_deadline_reminder')
+        .eq('status', 'success')
+        .gte('created_at', todayStart.toISOString());
+
+      // Build a set of "email::project_id" keys already sent today
+      const alreadySentKeys = new Set<string>();
+      for (const log of alreadySentLogs || []) {
+        // We store project_id in resend_response metadata
+        const projectId = (log.resend_response as any)?.project_id;
+        if (projectId) {
+          alreadySentKeys.add(`${log.recipient_email}::${projectId}`);
+        }
+      }
+
       let totalSent = 0;
 
       for (const project of projects) {
@@ -341,9 +362,15 @@ const handler = async (req: Request): Promise<Response> => {
 
         const submittedIds = new Set((submissions || []).map((s: any) => s.student_id));
 
+        // Filter out students who submitted OR already received this reminder today
         const emails = [...new Set(
           enrollments
-            .filter((e: any) => !submittedIds.has(e.students.id))
+            .filter((e: any) => {
+              if (submittedIds.has(e.students.id)) return false;
+              const key = `${e.students.email}::${project.id}`;
+              if (alreadySentKeys.has(key)) return false;
+              return true;
+            })
             .map((e: any) => e.students.email)
             .filter(Boolean)
         )];
@@ -358,12 +385,18 @@ const handler = async (req: Request): Promise<Response> => {
           site_url: siteUrl,
         });
 
-        const sent = await sendViaResend(supabase, emails, subject, html, 'automation_deadline_reminder');
+        // Send with project_id metadata for dedup tracking
+        const sent = await sendViaResendWithMeta(supabase, emails, subject, html, 'automation_deadline_reminder', { project_id: project.id });
         totalSent += sent;
 
-        // Also create in-app notifications for these students
+        // Create in-app notifications only for students not yet notified today
         const studentsToNotify = enrollments
-          .filter((e: any) => !submittedIds.has(e.students.id))
+          .filter((e: any) => {
+            if (submittedIds.has(e.students.id)) return false;
+            const key = `${e.students.email}::${project.id}`;
+            if (alreadySentKeys.has(key)) return false;
+            return true;
+          })
           .map((e: any) => e.students);
 
         for (const student of studentsToNotify) {
