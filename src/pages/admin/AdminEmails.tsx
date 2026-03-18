@@ -356,7 +356,7 @@ export default function AdminEmails() {
             />
             <AutomationCard
               title="Rappel d'échéance (48h)"
-              description="Email de rappel automatique 48h avant la date limite d'un projet"
+              description="3 rappels/jour (8h, 14h, 19h UTC) pour les projets expirant dans 48h — dédupliqué par étudiant"
               icon="⏰"
               enabled={true}
             />
