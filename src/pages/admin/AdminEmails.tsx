@@ -370,7 +370,7 @@ export default function AdminEmails() {
                   <h3 className="font-semibold text-foreground">Comment fonctionnent les automatisations</h3>
                   <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
                     <li>• <strong>Nouveau cours/projet :</strong> L'email est envoyé automatiquement lors de la création du contenu</li>
-                    <li>• <strong>Rappel d'échéance :</strong> Un job vérifie toutes les heures les projets expirant dans les 48h</li>
+                    <li>• <strong>Rappel d'échéance :</strong> Envoyé 3 fois/jour (8h, 14h, 19h UTC) — chaque étudiant ne reçoit qu'un seul rappel par projet par jour</li>
                     <li>• Les étudiants reçoivent aussi une notification push dans l'application</li>
                     <li>• Seuls les étudiants n'ayant pas encore soumis reçoivent le rappel d'échéance</li>
                   </ul>
