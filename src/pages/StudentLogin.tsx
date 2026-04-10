@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Github, Loader2, Mail, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import kelyaLogo from '@/assets/kelya-logo-black.jpg';
+import hacktualizLogo from '@/assets/hacktualiz-main-logo.jpeg';
 import { motion, AnimatePresence } from 'framer-motion';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 
@@ -172,8 +172,8 @@ export default function StudentLogin() {
         <div className="text-center mb-8">
           <Link to="/">
             <img
-              src={kelyaLogo}
-              alt="Kelya Group"
+              src={hacktualizLogo}
+              alt="Hacktualiz"
               className="h-12 w-12 rounded-xl object-cover mx-auto mb-4 hover:scale-105 transition-transform"
             />
           </Link>

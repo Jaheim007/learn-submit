@@ -153,7 +153,7 @@ export default function AdminHome() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Tableau de bord</h1>
-        <p className="text-sm text-muted-foreground mt-1.5">Vue d'ensemble de la plateforme Kelya × Hacktualiz</p>
+        <p className="text-sm text-muted-foreground mt-1.5">Vue d'ensemble de la plateforme Hacktualiz</p>
       </div>
 
       {/* Stats Grid — more generous spacing */}

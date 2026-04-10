@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Users } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import kelyaLogo from '@/assets/kelya-logo-black.jpg';
+import hacktualizLogo from '@/assets/hacktualiz-main-logo.jpeg';
 
 export default function TeacherLogin() {
   const [email, setEmail] = useState('');
@@ -88,11 +88,11 @@ export default function TeacherLogin() {
       <Card className="w-full max-w-md relative z-10 backdrop-blur-sm bg-card/95">
         <CardHeader className="space-y-4 text-center">
           <div className="flex justify-center">
-            <img src={kelyaLogo} alt="Kelya Group" className="h-16 w-16 rounded-xl object-cover" />
+            <img src={hacktualizLogo} alt="Hacktualiz" className="h-16 w-16 rounded-xl object-cover" />
           </div>
           <div>
             <CardTitle className="text-2xl">Portail Formateurs</CardTitle>
-            <CardDescription>Kelya Group — Espace Formateur</CardDescription>
+            <CardDescription>Hacktualiz — Espace Formateur</CardDescription>
           </div>
         </CardHeader>
         <CardContent>

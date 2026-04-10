@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, FileText, BookOpen, Trophy, User, LogOut, X, Shield, Video } from 'lucide-react';
-import kelyaLogoBlack from '@/assets/kelya-logo-black.jpg';
+import hacktualizLogo from '@/assets/hacktualiz-main-logo.jpeg';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -44,14 +44,14 @@ export const StudentSidebar = ({ open, onClose }: StudentSidebarProps) => {
         <Link to="/etudiant/projets" className="flex items-center gap-3 group" onClick={handleNavClick}>
           <div className="relative">
             <img
-              src={kelyaLogoBlack}
-              alt="Kelya Group"
+              src={hacktualizLogo}
+              alt="Hacktualiz"
               className="h-10 w-10 object-cover rounded-xl transition-all duration-300 group-hover:scale-105 ring-2 ring-border/50 group-hover:ring-primary/30"
             />
             <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-success border-2 border-background" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-foreground tracking-tight">Kelya Group</h1>
+            <h1 className="text-sm font-bold text-foreground tracking-tight">Hacktualiz</h1>
             <p className="text-[11px] text-muted-foreground font-medium">Espace Étudiant</p>
           </div>
         </Link>
