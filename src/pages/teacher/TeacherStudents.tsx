@@ -113,24 +113,24 @@ export default function TeacherStudents() {
   }
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto">
+    <div className="space-y-5 max-w-[1400px] mx-auto">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Mes Étudiants</h1>
-        <p className="text-muted-foreground mt-1">Étudiants inscrits dans vos classes assignées</p>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Mes Étudiants</h1>
+        <p className="text-sm text-muted-foreground mt-1">Étudiants inscrits dans vos classes</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Rechercher un étudiant..."
+            placeholder="Rechercher..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-10"
           />
         </div>
         <Select value={classFilter} onValueChange={setClassFilter}>
-          <SelectTrigger className="w-full sm:w-[200px]">
+          <SelectTrigger className="w-full sm:w-[200px] h-10">
             <SelectValue placeholder="Filtrer par classe" />
           </SelectTrigger>
           <SelectContent>
@@ -142,48 +142,71 @@ export default function TeacherStudents() {
         </Select>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
+      {/* Desktop Table */}
+      <Card className="hidden lg:block">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Users className="h-4 w-4" />
             {filtered.length} étudiant{filtered.length !== 1 ? 's' : ''}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {filtered.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground">
-              Aucun étudiant trouvé
-            </div>
+            <div className="py-12 text-center text-muted-foreground text-sm">Aucun étudiant trouvé</div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead className="hidden md:table-cell">Téléphone</TableHead>
-                    <TableHead className="hidden lg:table-cell">WhatsApp</TableHead>
-                    <TableHead>Classe</TableHead>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nom</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Téléphone</TableHead>
+                  <TableHead>WhatsApp</TableHead>
+                  <TableHead>Classe</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((student, idx) => (
+                  <TableRow key={`${student.id}-${idx}`}>
+                    <TableCell className="font-medium">{student.full_name}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{student.email}</TableCell>
+                    <TableCell className="text-sm">{student.phone || '—'}</TableCell>
+                    <TableCell className="text-sm">{student.whatsapp || '—'}</TableCell>
+                    <TableCell><Badge variant="secondary">{student.classCode}</Badge></TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map((student, idx) => (
-                    <TableRow key={`${student.id}-${idx}`}>
-                      <TableCell className="font-medium">{student.full_name}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{student.email}</TableCell>
-                      <TableCell className="hidden md:table-cell text-sm">{student.phone || '—'}</TableCell>
-                      <TableCell className="hidden lg:table-cell text-sm">{student.whatsapp || '—'}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{student.classCode}</Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
+
+      {/* Mobile Cards */}
+      <div className="lg:hidden space-y-3">
+        <p className="text-xs text-muted-foreground">{filtered.length} étudiant{filtered.length !== 1 ? 's' : ''}</p>
+        {filtered.length === 0 ? (
+          <Card><CardContent className="py-8 text-center text-muted-foreground text-sm">Aucun étudiant trouvé</CardContent></Card>
+        ) : (
+          filtered.map((student, idx) => (
+            <Card key={`${student.id}-${idx}`} className="touch-manipulation active:scale-[0.99] transition-transform">
+              <CardContent className="p-4 space-y-1.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground truncate">{student.full_name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{student.email}</p>
+                  </div>
+                  <Badge variant="secondary" className="text-[10px] shrink-0">{student.classCode}</Badge>
+                </div>
+                {(student.phone || student.whatsapp) && (
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground pt-1">
+                    {student.phone && <span>📞 {student.phone}</span>}
+                    {student.whatsapp && <span>💬 {student.whatsapp}</span>}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
     </div>
   );
 }
