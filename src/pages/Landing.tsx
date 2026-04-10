@@ -345,13 +345,13 @@ const Landing = () => {
             </motion.div>
           </div>
 
-          {/* Stats Cards */}
+          {/* Stats — horizontal scroll on mobile */}
           <motion.div 
             variants={stagger} initial="hidden" animate="visible"
-            className="mt-20 sm:mt-24"
+            className="mt-10 sm:mt-24"
           >
-            <div className="bg-card rounded-2xl border border-border p-6 sm:p-8 shadow-custom">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="sm:bg-card sm:rounded-2xl sm:border sm:border-border sm:p-8 sm:shadow-custom">
+              <div className="flex gap-3 overflow-x-auto pb-2 sm:pb-0 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-4 sm:gap-4 scrollbar-hide">
                 {[
                   { label: 'Projets soumis', value: stats?.submissionsCount ?? '...', icon: Upload },
                   { label: 'Étudiants actifs', value: stats?.studentsCount ?? '...', icon: Users },
@@ -361,12 +361,11 @@ const Landing = () => {
                   <motion.div 
                     key={i} 
                     variants={scaleIn} custom={i + 4}
-                    whileHover={{ scale: 1.03, y: -2 }}
-                    className="bg-background rounded-xl border border-border p-4 sm:p-5 text-center cursor-default transition-shadow hover:shadow-lg"
+                    className="min-w-[140px] snap-center bg-card sm:bg-background rounded-xl border border-border p-4 text-center cursor-default flex-shrink-0 sm:flex-shrink"
                   >
                     <stat.icon className="h-5 w-5 text-secondary mx-auto mb-2" />
-                    <div className="text-xl sm:text-2xl font-heading font-bold text-foreground">{stat.value}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
+                    <div className="text-xl font-heading font-bold text-foreground">{stat.value}</div>
+                    <div className="text-[11px] text-muted-foreground mt-1">{stat.label}</div>
                   </motion.div>
                 ))}
               </div>
