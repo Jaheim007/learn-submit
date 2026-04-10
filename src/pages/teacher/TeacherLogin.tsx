@@ -102,7 +102,7 @@ export default function TeacherLogin() {
               <Input
                 id="email"
                 type="email"
-                placeholder="votre.email@kelyagroup.com"
+                placeholder="votre.email@hacktualiz.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

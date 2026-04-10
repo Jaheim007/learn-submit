@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Download, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import kelyaIcon from '@/assets/kelya-icon-white.png';
+import hacktualizLogo from '@/assets/hacktualiz-main-logo.jpeg';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -81,7 +81,7 @@ export const PWAInstallPrompt = () => {
         {/* Icon */}
         <div className="flex justify-center">
           <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center p-2">
-            <img src={kelyaIcon} alt="Kelya Group" className="h-12 w-12 object-contain" />
+            <img src={hacktualizLogo} alt="Hacktualiz" className="h-12 w-12 object-contain rounded-lg" />
           </div>
         </div>
 
@@ -103,7 +103,7 @@ export const PWAInstallPrompt = () => {
           <>
             <div className="text-center space-y-2">
               <h3 className="text-lg font-bold text-foreground">
-                📲 Installez Kelya Group
+                📲 Installez Hacktualiz
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Accédez plus rapidement à vos projets et soumissions. Installez l'app sur votre appareil pour une expérience optimale !
