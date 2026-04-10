@@ -57,7 +57,7 @@ async function sendViaResend({
   emailType: string;
 }): Promise<SendResult[]> {
   const resendApiKey = Deno.env.get("RESEND_API_KEY");
-  const resendFrom = Deno.env.get("RESEND_FROM") || "Kelya Group <info@genessible.com>";
+  const resendFrom = Deno.env.get("RESEND_FROM") || "Hacktualiz <info@genessible.com>";
 
   if (!resendApiKey) throw new Error("RESEND_API_KEY not configured");
 

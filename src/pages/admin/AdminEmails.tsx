@@ -95,13 +95,13 @@ export default function AdminEmails() {
       const htmlBody = `
         <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb;">
           <div style="background: linear-gradient(135deg, #1a2744, #c7253e); padding: 24px; text-align: center;">
-            <h1 style="color: white; font-size: 20px; margin: 0;">Kelya Group × Hacktualiz</h1>
+            <h1 style="color: white; font-size: 20px; margin: 0;">Hacktualiz INC</h1>
           </div>
           <div style="padding: 24px; line-height: 1.8; font-size: 14px; color: #333;">
             ${body}
           </div>
           <div style="padding: 16px; text-align: center; color: #888; font-size: 12px; border-top: 1px solid #eee;">
-            <p>Kelya Group × Hacktualiz INC — Plateforme d'apprentissage</p>
+            <p>Hacktualiz INC — Formation · Certification · Intégration</p>
           </div>
         </div>`;
 
@@ -320,7 +320,7 @@ export default function AdminEmails() {
                 <CardContent>
                   <div className="border rounded-lg overflow-hidden text-xs">
                     <div className="bg-gradient-to-r from-[#1a2744] to-[#c7253e] p-3 text-center">
-                      <span className="text-white font-bold text-sm">Kelya Group × Hacktualiz</span>
+                      <span className="text-white font-bold text-sm">Hacktualiz INC</span>
                     </div>
                     <div className="p-3 bg-white text-gray-800">
                       <p className="font-semibold mb-2">{subject || 'Sujet...'}</p>
@@ -331,7 +331,7 @@ export default function AdminEmails() {
                       )}
                     </div>
                     <div className="p-2 text-center text-[10px] text-gray-400 border-t">
-                      Kelya Group × Hacktualiz INC
+                      Hacktualiz INC
                     </div>
                   </div>
                 </CardContent>

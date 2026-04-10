@@ -6,7 +6,7 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
-import kelyaLogo from '@/assets/kelya-logo-black.jpg';
+import hacktualizLogo from '@/assets/hacktualiz-main-logo.jpeg';
 
 export default function TeacherLayout() {
   const navigate = useNavigate();
@@ -36,9 +36,9 @@ export default function TeacherLayout() {
     <>
       <div className="p-6 border-b border-border/50">
         <div className="flex items-center gap-3">
-          <img src={kelyaLogo} alt="Kelya Group" className="h-10 w-10 rounded-lg object-cover" />
+          <img src={hacktualizLogo} alt="Hacktualiz" className="h-10 w-10 rounded-lg object-cover" />
           <div>
-            <h2 className="font-bold text-foreground text-sm">Kelya Group</h2>
+            <h2 className="font-bold text-foreground text-sm">Hacktualiz</h2>
             <p className="text-xs text-muted-foreground">Espace Formateur</p>
           </div>
         </div>

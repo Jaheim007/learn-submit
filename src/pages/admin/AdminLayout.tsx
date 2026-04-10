@@ -1,7 +1,7 @@
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
-import kelyaLogoBlack from '@/assets/kelya-logo-black.jpg';
+import hacktualizLogo from '@/assets/hacktualiz-main-logo.jpeg';
 import { useState } from 'react';
 import {
   LayoutDashboard,
@@ -61,15 +61,15 @@ export default function AdminLayout() {
         <Link to="/admin" className="flex items-center gap-3 group" onClick={() => setSidebarOpen(false)}>
           <div className="relative">
             <img
-              src={kelyaLogoBlack}
-              alt="Kelya"
+              src={hacktualizLogo}
+              alt="Hacktualiz"
               className="h-10 w-10 object-cover rounded-xl transition-all duration-300 group-hover:scale-105 ring-2 ring-border/50 group-hover:ring-primary/30"
             />
             <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-primary border-2 border-background" />
           </div>
           <div>
             <h1 className="text-sm font-bold text-foreground tracking-tight">
-              Kelya <span className="text-muted-foreground font-normal">×</span> Hacktualiz
+              Hacktualiz
             </h1>
             <p className="text-[11px] text-muted-foreground font-medium">Administration</p>
           </div>

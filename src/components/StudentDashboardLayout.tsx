@@ -51,7 +51,7 @@ export const StudentDashboardLayout = ({ children }: StudentDashboardLayoutProps
 
           {/* Mobile center brand */}
           <div className="lg:hidden flex-1 flex justify-center">
-            <span className="text-sm font-bold text-foreground tracking-tight">Kelya Group</span>
+            <span className="text-sm font-bold text-foreground tracking-tight">Hacktualiz</span>
           </div>
 
           {/* Desktop greeting */}
