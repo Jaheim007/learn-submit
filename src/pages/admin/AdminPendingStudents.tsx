@@ -212,80 +212,99 @@ export default function AdminPendingStudents() {
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Étudiants en attente d'approbation ({pendingStudents.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {pendingStudents.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <UserCheck className="h-12 w-12 mx-auto mb-4 opacity-20" />
-              <p>Aucun étudiant en attente</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom complet</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Inscrit depuis</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pendingStudents.map((student) => (
-                  <TableRow key={student.id}>
-                    <TableCell className="font-medium">{student.full_name}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        {student.email}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {formatDistanceToNow(new Date(student.created_at), {
-                        addSuffix: true,
-                        locale: fr
-                      })}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
-                        <Clock className="h-3 w-3 mr-1" />
-                        En attente
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="default"
-                          onClick={() => openApprovalDialog(student)}
-                        >
-                          <UserCheck className="h-4 w-4 mr-1" />
-                          Approuver
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => openRejectDialog(student)}
-                        >
-                          <UserX className="h-4 w-4 mr-1" />
-                          Rejeter
-                        </Button>
-                      </div>
-                    </TableCell>
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
+          <Clock className="h-5 w-5 text-[hsl(var(--warning))]" />
+          En attente ({pendingStudents.length})
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">Étudiants en attente d'approbation</p>
+      </div>
+
+      {pendingStudents.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <UserCheck className="h-12 w-12 mx-auto mb-4 text-muted-foreground/20" />
+            <p className="text-muted-foreground font-medium">Aucun étudiant en attente</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* Desktop Table */}
+          <Card className="hidden lg:block">
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nom complet</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Inscrit depuis</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {pendingStudents.map((student) => (
+                    <TableRow key={student.id}>
+                      <TableCell className="font-medium">{student.full_name}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          {student.email}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {formatDistanceToNow(new Date(student.created_at), { addSuffix: true, locale: fr })}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-[hsl(var(--warning))]/10 text-[hsl(var(--warning))] border-[hsl(var(--warning))]/20">
+                          <Clock className="h-3 w-3 mr-1" />
+                          En attente
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button size="sm" variant="default" onClick={() => openApprovalDialog(student)}>
+                            <UserCheck className="h-4 w-4 mr-1" /> Approuver
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => openRejectDialog(student)}>
+                            <UserX className="h-4 w-4 mr-1" /> Rejeter
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* Mobile Cards */}
+          <div className="lg:hidden space-y-3">
+            {pendingStudents.map((student) => (
+              <Card key={student.id} className="touch-manipulation">
+                <CardContent className="p-4 space-y-3">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{student.full_name}</p>
+                    <p className="text-xs text-muted-foreground">{student.email}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      {formatDistanceToNow(new Date(student.created_at), { addSuffix: true, locale: fr })}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" className="flex-1 h-9 text-xs" onClick={() => openApprovalDialog(student)}>
+                      <UserCheck className="h-3.5 w-3.5 mr-1" /> Approuver
+                    </Button>
+                    <Button size="sm" variant="destructive" className="flex-1 h-9 text-xs" onClick={() => openRejectDialog(student)}>
+                      <UserX className="h-3.5 w-3.5 mr-1" /> Rejeter
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Approval Dialog */}
       <Dialog open={approvalDialogOpen} onOpenChange={setApprovalDialogOpen}>

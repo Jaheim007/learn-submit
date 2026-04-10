@@ -261,11 +261,11 @@ export default function AdminClasses() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Gestion des classes</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Gestion des classes</h1>
+          <p className="text-sm text-muted-foreground">
             {classes.length} classe{classes.length > 1 ? 's' : ''} au total
           </p>
         </div>
@@ -275,7 +275,7 @@ export default function AdminClasses() {
           if (!open) resetForm();
         }}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Nouvelle classe
             </Button>
@@ -309,7 +309,6 @@ export default function AdminClasses() {
                   />
                 </div>
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="create-title">Titre *</Label>
                 <Input
@@ -319,7 +318,6 @@ export default function AdminClasses() {
                   placeholder="VibeCoder PRO"
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="create-description">Description</Label>
                 <Textarea
@@ -330,7 +328,6 @@ export default function AdminClasses() {
                   rows={3}
                 />
               </div>
-
               <div className="flex items-center space-x-2">
                 <Switch
                   id="create-is_active"
@@ -353,7 +350,8 @@ export default function AdminClasses() {
         </Dialog>
       </div>
 
-      <Card>
+      {/* Desktop Table */}
+      <Card className="hidden lg:block">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
@@ -372,11 +370,7 @@ export default function AdminClasses() {
                 <TableRow key={classItem.id}>
                   <TableCell className="font-mono font-medium">{classItem.code}</TableCell>
                   <TableCell>{classItem.title}</TableCell>
-                  <TableCell>
-                    {classItem.session_name || (
-                      <span className="text-muted-foreground">—</span>
-                    )}
-                  </TableCell>
+                  <TableCell>{classItem.session_name || <span className="text-muted-foreground">—</span>}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Users className="h-4 w-4 text-muted-foreground" />
@@ -384,32 +378,17 @@ export default function AdminClasses() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Switch
-                      checked={classItem.is_active}
-                      onCheckedChange={() => toggleActiveStatus(classItem)}
-                    />
+                    <Switch checked={classItem.is_active} onCheckedChange={() => toggleActiveStatus(classItem)} />
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {formatDistanceToNow(new Date(classItem.created_at), {
-                      addSuffix: true,
-                      locale: fr,
-                    })}
+                    {formatDistanceToNow(new Date(classItem.created_at), { addSuffix: true, locale: fr })}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openEditDialog(classItem)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => openEditDialog(classItem)}>
                         <Edit2 className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => setClassToDelete(classItem)}
-                      >
+                      <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setClassToDelete(classItem)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -427,6 +406,47 @@ export default function AdminClasses() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Mobile Cards */}
+      <div className="lg:hidden space-y-3">
+        {classes.length === 0 ? (
+          <Card><CardContent className="py-8 text-center text-muted-foreground text-sm">Aucune classe trouvée</CardContent></Card>
+        ) : (
+          classes.map((classItem) => (
+            <Card key={classItem.id} className="touch-manipulation active:scale-[0.99] transition-transform">
+              <CardContent className="p-4 space-y-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-sm font-bold text-primary">{classItem.code}</span>
+                      <span className={`h-2 w-2 rounded-full ${classItem.is_active ? 'bg-[hsl(var(--success))]' : 'bg-muted-foreground/30'}`} />
+                    </div>
+                    <p className="text-sm font-medium text-foreground mt-0.5">{classItem.title}</p>
+                    {classItem.session_name && (
+                      <p className="text-xs text-muted-foreground">{classItem.session_name}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(classItem)}>
+                      <Edit2 className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setClassToDelete(classItem)}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Users className="h-3 w-3" />
+                    <span>{classItem.student_count} étudiants</span>
+                  </div>
+                  <span>{formatDistanceToNow(new Date(classItem.created_at), { addSuffix: true, locale: fr })}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
 
       {/* Edit Dialog */}
       <Dialog open={isEditOpen} onOpenChange={(open) => {
