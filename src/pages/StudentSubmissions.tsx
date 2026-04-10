@@ -3,11 +3,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { StudentDashboardLayout } from '@/components/StudentDashboardLayout';
-import { FileText, Download, Calendar, AlertCircle } from 'lucide-react';
+import { FileText, Download, Calendar } from 'lucide-react';
 import { RichTextRenderer } from '@/components/ui/rich-text-editor';
 import { toast } from 'sonner';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Badge } from '@/components/ui/badge';
+import { motion } from 'framer-motion';
+import { staggerContainer, staggerItem } from '@/lib/animations';
 
 interface Submission {
   id: number;
@@ -40,96 +42,33 @@ export default function StudentSubmissions() {
 
   const fetchSubmissions = async () => {
     try {
-      const { data: studentData } = await supabase
-        .from('students')
-        .select('id')
-        .eq('user_id', user?.id)
-        .single();
-
+      const { data: studentData } = await supabase.from('students').select('id').eq('user_id', user?.id).single();
       if (!studentData) return;
-
-      const { data } = await supabase
-        .from('submissions')
-        .select(`
-          id,
-          submitted_at,
-          status,
-          link1,
-          link2,
-          link3,
-          file1_url,
-          file2_url,
-          file3_url,
-          file_urls,
-          description,
-          grade,
-          feedback,
-          projects (code, title, image_url),
-          classes (code)
-        `)
-        .eq('student_id', studentData.id)
-        .order('submitted_at', { ascending: false });
-
-      const mapped = data?.map((s: any) => ({
-        ...s,
-        project_code: s.projects?.code,
-        project_title: s.projects?.title,
-        project_image_url: s.projects?.image_url,
-        class_code: s.classes?.code
-      })) || [];
-
+      const { data } = await supabase.from('submissions').select(`id, submitted_at, status, link1, link2, link3, file1_url, file2_url, file3_url, file_urls, description, grade, feedback, projects (code, title, image_url), classes (code)`).eq('student_id', studentData.id).order('submitted_at', { ascending: false });
+      const mapped = data?.map((s: any) => ({ ...s, project_code: s.projects?.code, project_title: s.projects?.title, project_image_url: s.projects?.image_url, class_code: s.classes?.code })) || [];
       setSubmissions(mapped);
-    } catch (error) {
-      toast.error('Erreur lors du chargement');
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { toast.error('Erreur lors du chargement'); } finally { setLoading(false); }
   };
 
   const downloadFile = async (filePath: string) => {
     try {
       const fileName = filePath.split('/').pop() || 'file';
-      
-      // Check if it's a full URL or a storage path
       if (filePath.startsWith('http')) {
-        // It's a full URL - fetch directly
         const response = await fetch(filePath);
         if (!response.ok) throw new Error('Network response was not ok');
         const blob = await response.blob();
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = fileName;
-        link.click();
+        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = fileName; link.click();
       } else {
-        // It's a storage path - create a signed URL for private bucket
-        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-          .from('submissions')
-          .createSignedUrl(filePath, 60); // 60 seconds expiry
-        
-        if (signedUrlError) {
-          console.error('Signed URL error:', signedUrlError);
-          throw signedUrlError;
-        }
-        
-        if (!signedUrlData?.signedUrl) {
-          throw new Error('No signed URL generated');
-        }
-        
-        // Download using the signed URL
+        const { data: signedUrlData, error: signedUrlError } = await supabase.storage.from('submissions').createSignedUrl(filePath, 60);
+        if (signedUrlError) throw signedUrlError;
+        if (!signedUrlData?.signedUrl) throw new Error('No signed URL generated');
         const response = await fetch(signedUrlData.signedUrl);
         if (!response.ok) throw new Error('Download failed');
         const blob = await response.blob();
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = fileName;
-        link.click();
+        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = fileName; link.click();
       }
-      
       toast.success('Téléchargement réussi');
-    } catch (error: any) {
-      console.error('Download error:', error);
-      toast.error('Erreur: ' + (error.message || 'Téléchargement impossible'));
-    }
+    } catch (error: any) { toast.error('Erreur: ' + (error.message || 'Téléchargement impossible')); }
   };
 
   const withProtocol = (url?: string | null) => {
@@ -141,104 +80,89 @@ export default function StudentSubmissions() {
 
   return (
     <StudentDashboardLayout>
-      <div className="max-w-7xl mx-auto space-y-4 lg:space-y-6">
-        <div>
-          <h1 className="text-2xl lg:text-4xl font-bold mb-1">Mes Soumissions</h1>
-          <p className="text-sm text-muted-foreground">Historique de vos soumissions</p>
-        </div>
+      <div className="max-w-7xl mx-auto space-y-5">
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight font-heading">Mes Soumissions</h1>
+          <p className="text-sm text-muted-foreground mt-1">{submissions.length} soumission{submissions.length !== 1 ? 's' : ''}</p>
+        </motion.div>
 
-        <div className="grid gap-6">
-          {submissions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Aucune soumission</h3>
-              <p className="text-sm text-muted-foreground">Vous n'avez pas encore soumis de projet</p>
+        {submissions.length === 0 ? (
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center py-16">
+            <div className="h-20 w-20 rounded-[22px] bg-muted/60 flex items-center justify-center mb-5">
+              <FileText className="h-10 w-10 text-muted-foreground/30" />
             </div>
-          ) : (
-            submissions.map((sub) => (
-              <div key={sub.id} className="premium-card overflow-hidden">
-                {/* Project Image Hero */}
+            <h3 className="text-lg font-bold text-foreground mb-1">Aucune soumission</h3>
+            <p className="text-sm text-muted-foreground">Vous n'avez pas encore soumis de projet</p>
+          </motion.div>
+        ) : (
+          <motion.div variants={staggerContainer} initial="hidden" animate="show" className="grid gap-4">
+            {submissions.map((sub) => (
+              <motion.div key={sub.id} variants={staggerItem} className="bg-card rounded-2xl border border-border/50 overflow-hidden native-press touch-manipulation">
+                {/* Image hero */}
                 {sub.project_image_url ? (
-                  <div className="relative h-32 lg:h-48 w-full overflow-hidden">
-                    <img
-                      src={sub.project_image_url}
-                      alt={sub.project_title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+                  <div className="relative h-32 lg:h-44 w-full overflow-hidden">
+                    <img src={sub.project_image_url} alt={sub.project_title} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
                     <div className="absolute top-3 left-3">
-                      <Badge variant="outline" className="bg-background/90 backdrop-blur-sm border-border/50 text-xs">
-                        {sub.project_code}
-                      </Badge>
+                      <Badge variant="outline" className="bg-card/90 backdrop-blur-sm border-border/30 text-xs font-semibold rounded-lg">{sub.project_code}</Badge>
                     </div>
-                    <div className="absolute top-3 right-3">
-                      <StatusBadge status={sub.status} />
-                    </div>
+                    <div className="absolute top-3 right-3"><StatusBadge status={sub.status} /></div>
                   </div>
                 ) : (
-                  <div className="relative h-20 lg:h-32 w-full bg-gradient-to-br from-primary/10 via-background to-accent/10">
+                  <div className="relative h-20 lg:h-28 w-full bg-gradient-to-br from-primary/8 via-card to-accent/5">
+                    <div className="absolute -top-6 -right-6 h-20 w-20 rounded-full bg-primary/5" />
                     <div className="absolute top-3 left-3">
-                      <Badge variant="outline" className="bg-background/90 backdrop-blur-sm border-border/50 text-xs">
-                        {sub.project_code}
-                      </Badge>
+                      <Badge variant="outline" className="bg-card/90 backdrop-blur-sm border-border/30 text-xs font-semibold rounded-lg">{sub.project_code}</Badge>
                     </div>
-                    <div className="absolute top-3 right-3">
-                      <StatusBadge status={sub.status} />
-                    </div>
+                    <div className="absolute top-3 right-3"><StatusBadge status={sub.status} /></div>
                   </div>
                 )}
 
-                {/* Content */}
-                <div className="p-4 lg:p-6">
-                  <h3 className="text-base lg:text-xl font-bold mb-2">{sub.project_title}</h3>
+                <div className="p-4 lg:p-5 space-y-3">
+                  <h3 className="text-base lg:text-lg font-bold text-foreground">{sub.project_title}</h3>
 
-                  <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground mb-3">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Calendar className="h-3.5 w-3.5 shrink-0" />
-                    <span>
-                      {new Date(sub.submitted_at).toLocaleDateString('fr-FR')} à{' '}
-                      {new Date(sub.submitted_at).toLocaleTimeString('fr-FR', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </span>
+                    <span>{new Date(sub.submitted_at).toLocaleDateString('fr-FR')} à {new Date(sub.submitted_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
 
                   {sub.description && (
-                    <div className="text-sm text-muted-foreground mb-4 pb-4 border-b border-border">
+                    <div className="text-sm text-muted-foreground border-t border-border/40 pt-3">
                       <RichTextRenderer content={sub.description} />
                     </div>
                   )}
 
-                  <div className="grid gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {[sub.link1, sub.link2, sub.link3].filter(Boolean).map((link, idx) => (
-                      <a key={idx} href={withProtocol(link!)} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+                      <a key={idx} href={withProtocol(link!)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/20 transition-colors native-btn">
                         Lien {idx + 1}
                       </a>
                     ))}
-
-                    {/* Show all files from file_urls array (unlimited), or fallback to legacy columns */}
                     {(sub.file_urls && sub.file_urls.length > 0
                       ? sub.file_urls
                       : [sub.file1_url, sub.file2_url, sub.file3_url].filter(Boolean) as string[]
                     ).map((file, idx) => (
-                      <button key={idx} onClick={() => downloadFile(file)} className="text-sm text-primary hover:underline flex items-center gap-2">
-                        <Download className="h-4 w-4" />
+                      <button key={idx} onClick={() => downloadFile(file)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted text-foreground text-xs font-semibold hover:bg-muted/80 transition-colors native-btn">
+                        <Download className="h-3 w-3" />
                         {file.split('/').pop()?.replace(/^\d+_/, '') || `Fichier ${idx + 1}`}
                       </button>
                     ))}
                   </div>
 
                   {sub.grade !== null && (
-                    <div className="mt-4 pt-4 border-t border-border">
-                      <p className="text-sm font-semibold">Note: {sub.grade}/20</p>
-                      {sub.feedback && <div className="text-sm text-muted-foreground mt-2"><RichTextRenderer content={sub.feedback} /></div>}
+                    <div className="border-t border-border/40 pt-3 space-y-2">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-bold text-foreground">Note:</span>
+                        <span className={`text-lg font-bold ${sub.grade >= 14 ? 'text-success' : sub.grade >= 10 ? 'text-warning' : 'text-destructive'}`}>{sub.grade}/20</span>
+                      </div>
+                      {sub.feedback && <div className="text-sm text-muted-foreground"><RichTextRenderer content={sub.feedback} /></div>}
                     </div>
                   )}
                 </div>
-              </div>
-            ))
-          )}
-        </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
       </div>
     </StudentDashboardLayout>
   );
