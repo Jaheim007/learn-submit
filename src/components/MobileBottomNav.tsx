@@ -14,10 +14,10 @@ export const MobileBottomNav = () => {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-background/80 backdrop-blur-xl border-t border-border/40"
+      className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card/95 backdrop-blur-2xl border-t border-border/30 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="flex items-center justify-around h-16">
+      <div className="flex items-center justify-around h-[60px]">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -26,15 +26,20 @@ export const MobileBottomNav = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`relative flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all duration-200 ${
-                isActive ? 'text-primary' : 'text-muted-foreground active:scale-95'
+              className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all duration-150 touch-manipulation ${
+                isActive ? 'text-primary' : 'text-muted-foreground active:scale-90 active:opacity-70'
               }`}
             >
               {isActive && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary" />
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-[3px] rounded-b-full bg-primary" />
               )}
-              <Icon className={`h-5 w-5 transition-transform ${isActive ? 'scale-110' : ''}`} />
-              <span className="text-[10px] font-semibold leading-none">{item.label}</span>
+              <div className={`relative ${isActive ? 'scale-110' : ''} transition-transform duration-150`}>
+                <Icon className="h-[22px] w-[22px]" strokeWidth={isActive ? 2.5 : 2} />
+                {isActive && (
+                  <div className="absolute inset-0 bg-primary/15 rounded-full blur-lg scale-[2.5]" />
+                )}
+              </div>
+              <span className={`text-[10px] leading-none mt-0.5 ${isActive ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
             </Link>
           );
         })}

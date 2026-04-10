@@ -34,16 +34,16 @@ export const StudentDashboardLayout = ({ children }: StudentDashboardLayoutProps
   };
 
   return (
-    <div className="min-h-screen w-full bg-muted/30">
+    <div className="min-h-screen min-h-[100dvh] w-full bg-background">
       <StudentSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main Content */}
       <div className="lg:ml-[260px]">
-        {/* Top Bar — glassmorphism */}
-        <div className="h-16 bg-background/70 backdrop-blur-xl border-b border-border/40 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30">
+        {/* Top Bar — native style sticky header */}
+        <div className="h-14 lg:h-16 bg-card/95 backdrop-blur-2xl border-b border-border/30 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-sm">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2.5 -ml-1 rounded-xl text-foreground hover:bg-muted/60 transition-all active:scale-95"
+            className="lg:hidden p-2 -ml-1 rounded-xl text-foreground hover:bg-muted/60 transition-all active:scale-90 touch-manipulation"
             aria-label="Ouvrir le menu"
           >
             <Menu className="h-5 w-5" />
@@ -51,7 +51,7 @@ export const StudentDashboardLayout = ({ children }: StudentDashboardLayoutProps
 
           {/* Mobile center brand */}
           <div className="lg:hidden flex-1 flex justify-center">
-            <span className="text-sm font-bold text-foreground tracking-tight">Hacktualiz</span>
+            <span className="text-[15px] font-bold text-foreground tracking-tight">Hacktualiz</span>
           </div>
 
           {/* Desktop greeting */}
@@ -61,12 +61,14 @@ export const StudentDashboardLayout = ({ children }: StudentDashboardLayoutProps
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <ThemeToggle />
+          <div className="flex items-center gap-1">
+            <div className="hidden lg:block">
+              <ThemeToggle />
+            </div>
             <NotificationBell />
             <button
               onClick={() => navigate('/etudiant/profil')}
-              className="hover:opacity-80 transition-all cursor-pointer active:scale-95 rounded-full ring-2 ring-transparent hover:ring-primary/20"
+              className="hover:opacity-80 transition-all cursor-pointer active:scale-90 rounded-full touch-manipulation"
             >
               <ProfileAvatar
                 avatarUrl={profile?.avatar_url}
@@ -77,8 +79,8 @@ export const StudentDashboardLayout = ({ children }: StudentDashboardLayoutProps
           </div>
         </div>
 
-        {/* Page Content */}
-        <main className="p-4 lg:p-8 pb-24 lg:pb-8">
+        {/* Page Content — native scroll container */}
+        <main className="p-4 lg:p-8 pb-[88px] lg:pb-8 overscroll-y-contain">
           {children}
         </main>
       </div>
