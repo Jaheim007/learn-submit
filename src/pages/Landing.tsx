@@ -263,38 +263,36 @@ const Landing = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
-      {/* Navigation */}
+    <div className="min-h-screen min-h-[100dvh] bg-background overflow-x-hidden">
+      {/* Navigation — native-style sticky header */}
       <motion.nav 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border"
+        className="sticky top-0 z-50 bg-card/95 backdrop-blur-2xl border-b border-border/30 shadow-sm"
       >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={hacktualizLogo} alt="Hacktualiz" className="h-9 w-9 rounded-lg object-cover" />
-            <span className="font-heading font-bold text-lg text-foreground tracking-tight">Hacktualiz</span>
-            <div className="hidden sm:flex items-center gap-1.5 bg-muted px-2.5 py-1 rounded-full">
-              <span className="text-xs text-muted-foreground font-medium">Formation · Certification · Intégration</span>
-            </div>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 lg:h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <img src={hacktualizLogo} alt="Hacktualiz" className="h-8 w-8 rounded-xl object-cover" />
+            <span className="font-heading font-bold text-[15px] lg:text-lg text-foreground tracking-tight">Hacktualiz</span>
           </div>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleDarkMode}
-              className="rounded-full"
+              className="rounded-full h-9 w-9 touch-manipulation active:scale-90"
             >
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
             <Button 
               size="sm"
               onClick={() => navigate('/etudiant/login')}
-              className="bg-gradient-primary hover:opacity-90 text-primary-foreground rounded-lg font-semibold"
+              className="bg-gradient-primary hover:opacity-90 text-primary-foreground rounded-xl font-semibold h-9 px-4 touch-manipulation active:scale-95"
             >
               <LogIn className="h-4 w-4 mr-1.5" />
-              Connexion
+              <span className="hidden sm:inline">Connexion</span>
+              <span className="sm:hidden">Entrer</span>
             </Button>
           </div>
         </div>
