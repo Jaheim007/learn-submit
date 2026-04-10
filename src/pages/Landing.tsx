@@ -263,62 +263,59 @@ const Landing = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
-      {/* Navigation */}
+    <div className="min-h-screen min-h-[100dvh] bg-background overflow-x-hidden">
+      {/* Navigation — native-style sticky header */}
       <motion.nav 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border"
+        className="sticky top-0 z-50 bg-card/95 backdrop-blur-2xl border-b border-border/30 shadow-sm"
       >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={hacktualizLogo} alt="Hacktualiz" className="h-9 w-9 rounded-lg object-cover" />
-            <span className="font-heading font-bold text-lg text-foreground tracking-tight">Hacktualiz</span>
-            <div className="hidden sm:flex items-center gap-1.5 bg-muted px-2.5 py-1 rounded-full">
-              <span className="text-xs text-muted-foreground font-medium">Formation · Certification · Intégration</span>
-            </div>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 lg:h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <img src={hacktualizLogo} alt="Hacktualiz" className="h-8 w-8 rounded-xl object-cover" />
+            <span className="font-heading font-bold text-[15px] lg:text-lg text-foreground tracking-tight">Hacktualiz</span>
           </div>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleDarkMode}
-              className="rounded-full"
+              className="rounded-full h-9 w-9 touch-manipulation active:scale-90"
             >
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
             <Button 
               size="sm"
               onClick={() => navigate('/etudiant/login')}
-              className="bg-gradient-primary hover:opacity-90 text-primary-foreground rounded-lg font-semibold"
+              className="bg-gradient-primary hover:opacity-90 text-primary-foreground rounded-xl font-semibold h-9 px-4 touch-manipulation active:scale-95"
             >
               <LogIn className="h-4 w-4 mr-1.5" />
-              Connexion
+              <span className="hidden sm:inline">Connexion</span>
+              <span className="sm:hidden">Entrer</span>
             </Button>
           </div>
         </div>
       </motion.nav>
 
-      {/* Hero Section */}
+      {/* Hero Section — full viewport on mobile */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_hsl(var(--secondary)_/_0.08),_transparent_50%)]" />
         <div className="absolute top-10 right-10 w-[500px] h-[500px] bg-secondary/5 rounded-full blur-[100px]" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[80px]" />
         
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-16 sm:pb-20 relative">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-28 pb-10 sm:pb-20 relative">
           <div className="max-w-3xl">
             <motion.div 
               variants={fadeUp} initial="hidden" animate="visible" custom={0}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-secondary/8 border border-secondary/15 rounded-full mb-8"
+              className="inline-flex items-center gap-2 px-3 py-1.5 bg-secondary/8 border border-secondary/15 rounded-full mb-5 sm:mb-8"
             >
               <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-              <span className="text-secondary text-xs font-semibold tracking-wide uppercase">Plateforme de soumission de projets</span>
+              <span className="text-secondary text-[11px] sm:text-xs font-semibold tracking-wide uppercase">Plateforme de soumission</span>
             </motion.div>
             
             <motion.h1 
               variants={fadeUp} initial="hidden" animate="visible" custom={1}
-              className="text-5xl sm:text-6xl lg:text-7xl font-heading font-bold text-foreground leading-[1.05] tracking-tight mb-6"
+              className="text-[28px] sm:text-5xl lg:text-7xl font-heading font-bold text-foreground leading-[1.1] tracking-tight mb-4 sm:mb-6"
             >
               Soumettez vos projets.
               <br />
@@ -327,7 +324,7 @@ const Landing = () => {
             
             <motion.p 
               variants={fadeUp} initial="hidden" animate="visible" custom={2}
-              className="text-lg sm:text-xl text-muted-foreground max-w-xl leading-relaxed mb-10"
+              className="text-sm sm:text-xl text-muted-foreground max-w-xl leading-relaxed mb-6 sm:mb-10"
             >
               La plateforme centralisée pour soumettre vos travaux, accéder à vos cours et suivre vos résultats en temps réel.
             </motion.p>
@@ -339,7 +336,7 @@ const Landing = () => {
               <Button 
                 size="lg"
                 onClick={() => navigate('/etudiant/login')}
-                className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 h-13 text-base font-semibold rounded-xl shadow-xl shadow-primary/20 group"
+                className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 h-12 sm:h-13 text-sm sm:text-base font-semibold rounded-xl shadow-xl shadow-primary/20 group w-full sm:w-auto touch-manipulation active:scale-95"
               >
                 <LogIn className="mr-2 h-5 w-5" />
                 Se connecter
@@ -348,13 +345,13 @@ const Landing = () => {
             </motion.div>
           </div>
 
-          {/* Stats Cards */}
+          {/* Stats — horizontal scroll on mobile */}
           <motion.div 
             variants={stagger} initial="hidden" animate="visible"
-            className="mt-20 sm:mt-24"
+            className="mt-10 sm:mt-24"
           >
-            <div className="bg-card rounded-2xl border border-border p-6 sm:p-8 shadow-custom">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="sm:bg-card sm:rounded-2xl sm:border sm:border-border sm:p-8 sm:shadow-custom">
+              <div className="flex gap-3 overflow-x-auto pb-2 sm:pb-0 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-4 sm:gap-4 scrollbar-hide">
                 {[
                   { label: 'Projets soumis', value: stats?.submissionsCount ?? '...', icon: Upload },
                   { label: 'Étudiants actifs', value: stats?.studentsCount ?? '...', icon: Users },
@@ -364,12 +361,11 @@ const Landing = () => {
                   <motion.div 
                     key={i} 
                     variants={scaleIn} custom={i + 4}
-                    whileHover={{ scale: 1.03, y: -2 }}
-                    className="bg-background rounded-xl border border-border p-4 sm:p-5 text-center cursor-default transition-shadow hover:shadow-lg"
+                    className="min-w-[140px] snap-center bg-card sm:bg-background rounded-xl border border-border p-4 text-center cursor-default flex-shrink-0 sm:flex-shrink"
                   >
                     <stat.icon className="h-5 w-5 text-secondary mx-auto mb-2" />
-                    <div className="text-xl sm:text-2xl font-heading font-bold text-foreground">{stat.value}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
+                    <div className="text-xl font-heading font-bold text-foreground">{stat.value}</div>
+                    <div className="text-[11px] text-muted-foreground mt-1">{stat.label}</div>
                   </motion.div>
                 ))}
               </div>

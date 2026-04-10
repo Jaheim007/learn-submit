@@ -167,7 +167,7 @@ export default function StudentLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
+    <div className="min-h-screen min-h-[100dvh] flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <Link to="/">
