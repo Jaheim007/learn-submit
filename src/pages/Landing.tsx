@@ -4,8 +4,7 @@ import { ArrowRight, CheckCircle, Upload, BookOpen, BarChart3, Shield, Clock, Us
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
 
-import kelyaLogo from '@/assets/kelya-logo-dark.png';
-import hacktualzLogo from '@/assets/hacktualiz-logo-light.png';
+import hacktualizLogo from '@/assets/hacktualiz-main-logo.jpeg';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -242,7 +241,6 @@ const PlatformSlider = () => {
 
 const Landing = () => {
   const navigate = useNavigate();
-  // Curated showcase values for the public landing page (RLS blocks anon reads)
   const stats = { submissionsCount: '1,200+', studentsCount: '350+', validationRate: '94%', coursesCount: '45+' };
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
 
@@ -272,11 +270,10 @@ const Landing = () => {
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={kelyaLogo} alt="Kelya Group" className="h-9 w-9 rounded-lg object-cover" />
-            <span className="font-heading font-bold text-lg text-foreground tracking-tight">Kelya Group</span>
+            <img src={hacktualizLogo} alt="Hacktualiz" className="h-9 w-9 rounded-lg object-cover" />
+            <span className="font-heading font-bold text-lg text-foreground tracking-tight">Hacktualiz</span>
             <div className="hidden sm:flex items-center gap-1.5 bg-muted px-2.5 py-1 rounded-full">
-              <img src={hacktualzLogo} alt="Hacktualiz" className="h-4 w-4 rounded-sm object-cover" />
-              <span className="text-xs text-muted-foreground font-medium">× Hacktualiz</span>
+              <span className="text-xs text-muted-foreground font-medium">Formation · Certification · Intégration</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -302,7 +299,6 @@ const Landing = () => {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        {/* Decorative blobs */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_hsl(var(--secondary)_/_0.08),_transparent_50%)]" />
         <div className="absolute top-10 right-10 w-[500px] h-[500px] bg-secondary/5 rounded-full blur-[100px]" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[80px]" />
@@ -387,16 +383,12 @@ const Landing = () => {
             className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12"
           >
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.2em]">Propulsé par</span>
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-4">
               <motion.img 
                 whileHover={{ scale: 1.05 }}
-                src={kelyaLogo} alt="Kelya Group" className="h-10 w-10 rounded-lg object-cover" 
+                src={hacktualizLogo} alt="Hacktualiz" className="h-10 w-10 rounded-lg object-cover" 
               />
-              <span className="text-muted-foreground text-lg font-light">×</span>
-              <motion.img 
-                whileHover={{ scale: 1.05 }}
-                src={hacktualzLogo} alt="Hacktualiz" className="h-10 w-10 rounded-lg object-cover" 
-              />
+              <span className="font-heading font-semibold text-foreground">Hacktualiz INC</span>
             </div>
           </motion.div>
         </div>
@@ -625,13 +617,12 @@ const Landing = () => {
       <footer className="py-8 sm:py-12 px-4 sm:px-6 border-t border-border">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <img src={kelyaLogo} alt="Kelya Group" className="h-8 w-8 rounded-lg object-cover" />
-              <span className="text-xs text-muted-foreground">×</span>
-              <img src={hacktualzLogo} alt="Hacktualiz" className="h-8 w-8 rounded-lg object-cover" />
+            <div className="flex items-center gap-3">
+              <img src={hacktualizLogo} alt="Hacktualiz" className="h-8 w-8 rounded-lg object-cover" />
+              <span className="font-heading font-semibold text-sm text-foreground">Hacktualiz INC</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Kelya Group × Hacktualiz INC. Tous droits réservés.
+              © {new Date().getFullYear()} Hacktualiz INC. Tous droits réservés.
             </p>
           </div>
         </div>
