@@ -152,12 +152,12 @@ export default function AdminHome() {
     <div className="space-y-10">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Tableau de bord</h1>
-        <p className="text-sm text-muted-foreground mt-1.5">Vue d'ensemble de la plateforme Hacktualiz</p>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Tableau de bord</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">Vue d'ensemble de la plateforme Hacktualiz</p>
       </div>
 
       {/* Stats Grid — more generous spacing */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-5">
         {statCards.map((stat) => (
           <Card
             key={stat.title}

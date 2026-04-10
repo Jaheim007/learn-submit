@@ -148,7 +148,7 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 w-[95vw] sm:w-auto">
         {/* Header */}
         <div className="bg-primary/5 border-b px-6 py-5">
           <DialogHeader>
