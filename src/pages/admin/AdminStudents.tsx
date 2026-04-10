@@ -256,22 +256,22 @@ export default function AdminStudents() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-3xl font-bold text-foreground">Gestion des étudiants</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Gestion des étudiants</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             {getFilteredStudents.length} étudiant{getFilteredStudents.length > 1 ? 's' : ''} trouvé{getFilteredStudents.length > 1 ? 's' : ''}
           </p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
           <RefreshHeader 
             lastRefreshTime={lastRefreshTime} 
             onRefresh={refresh}
             isRefreshing={loading}
           />
           <Button onClick={exportToCSV} variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="h-4 w-4 mr-1.5" />
             <span className="hidden sm:inline">Exporter CSV</span>
             <span className="sm:hidden">CSV</span>
           </Button>
@@ -280,23 +280,20 @@ export default function AdminStudents() {
 
       {/* Filters */}
       <Card>
-        <CardHeader>
-          <CardTitle>Filtres</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <CardContent className="pt-4 pb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Rechercher par nom ou email..."
+                placeholder="Rechercher..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
+                className="pl-9 h-10"
               />
             </div>
             
             <Select value={selectedClass} onValueChange={setSelectedClass}>
-              <SelectTrigger>
+              <SelectTrigger className="h-10">
                 <SelectValue placeholder="Toutes les classes" />
               </SelectTrigger>
               <SelectContent>
@@ -309,7 +306,7 @@ export default function AdminStudents() {
               </SelectContent>
             </Select>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 col-span-1 sm:col-span-2 lg:col-span-2">
               <input
                 type="checkbox"
                 id="showInactive"
@@ -325,8 +322,9 @@ export default function AdminStudents() {
         </CardContent>
       </Card>
 
-      {/* Students Table */}
-      <Card>
+      {/* Students — Desktop Table, Mobile Cards */}
+      {/* Desktop */}
+      <Card className="hidden lg:block">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
@@ -344,7 +342,7 @@ export default function AdminStudents() {
               {filteredStudents.map((student) => (
                 <TableRow key={student.id}>
                   <TableCell className="font-medium">{student.full_name}</TableCell>
-                  <TableCell>{student.email}</TableCell>
+                  <TableCell className="text-sm">{student.email}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {student.classes.map((classe) => (
@@ -360,65 +358,33 @@ export default function AdminStudents() {
                       {student.is_active ? 'Actif' : 'Inactif'}
                     </Badge>
                   </TableCell>
-                  <TableCell>
-                    {formatDistanceToNow(new Date(student.created_at), { 
-                      addSuffix: true, 
-                      locale: fr 
-                    })}
+                  <TableCell className="text-sm text-muted-foreground">
+                    {formatDistanceToNow(new Date(student.created_at), { addSuffix: true, locale: fr })}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => {
-                          setSelectedStudent(student);
-                          setProfileModalOpen(true);
-                        }}
-                        title="Voir profil"
-                      >
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => { setSelectedStudent(student); setProfileModalOpen(true); }} title="Voir profil">
                         <Eye className="h-4 w-4" />
                       </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setStudentToChangeClass(student);
-                          setChangeClassOpen(true);
-                        }}
-                        title="Changer de classe"
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => { setStudentToChangeClass(student); setChangeClassOpen(true); }} title="Changer de classe">
                         <ArrowRightLeft className="h-4 w-4" />
                       </Button>
-                      
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className={student.is_active ? "text-red-600" : "text-green-600"}
-                          >
+                          <Button variant="ghost" size="sm" className={student.is_active ? "text-destructive" : "text-[hsl(var(--success))]"}>
                             {student.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              {student.is_active ? 'Désactiver' : 'Réactiver'} l'étudiant
-                            </AlertDialogTitle>
+                            <AlertDialogTitle>{student.is_active ? 'Désactiver' : 'Réactiver'} l'étudiant</AlertDialogTitle>
                             <AlertDialogDescription>
-                              {student.is_active 
-                                ? 'Désactiver l\'étudiant ? Cette action est réversible.'
-                                : 'Réactiver l\'étudiant ? Il pourra à nouveau accéder à la plateforme.'
-                              }
+                              {student.is_active ? "Désactiver l'étudiant ? Cette action est réversible." : "Réactiver l'étudiant ?"}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Annuler</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => toggleStudentStatus(student.id, student.is_active)}
-                            >
+                            <AlertDialogAction onClick={() => toggleStudentStatus(student.id, student.is_active)}>
                               {student.is_active ? 'Désactiver' : 'Réactiver'}
                             </AlertDialogAction>
                           </AlertDialogFooter>
@@ -439,6 +405,56 @@ export default function AdminStudents() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Mobile Cards */}
+      <div className="lg:hidden space-y-3">
+        {filteredStudents.length === 0 ? (
+          <Card><CardContent className="py-8 text-center text-muted-foreground text-sm">Aucun étudiant trouvé</CardContent></Card>
+        ) : (
+          filteredStudents.map((student) => (
+            <Card key={student.id} className="touch-manipulation active:scale-[0.99] transition-transform">
+              <CardContent className="p-4 space-y-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground truncate">{student.full_name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{student.email}</p>
+                  </div>
+                  <Badge variant={student.is_active ? "default" : "secondary"} className="text-[10px] shrink-0">
+                    {student.is_active ? 'Actif' : 'Inactif'}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {student.classes.map((classe) => (
+                    <Badge key={classe.code} variant="secondary" className="text-[10px] px-1.5 py-0">{classe.code}</Badge>
+                  ))}
+                  <span className="text-[10px] text-muted-foreground ml-auto">{student.submissions_count} soum.</span>
+                </div>
+                <div className="flex items-center justify-between pt-1 border-t border-border/40">
+                  <span className="text-[10px] text-muted-foreground">
+                    {formatDistanceToNow(new Date(student.created_at), { addSuffix: true, locale: fr })}
+                  </span>
+                  <div className="flex items-center gap-0.5">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setSelectedStudent(student); setProfileModalOpen(true); }}>
+                      <Eye className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setStudentToChangeClass(student); setChangeClassOpen(true); }}>
+                      <ArrowRightLeft className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`h-8 w-8 ${student.is_active ? "text-destructive" : "text-[hsl(var(--success))]"}`}
+                      onClick={() => toggleStudentStatus(student.id, student.is_active)}
+                    >
+                      {student.is_active ? <UserX className="h-3.5 w-3.5" /> : <UserCheck className="h-3.5 w-3.5" />}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
 
       {/* Pagination */}
       {totalPages > 1 && (

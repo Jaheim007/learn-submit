@@ -148,7 +148,7 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 w-[95vw] sm:w-auto">
         {/* Header */}
         <div className="bg-primary/5 border-b px-6 py-5">
           <DialogHeader>
@@ -569,11 +569,11 @@ export default function AdminSubmissions() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Révision des soumissions</h1>
-          <p className="text-muted-foreground text-sm">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Révision des soumissions</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm">
             {totalCount} soumission{totalCount > 1 ? 's' : ''} au total
             {totalPages > 1 && ` — Page ${currentPage + 1}/${totalPages}`}
           </p>
@@ -587,23 +587,20 @@ export default function AdminSubmissions() {
 
       {/* Filters */}
       <Card>
-        <CardHeader>
-          <CardTitle>Filtres</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <CardContent className="pt-4 pb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
+                className="pl-9 h-10"
               />
             </div>
             
             <Select value={selectedClass} onValueChange={setSelectedClass}>
-              <SelectTrigger>
+              <SelectTrigger className="h-10">
                 <SelectValue placeholder="Toutes les classes" />
               </SelectTrigger>
               <SelectContent>
@@ -617,7 +614,7 @@ export default function AdminSubmissions() {
             </Select>
 
             <Select value={selectedProject} onValueChange={setSelectedProject}>
-              <SelectTrigger>
+              <SelectTrigger className="h-10">
                 <SelectValue placeholder="Tous les projets" />
               </SelectTrigger>
               <SelectContent>
@@ -631,7 +628,7 @@ export default function AdminSubmissions() {
             </Select>
 
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger>
+              <SelectTrigger className="h-10">
                 <SelectValue placeholder="Tous les statuts" />
               </SelectTrigger>
               <SelectContent>
@@ -652,15 +649,15 @@ export default function AdminSubmissions() {
                 className="rounded"
               />
               <label htmlFor="latestOnly" className="text-sm">
-                Dernières versions uniquement
+                Dernières uniquement
               </label>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Submissions Table */}
-      <Card>
+      {/* Desktop Table */}
+      <Card className="hidden lg:block">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
@@ -680,20 +677,17 @@ export default function AdminSubmissions() {
                 <TableRow key={submission.id}>
                    <TableCell>
                      <div>
-                       <div className="font-medium">
+                       <div className="font-medium text-sm">
                          {submission.student.full_name || submission.student.email || 'Nom non défini'}
                        </div>
-                       <div className="text-sm text-muted-foreground">{submission.student.email}</div>
+                       <div className="text-xs text-muted-foreground">{submission.student.email}</div>
                      </div>
                    </TableCell>
                   <TableCell>{submission.class.code}</TableCell>
-                  <TableCell>{submission.project.title}</TableCell>
+                  <TableCell className="max-w-[200px] truncate">{submission.project.title}</TableCell>
                   <TableCell>#{submission.version}</TableCell>
-                  <TableCell>
-                    {formatDistanceToNow(new Date(submission.submitted_at), { 
-                      addSuffix: true, 
-                      locale: fr 
-                    })}
+                  <TableCell className="text-sm">
+                    {formatDistanceToNow(new Date(submission.submitted_at), { addSuffix: true, locale: fr })}
                   </TableCell>
                   <TableCell>
                     <Badge className={getStatusBadgeColor(submission.status)}>
@@ -730,31 +724,56 @@ export default function AdminSubmissions() {
         </CardContent>
       </Card>
 
+      {/* Mobile Cards */}
+      <div className="lg:hidden space-y-3">
+        {filteredSubmissions.length === 0 ? (
+          <Card><CardContent className="py-8 text-center text-muted-foreground text-sm">Aucune soumission trouvée</CardContent></Card>
+        ) : (
+          filteredSubmissions.map((submission) => (
+            <Card
+              key={submission.id}
+              className="touch-manipulation active:scale-[0.99] transition-transform cursor-pointer"
+              onClick={() => { setSelectedSubmission(submission); setIsReviewModalOpen(true); }}
+            >
+              <CardContent className="p-4 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground truncate">
+                      {submission.student.full_name || submission.student.email}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">{submission.project.title}</p>
+                  </div>
+                  <Badge className={`${getStatusBadgeColor(submission.status)} text-[10px] shrink-0`}>
+                    {submission.status}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{submission.class.code}</Badge>
+                    <span>v{submission.version}</span>
+                    <span>{submission.grade ? `${submission.grade}/20` : '—'}</span>
+                  </div>
+                  <span>{formatDistanceToNow(new Date(submission.submitted_at), { addSuffix: true, locale: fr })}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
       {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Affichage {currentPage * PAGE_SIZE + 1}–{Math.min((currentPage + 1) * PAGE_SIZE, totalCount)} sur {totalCount}
+          <p className="text-xs text-muted-foreground">
+            {currentPage * PAGE_SIZE + 1}–{Math.min((currentPage + 1) * PAGE_SIZE, totalCount)} / {totalCount}
           </p>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage === 0}
-              onClick={() => setCurrentPage(p => p - 1)}
-            >
-              Précédent
+            <Button variant="outline" size="sm" disabled={currentPage === 0} onClick={() => setCurrentPage(p => p - 1)}>
+              Préc.
             </Button>
-            <span className="text-sm font-medium px-2">
-              {currentPage + 1} / {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage >= totalPages - 1}
-              onClick={() => setCurrentPage(p => p + 1)}
-            >
-              Suivant
+            <span className="text-xs font-medium">{currentPage + 1}/{totalPages}</span>
+            <Button variant="outline" size="sm" disabled={currentPage >= totalPages - 1} onClick={() => setCurrentPage(p => p + 1)}>
+              Suiv.
             </Button>
           </div>
         </div>

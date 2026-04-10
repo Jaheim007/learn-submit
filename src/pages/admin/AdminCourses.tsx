@@ -273,21 +273,21 @@ export default function AdminCourses() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       {/* Page header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Gestion des Cours</h1>
-          <p className="text-muted-foreground mt-1">
-            {materials.length} cours disponible{materials.length > 1 ? 's' : ''} pour vos groupes
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Gestion des Cours</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {materials.length} cours disponible{materials.length > 1 ? 's' : ''}
           </p>
         </div>
         <Button
           onClick={() => setShowUploadForm(!showUploadForm)}
-          className="gap-2"
+          className="gap-2 w-full sm:w-auto"
         >
           {showUploadForm ? <ChevronUp className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
-          {showUploadForm ? 'Masquer le formulaire' : 'Nouveau cours'}
+          {showUploadForm ? 'Masquer' : 'Nouveau cours'}
         </Button>
       </div>
 
