@@ -107,7 +107,7 @@ export default function TeacherLayout() {
       )}
 
       <div className="lg:ml-64 relative z-10">
-        <div className="h-14 lg:h-16 border-b border-border/50 bg-card/95 lg:bg-background/40 backdrop-blur-2xl lg:backdrop-blur-xl flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30 shadow-sm lg:shadow-none">
+        <div className="h-14 lg:h-16 border-b border-border/20 glass-heavy flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
           <div className="flex items-center gap-3">
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-xl text-foreground hover:bg-muted/60 transition-all touch-manipulation active:scale-90">
               <Menu className="h-5 w-5" />
@@ -125,8 +125,9 @@ export default function TeacherLayout() {
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card/95 backdrop-blur-2xl border-t border-border/30 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="flex items-center justify-around h-[60px]">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden glass-heavy" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        <div className="flex items-center justify-around h-[64px]">
           {bottomNavItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
