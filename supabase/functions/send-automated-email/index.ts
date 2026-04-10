@@ -21,13 +21,13 @@ function getEmailTemplate(type: EventType, data: Record<string, any>): { subject
   const brandHeader = `
     <div style="background: linear-gradient(135deg, #1a2744, #c7253e); padding: 24px; text-align: center;">
       <h1 style="color: white; font-family: 'Space Grotesk', sans-serif; margin: 0; font-size: 20px;">
-        Kelya Group × Hacktualiz
+        Hacktualiz INC
       </h1>
     </div>`;
 
   const brandFooter = `
     <div style="padding: 16px; text-align: center; color: #888; font-size: 12px; border-top: 1px solid #eee;">
-      <p>Kelya Group × Hacktualiz INC — Plateforme d'apprentissage</p>
+      <p>Hacktualiz INC — Formation · Certification · Intégration</p>
     </div>`;
 
   switch (type) {
@@ -128,7 +128,7 @@ async function sendViaResend(
   emailType: string,
 ) {
   const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-  const RESEND_FROM = Deno.env.get('RESEND_FROM') || 'Kelya Group <info@genessible.com>';
+  const RESEND_FROM = Deno.env.get('RESEND_FROM') || 'Hacktualiz <info@genessible.com>';
   if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY not configured');
 
   let sent = 0;
@@ -189,7 +189,7 @@ async function sendViaResendWithMeta(
   meta: Record<string, any>,
 ) {
   const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-  const RESEND_FROM = Deno.env.get('RESEND_FROM') || 'Kelya Group <info@genessible.com>';
+  const RESEND_FROM = Deno.env.get('RESEND_FROM') || 'Hacktualiz <info@genessible.com>';
   if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY not configured');
 
   let sent = 0;

@@ -40,7 +40,7 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    const resendFrom = Deno.env.get("RESEND_FROM") || "Kelya Group <info@genessible.com>";
+    const resendFrom = Deno.env.get("RESEND_FROM") || "Hacktualiz <info@genessible.com>";
 
     if (!supabaseUrl || !supabaseServiceKey) {
       throw new Error("Missing Supabase environment variables");
@@ -123,7 +123,7 @@ const handler = async (req: Request): Promise<Response> => {
         html: `
           <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #e5e7eb;">
             <div style="background: linear-gradient(135deg, #1a2744, #c7253e); padding: 24px; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 20px;">Kelya Group × Hacktualiz</h1>
+              <h1 style="color: white; margin: 0; font-size: 20px;">Hacktualiz INC</h1>
             </div>
             <div style="padding: 24px; color: #1f2937;">
               <h2 style="margin: 0 0 12px; font-size: 18px;">Votre code de connexion</h2>
