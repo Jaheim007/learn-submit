@@ -5,40 +5,40 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Hacktualiz — Navy/Dark/Red Design System */
+/* Hacktualiz — Dark Tech Design System */
 
 @layer base {
   :root {
-    /* Light Mode — Clean with Navy accents */
-    --background: 220 20% 97%;
-    --foreground: 230 40% 10%;
+    /* Light Mode — Clean with purple accents */
+    --background: 225 15% 96%;
+    --foreground: 225 30% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 230 40% 10%;
+    --card-foreground: 225 30% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 230 40% 10%;
+    --popover-foreground: 225 30% 10%;
 
-    /* Primary - Deep Navy (from Hacktualiz) */
-    --primary: 230 60% 22%;
+    /* Primary - Deep Indigo/Purple (from Hacktualiz) */
+    --primary: 248 53% 58%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 230 60% 16%;
-    --primary-light: 230 50% 35%;
-    --primary-glow: 230 60% 28%;
+    --primary-hover: 248 53% 50%;
+    --primary-light: 248 45% 68%;
+    --primary-glow: 248 53% 63%;
 
-    /* Secondary - Crimson Red accent */
-    --secondary: 350 80% 45%;
+    /* Secondary - Soft Lavender accent */
+    --secondary: 248 53% 58%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-hover: 350 80% 38%;
-    --secondary-light: 350 70% 55%;
-    --secondary-glow: 350 80% 50%;
+    --secondary-hover: 248 53% 50%;
+    --secondary-light: 248 45% 68%;
+    --secondary-glow: 248 53% 63%;
 
     /* Neutral System */
-    --muted: 220 16% 93%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 225 14% 92%;
+    --muted-foreground: 225 10% 46%;
 
-    --accent: 220 16% 93%;
-    --accent-foreground: 230 40% 10%;
+    --accent: 225 14% 92%;
+    --accent-foreground: 225 30% 10%;
 
     /* Status Colors */
     --success: 152 60% 36%;
@@ -47,7 +47,7 @@
     --success-glow: 152 60% 40%;
 
     --warning: 38 92% 50%;
-    --warning-foreground: 230 40% 10%;
+    --warning-foreground: 225 30% 10%;
     --warning-light: 38 92% 60%;
     --warning-glow: 38 92% 55%;
 
@@ -57,75 +57,75 @@
     --destructive-glow: 0 72% 56%;
 
     /* Interface Elements */
-    --border: 220 16% 88%;
-    --input: 220 16% 88%;
-    --ring: 230 60% 22%;
+    --border: 225 14% 88%;
+    --input: 225 14% 88%;
+    --ring: 248 53% 58%;
 
     /* Layout */
     --radius: 0.625rem;
     --content-max-width: 1400px;
 
-    /* Gradients — Navy to Dark with Red accent */
-    --gradient-primary: linear-gradient(135deg, hsl(230 60% 22%) 0%, hsl(350 80% 45%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(220 20% 97%) 0%, hsl(230 30% 94%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(230 20% 97%) 100%);
+    /* Gradients — Purple to Blue */
+    --gradient-primary: linear-gradient(135deg, hsl(248 53% 58%) 0%, hsl(220 70% 55%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(225 15% 96%) 0%, hsl(248 20% 94%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(248 15% 97%) 100%);
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(230 40% 10% / 0.04);
-    --shadow-md: 0 4px 6px -1px hsl(230 40% 10% / 0.06), 0 2px 4px -2px hsl(230 40% 10% / 0.04);
-    --shadow-lg: 0 10px 15px -3px hsl(230 40% 10% / 0.08), 0 4px 6px -4px hsl(230 40% 10% / 0.04);
-    --shadow-xl: 0 20px 25px -5px hsl(230 40% 10% / 0.08), 0 8px 10px -6px hsl(230 40% 10% / 0.04);
+    --shadow-sm: 0 1px 2px 0 hsl(225 30% 10% / 0.04);
+    --shadow-md: 0 4px 6px -1px hsl(225 30% 10% / 0.06), 0 2px 4px -2px hsl(225 30% 10% / 0.04);
+    --shadow-lg: 0 10px 15px -3px hsl(225 30% 10% / 0.08), 0 4px 6px -4px hsl(225 30% 10% / 0.04);
+    --shadow-xl: 0 20px 25px -5px hsl(225 30% 10% / 0.08), 0 8px 10px -6px hsl(225 30% 10% / 0.04);
 
     /* Animation easing */
     --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
     --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     /* Sidebar - Light variant */
-    --sidebar-background: 230 30% 98%;
-    --sidebar-foreground: 230 40% 10%;
-    --sidebar-primary: 230 60% 22%;
+    --sidebar-background: 248 20% 98%;
+    --sidebar-foreground: 225 30% 10%;
+    --sidebar-primary: 248 53% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 230 20% 94%;
-    --sidebar-accent-foreground: 230 40% 10%;
-    --sidebar-border: 220 16% 88%;
-    --sidebar-ring: 230 60% 22%;
+    --sidebar-accent: 248 15% 94%;
+    --sidebar-accent-foreground: 225 30% 10%;
+    --sidebar-border: 225 14% 88%;
+    --sidebar-ring: 248 53% 58%;
 
     /* Brand tokens */
-    --brand-navy: 230 60% 22%;
+    --brand-navy: 228 50% 14%;
     --brand-red: 350 80% 45%;
   }
 
   .dark {
-    /* Dark Mode — Deep Navy/Charcoal base */
-    --background: 230 30% 8%;
-    --foreground: 220 20% 92%;
+    /* Dark Mode — Matching hacktualiz.com */
+    --background: 228 40% 7%;
+    --foreground: 220 15% 85%;
 
-    --card: 230 25% 12%;
-    --card-foreground: 220 20% 92%;
+    --card: 228 35% 10%;
+    --card-foreground: 220 15% 85%;
 
-    --popover: 230 25% 12%;
-    --popover-foreground: 220 20% 92%;
+    --popover: 228 35% 10%;
+    --popover-foreground: 220 15% 85%;
 
-    /* Primary - Lighter Navy for contrast */
-    --primary: 230 55% 55%;
+    /* Primary - Lavender Purple */
+    --primary: 248 50% 65%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 230 55% 62%;
-    --primary-light: 230 50% 45%;
-    --primary-glow: 230 55% 50%;
+    --primary-hover: 248 50% 72%;
+    --primary-light: 248 45% 55%;
+    --primary-glow: 248 50% 60%;
 
-    /* Secondary - Bright Red */
-    --secondary: 350 75% 55%;
+    /* Secondary - Same purple family */
+    --secondary: 248 50% 65%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-hover: 350 75% 62%;
-    --secondary-light: 350 65% 45%;
-    --secondary-glow: 350 75% 50%;
+    --secondary-hover: 248 50% 72%;
+    --secondary-light: 248 45% 55%;
+    --secondary-glow: 248 50% 60%;
 
     /* Neutral System */
-    --muted: 230 20% 16%;
-    --muted-foreground: 220 15% 58%;
+    --muted: 228 25% 14%;
+    --muted-foreground: 220 12% 50%;
 
-    --accent: 230 20% 16%;
-    --accent-foreground: 220 20% 92%;
+    --accent: 228 25% 14%;
+    --accent-foreground: 220 15% 85%;
 
     /* Status Colors */
     --success: 152 55% 45%;
@@ -134,7 +134,7 @@
     --success-glow: 152 55% 40%;
 
     --warning: 38 85% 55%;
-    --warning-foreground: 230 30% 8%;
+    --warning-foreground: 228 40% 7%;
     --warning-light: 38 85% 45%;
     --warning-glow: 38 85% 50%;
 
@@ -144,14 +144,14 @@
     --destructive-glow: 0 68% 50%;
 
     /* Interface Elements */
-    --border: 230 20% 20%;
-    --input: 230 20% 20%;
-    --ring: 230 55% 55%;
+    --border: 228 25% 16%;
+    --input: 228 25% 16%;
+    --ring: 248 50% 65%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(230 55% 55%) 0%, hsl(350 75% 55%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(230 30% 8%) 0%, hsl(230 25% 12%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(230 25% 12%) 0%, hsl(230 20% 14%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(248 50% 65%) 0%, hsl(220 65% 58%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(228 40% 7%) 0%, hsl(228 35% 10%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(228 35% 10%) 0%, hsl(228 30% 12%) 100%);
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.2);
@@ -159,18 +159,18 @@
     --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.3), 0 4px 6px -4px hsl(0 0% 0% / 0.2);
     --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.3), 0 8px 10px -6px hsl(0 0% 0% / 0.2);
 
-    /* Sidebar - Dark variant */
-    --sidebar-background: 230 25% 10%;
-    --sidebar-foreground: 220 20% 92%;
-    --sidebar-primary: 230 55% 55%;
+    /* Sidebar - Dark variant matching hacktualiz.com */
+    --sidebar-background: 228 35% 8%;
+    --sidebar-foreground: 220 15% 85%;
+    --sidebar-primary: 248 50% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 230 20% 16%;
-    --sidebar-accent-foreground: 220 20% 92%;
-    --sidebar-border: 230 20% 20%;
-    --sidebar-ring: 230 55% 55%;
+    --sidebar-accent: 228 25% 14%;
+    --sidebar-accent-foreground: 220 15% 85%;
+    --sidebar-border: 228 25% 16%;
+    --sidebar-ring: 248 50% 65%;
 
     /* Brand tokens */
-    --brand-navy: 230 55% 55%;
+    --brand-navy: 228 40% 7%;
     --brand-red: 350 75% 55%;
   }
 }
@@ -196,7 +196,6 @@
     font-family: 'Clash Display', 'DM Sans', system-ui, sans-serif;
     font-weight: 600;
   }
-  /* Mobile-first: larger touch targets */
   button, a, input, select, textarea {
     touch-action: manipulation;
   }

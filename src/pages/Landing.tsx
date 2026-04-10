@@ -253,7 +253,10 @@ const Landing = () => {
 
   useEffect(() => {
     const saved = localStorage.getItem('theme');
-    if (saved === 'dark') {
+    if (saved === 'light') {
+      document.documentElement.classList.remove('dark');
+      setIsDark(false);
+    } else {
       document.documentElement.classList.add('dark');
       setIsDark(true);
     }

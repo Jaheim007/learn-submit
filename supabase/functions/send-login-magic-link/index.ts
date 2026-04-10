@@ -122,7 +122,7 @@ const handler = async (req: Request): Promise<Response> => {
         subject: "Votre code de connexion",
         html: `
           <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #e5e7eb;">
-            <div style="background: linear-gradient(135deg, #1a2744, #c7253e); padding: 24px; text-align: center;">
+            <div style="background: linear-gradient(135deg, #4f46e5, #6366f1); padding: 24px; text-align: center;">
               <h1 style="color: white; margin: 0; font-size: 20px;">Hacktualiz INC</h1>
             </div>
             <div style="padding: 24px; color: #1f2937;">

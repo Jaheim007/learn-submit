@@ -94,7 +94,7 @@ export default function AdminEmails() {
     try {
       const htmlBody = `
         <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb;">
-          <div style="background: linear-gradient(135deg, #1a2744, #c7253e); padding: 24px; text-align: center;">
+          <div style="background: linear-gradient(135deg, #4f46e5, #6366f1); padding: 24px; text-align: center;">
             <h1 style="color: white; font-size: 20px; margin: 0;">Hacktualiz INC</h1>
           </div>
           <div style="padding: 24px; line-height: 1.8; font-size: 14px; color: #333;">
@@ -319,7 +319,7 @@ export default function AdminEmails() {
                 </CardHeader>
                 <CardContent>
                   <div className="border rounded-lg overflow-hidden text-xs">
-                    <div className="bg-gradient-to-r from-[#1a2744] to-[#c7253e] p-3 text-center">
+                    <div className="bg-gradient-to-r from-[#4f46e5] to-[#6366f1] p-3 text-center">
                       <span className="text-white font-bold text-sm">Hacktualiz INC</span>
                     </div>
                     <div className="p-3 bg-white text-gray-800">

@@ -19,7 +19,7 @@ interface AutoEmailRequest {
 
 function getEmailTemplate(type: EventType, data: Record<string, any>): { subject: string; html: string } {
   const brandHeader = `
-    <div style="background: linear-gradient(135deg, #1a2744, #c7253e); padding: 24px; text-align: center;">
+    <div style="background: linear-gradient(135deg, #4f46e5, #6366f1); padding: 24px; text-align: center;">
       <h1 style="color: white; font-family: 'Space Grotesk', sans-serif; margin: 0; font-size: 20px;">
         Hacktualiz INC
       </h1>
@@ -44,7 +44,7 @@ function getEmailTemplate(type: EventType, data: Record<string, any>): { subject
                 <h3 style="margin: 0 0 8px; color: #1a2744;">${data.title}</h3>
                 ${data.description ? `<p style="margin: 0; color: #666;">${data.description}</p>` : ''}
               </div>
-              <a href="${data.site_url}/etudiant/cours" style="display: inline-block; background: linear-gradient(135deg, #1a2744, #c7253e); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+              <a href="${data.site_url}/etudiant/cours" style="display: inline-block; background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
                 Accéder au cours →
               </a>
             </div>
@@ -64,9 +64,9 @@ function getEmailTemplate(type: EventType, data: Record<string, any>): { subject
               <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin: 16px 0;">
                 <h3 style="margin: 0 0 8px; color: #1a2744;">${data.title}</h3>
                 ${data.description ? `<p style="margin: 0 0 8px; color: #666;">${data.description}</p>` : ''}
-                ${data.deadline ? `<p style="margin: 0; color: #c7253e; font-weight: 600;">📅 Date limite : ${data.deadline}</p>` : ''}
+                ${data.deadline ? `<p style="margin: 0; color: #6366f1; font-weight: 600;">📅 Date limite : ${data.deadline}</p>` : ''}
               </div>
-              <a href="${data.site_url}/etudiant/projets" style="display: inline-block; background: linear-gradient(135deg, #1a2744, #c7253e); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+              <a href="${data.site_url}/etudiant/projets" style="display: inline-block; background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
                 Voir le projet →
               </a>
             </div>
@@ -81,14 +81,14 @@ function getEmailTemplate(type: EventType, data: Record<string, any>): { subject
           <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb;">
             ${brandHeader}
             <div style="padding: 24px;">
-              <h2 style="color: #c7253e; margin-top: 0;">⏰ Rappel d'échéance</h2>
+              <h2 style="color: #6366f1; margin-top: 0;">⏰ Rappel d'échéance</h2>
               <p style="color: #555;">Le projet suivant arrive à échéance bientôt :</p>
-              <div style="background: #fff3f3; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #c7253e;">
+              <div style="background: #fff3f3; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #6366f1;">
                 <h3 style="margin: 0 0 8px; color: #1a2744;">${data.project_title}</h3>
-                <p style="margin: 0; color: #c7253e; font-weight: 600;">📅 Date limite : ${data.deadline}</p>
+                <p style="margin: 0; color: #6366f1; font-weight: 600;">📅 Date limite : ${data.deadline}</p>
               </div>
               <p style="color: #555;">N'oubliez pas de soumettre votre travail avant la date limite !</p>
-              <a href="${data.site_url}/etudiant/projets" style="display: inline-block; background: linear-gradient(135deg, #1a2744, #c7253e); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+              <a href="${data.site_url}/etudiant/projets" style="display: inline-block; background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
                 Soumettre maintenant →
               </a>
             </div>
