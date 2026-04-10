@@ -267,4 +267,13 @@
   .font-heading {
     font-family: 'Clash Display', 'DM Sans', system-ui, sans-serif;
   }
+
+  /* Hide scrollbar for horizontal scroll menus */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
