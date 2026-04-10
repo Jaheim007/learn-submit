@@ -139,7 +139,7 @@ export default function AdminLayout() {
       {/* Main Content */}
       <div className="lg:ml-[220px]">
         {/* Mobile top bar - native style */}
-        <div className="lg:hidden h-14 border-b border-border/30 bg-card/95 backdrop-blur-2xl flex items-center justify-between px-4 sticky top-0 z-30 shadow-sm">
+        <div className="lg:hidden h-14 border-b border-border/20 glass-heavy flex items-center justify-between px-4 sticky top-0 z-30">
           <div className="flex items-center gap-3">
             <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-xl text-foreground hover:bg-muted/60 transition-all touch-manipulation active:scale-90">
               <Menu className="h-5 w-5" />
@@ -150,7 +150,7 @@ export default function AdminLayout() {
         </div>
 
         {/* Desktop top bar */}
-        <div className="hidden lg:block h-14 border-b border-border bg-card/80 backdrop-blur-xl sticky top-0 z-30">
+        <div className="hidden lg:block h-14 border-b border-border glass-heavy sticky top-0 z-30">
           <div className="h-full flex items-center justify-between px-8 max-w-[1400px]">
             <h1 className="text-lg font-semibold text-foreground">{currentLabel}</h1>
             <ThemeToggle />
@@ -163,13 +163,14 @@ export default function AdminLayout() {
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card/95 backdrop-blur-2xl border-t border-border/30 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="flex items-center justify-around h-[60px]">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden glass-heavy" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        <div className="flex items-center justify-around h-[64px]">
           {bottomNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = isNavActive(item.href);
             return (
-              <Link key={item.href} to={item.href} className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all duration-150 touch-manipulation ${isActive ? 'text-primary' : 'text-muted-foreground active:scale-90 active:opacity-70'}`}>
+              <Link key={item.href} to={item.href} className={`relative flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all duration-200 touch-manipulation ${isActive ? 'text-primary' : 'text-muted-foreground active:scale-90 active:opacity-70'}`}>
                 {isActive && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-[3px] rounded-b-full bg-primary" />}
                 <Icon className="h-[22px] w-[22px]" strokeWidth={isActive ? 2.5 : 2} />
                 <span className={`text-[10px] leading-none mt-0.5 ${isActive ? 'font-bold' : 'font-medium'}`}>{item.name}</span>

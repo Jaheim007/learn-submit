@@ -4,48 +4,52 @@ import { motion } from 'framer-motion';
 export const LoadingScreen = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background overflow-hidden">
-      {/* Splash radial with navy-red gradient */}
+      {/* Radial glow */}
       <motion.div
-        className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.08)_0%,transparent_70%)]"
+        className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.06)_0%,transparent_60%)]"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 2.5, opacity: 1 }}
-        transition={{ duration: 1.2, ease: 'easeOut' }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
       />
 
-      <div className="relative z-10 flex flex-col items-center gap-6">
+      <div className="relative z-10 flex flex-col items-center gap-8">
+        {/* Logo with native spring bounce */}
         <motion.div
-          className="flex items-center gap-4"
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
         >
           <motion.img
             src={hacktualizLogo}
             alt="Hacktualiz"
-            className="h-20 w-20 object-cover rounded-xl shadow-lg"
-            animate={{ y: [0, -6, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            className="h-20 w-20 object-cover rounded-[22px] shadow-xl shadow-primary/10"
+            animate={{ y: [0, -5, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
           />
         </motion.div>
 
-        {/* Loading dots */}
-        <div className="flex gap-2">
-          {[0, 1, 2].map((i) => (
-            <motion.div
-              key={i}
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))` }}
-              animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
-              transition={{ duration: 1, repeat: Infinity, delay: i * 0.15 }}
-            />
-          ))}
-        </div>
-
-        <motion.p
-          className="text-muted-foreground text-sm font-light"
+        {/* Native iOS-style spinner */}
+        <motion.div
+          className="relative w-8 h-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
+          transition={{ delay: 0.3 }}
+        >
+          <motion.div
+            className="absolute inset-0 rounded-full border-2 border-primary/20"
+          />
+          <motion.div
+            className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+          />
+        </motion.div>
+
+        <motion.p
+          className="text-muted-foreground text-sm font-medium tracking-wide"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
         >
           Chargement...
         </motion.p>
