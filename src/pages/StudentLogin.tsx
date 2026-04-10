@@ -74,7 +74,7 @@ export default function StudentLogin() {
   };
 
   const handleVerifyOtp = async () => {
-    if (otpCode.length !== 6) { toast.error('Veuillez saisir le code à 6 chiffres'); return; }
+    if (otpCode.length !== 8) { toast.error('Veuillez saisir le code à 8 chiffres'); return; }
     setVerifying(true);
     try {
       const { error } = await supabase.auth.verifyOtp({ email: email.trim().toLowerCase(), token: otpCode, type: 'email' });
@@ -250,21 +250,25 @@ export default function StudentLogin() {
                   </div>
 
                   <div className="flex justify-center">
-                    <InputOTP maxLength={6} value={otpCode} onChange={(value) => setOtpCode(value)}>
+                    <InputOTP maxLength={8} value={otpCode} onChange={(value) => setOtpCode(value)}>
                       <InputOTPGroup>
                         <InputOTPSlot index={0} />
                         <InputOTPSlot index={1} />
                         <InputOTPSlot index={2} />
                         <InputOTPSlot index={3} />
+                      </InputOTPGroup>
+                      <InputOTPGroup>
                         <InputOTPSlot index={4} />
                         <InputOTPSlot index={5} />
+                        <InputOTPSlot index={6} />
+                        <InputOTPSlot index={7} />
                       </InputOTPGroup>
                     </InputOTP>
                   </div>
 
                   <Button
                     onClick={handleVerifyOtp}
-                    disabled={verifying || otpCode.length !== 6}
+                    disabled={verifying || otpCode.length !== 8}
                     className="w-full h-[52px] rounded-2xl font-semibold text-base shadow-lg shadow-primary/20 native-btn"
                   >
                     {verifying ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
