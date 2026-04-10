@@ -319,7 +319,7 @@ export default function AdminEmails() {
                 </CardHeader>
                 <CardContent>
                   <div className="border rounded-lg overflow-hidden text-xs">
-                    <div className="bg-gradient-to-r from-[#1a2744] to-[#c7253e] p-3 text-center">
+                    <div className="bg-gradient-to-r from-[#4f46e5] to-[#6366f1] p-3 text-center">
                       <span className="text-white font-bold text-sm">Hacktualiz INC</span>
                     </div>
                     <div className="p-3 bg-white text-gray-800">
