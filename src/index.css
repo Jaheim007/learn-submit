@@ -182,15 +182,23 @@
   html {
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+    height: 100%;
   }
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
     overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
+    min-height: 100%;
+    min-height: 100dvh;
+  }
+  #root {
+    min-height: 100%;
+    min-height: 100dvh;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Clash Display', 'DM Sans', system-ui, sans-serif;
@@ -198,6 +206,16 @@
   }
   button, a, input, select, textarea {
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Native-like scroll containers */
+  .overscroll-y-contain {
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Prevent pull-to-refresh on app shell */
+  main {
+    overscroll-behavior-y: contain;
   }
 }
 
