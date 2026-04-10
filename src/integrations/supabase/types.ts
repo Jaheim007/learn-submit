@@ -465,6 +465,7 @@ export type Database = {
       coaching_reports: {
         Row: {
           call_date: string | null
+          call_status: string | null
           conseiller: string
           conseiller_en_charge: string | null
           created_at: string
@@ -472,7 +473,12 @@ export type Database = {
           details_appel: string | null
           dit_client: string | null
           id: string
+          inscription_status: string | null
+          interest_level: string | null
+          linked_inscription_id: string | null
+          linked_table: string | null
           nom_client: string | null
+          payment_status: string | null
           program: string
           source: string | null
           statut_prospect: string | null
@@ -483,6 +489,7 @@ export type Database = {
         }
         Insert: {
           call_date?: string | null
+          call_status?: string | null
           conseiller: string
           conseiller_en_charge?: string | null
           created_at?: string
@@ -490,7 +497,12 @@ export type Database = {
           details_appel?: string | null
           dit_client?: string | null
           id?: string
+          inscription_status?: string | null
+          interest_level?: string | null
+          linked_inscription_id?: string | null
+          linked_table?: string | null
           nom_client?: string | null
+          payment_status?: string | null
           program?: string
           source?: string | null
           statut_prospect?: string | null
@@ -501,6 +513,7 @@ export type Database = {
         }
         Update: {
           call_date?: string | null
+          call_status?: string | null
           conseiller?: string
           conseiller_en_charge?: string | null
           created_at?: string
@@ -508,7 +521,12 @@ export type Database = {
           details_appel?: string | null
           dit_client?: string | null
           id?: string
+          inscription_status?: string | null
+          interest_level?: string | null
+          linked_inscription_id?: string | null
+          linked_table?: string | null
           nom_client?: string | null
+          payment_status?: string | null
           program?: string
           source?: string | null
           statut_prospect?: string | null
@@ -1222,6 +1240,90 @@ export type Database = {
         }
         Relationships: []
       }
+      hacker_candidate_profiles: {
+        Row: {
+          bio: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          current_profession: string | null
+          date_of_birth: string | null
+          education_level: string | null
+          email: string
+          full_name: string | null
+          github_url: string | null
+          id: string
+          id_document_back_url: string | null
+          id_document_url: string | null
+          linkedin_url: string | null
+          nationality: string | null
+          phone: string | null
+          plan: string | null
+          portfolio_url: string | null
+          profile_completed: boolean | null
+          registration_id: string | null
+          selfie_url: string | null
+          skills: string[] | null
+          updated_at: string | null
+          user_id: string
+          years_experience: number | null
+        }
+        Insert: {
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          current_profession?: string | null
+          date_of_birth?: string | null
+          education_level?: string | null
+          email: string
+          full_name?: string | null
+          github_url?: string | null
+          id?: string
+          id_document_back_url?: string | null
+          id_document_url?: string | null
+          linkedin_url?: string | null
+          nationality?: string | null
+          phone?: string | null
+          plan?: string | null
+          portfolio_url?: string | null
+          profile_completed?: boolean | null
+          registration_id?: string | null
+          selfie_url?: string | null
+          skills?: string[] | null
+          updated_at?: string | null
+          user_id: string
+          years_experience?: number | null
+        }
+        Update: {
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          current_profession?: string | null
+          date_of_birth?: string | null
+          education_level?: string | null
+          email?: string
+          full_name?: string | null
+          github_url?: string | null
+          id?: string
+          id_document_back_url?: string | null
+          id_document_url?: string | null
+          linkedin_url?: string | null
+          nationality?: string | null
+          phone?: string | null
+          plan?: string | null
+          portfolio_url?: string | null
+          profile_completed?: boolean | null
+          registration_id?: string | null
+          selfie_url?: string | null
+          skills?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
       hacker_formation_inscriptions: {
         Row: {
           conditions_acceptees: boolean
@@ -1244,8 +1346,8 @@ export type Database = {
           email: string
           id?: string
           mode_paiement: string
-          motivation: string
-          niveau_informatique: string
+          motivation?: string
+          niveau_informatique?: string
           nom: string
           notes_admin?: string | null
           prenom: string
@@ -1299,6 +1401,54 @@ export type Database = {
           motivation?: string | null
           phone?: string
           plan?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      hackerprof_inscriptions: {
+        Row: {
+          conditions_acceptees: boolean
+          created_at: string
+          email: string
+          id: string
+          motivation: string
+          nom: string
+          notes_admin: string | null
+          prenom: string
+          programme_choisi: string
+          situation: string
+          statut: string
+          telephone: string
+          updated_at: string
+        }
+        Insert: {
+          conditions_acceptees?: boolean
+          created_at?: string
+          email: string
+          id?: string
+          motivation?: string
+          nom: string
+          notes_admin?: string | null
+          prenom: string
+          programme_choisi?: string
+          situation?: string
+          statut?: string
+          telephone: string
+          updated_at?: string
+        }
+        Update: {
+          conditions_acceptees?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          motivation?: string
+          nom?: string
+          notes_admin?: string | null
+          prenom?: string
+          programme_choisi?: string
+          situation?: string
+          statut?: string
+          telephone?: string
           updated_at?: string
         }
         Relationships: []
@@ -1844,6 +1994,96 @@ export type Database = {
           nom?: string
           sous_domaine?: string
           telephone?: string
+        }
+        Relationships: []
+      }
+      speciale_offers: {
+        Row: {
+          availability: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          current_profession: string | null
+          date_of_birth: string | null
+          discovery_source: string | null
+          education_level: string | null
+          email: string | null
+          full_name: string
+          id: string
+          motivation: string | null
+          nationality: string | null
+          notes_admin: string | null
+          objective: string | null
+          payment_status: string
+          phone: string
+          profile_completed: boolean
+          programme: string
+          receipt_url: string | null
+          situation: string | null
+          source: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+          validated: boolean
+          years_experience: number | null
+        }
+        Insert: {
+          availability?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          current_profession?: string | null
+          date_of_birth?: string | null
+          discovery_source?: string | null
+          education_level?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          motivation?: string | null
+          nationality?: string | null
+          notes_admin?: string | null
+          objective?: string | null
+          payment_status?: string
+          phone: string
+          profile_completed?: boolean
+          programme?: string
+          receipt_url?: string | null
+          situation?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          validated?: boolean
+          years_experience?: number | null
+        }
+        Update: {
+          availability?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          current_profession?: string | null
+          date_of_birth?: string | null
+          discovery_source?: string | null
+          education_level?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          motivation?: string | null
+          nationality?: string | null
+          notes_admin?: string | null
+          objective?: string | null
+          payment_status?: string
+          phone?: string
+          profile_completed?: boolean
+          programme?: string
+          receipt_url?: string | null
+          situation?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          validated?: boolean
+          years_experience?: number | null
         }
         Relationships: []
       }
@@ -2824,6 +3064,54 @@ export type Database = {
           name?: string
           subject?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      webcreator_inscriptions: {
+        Row: {
+          conditions_acceptees: boolean
+          created_at: string
+          email: string
+          id: string
+          motivation: string
+          nom: string
+          notes_admin: string | null
+          pays: string
+          prenom: string
+          statut: string
+          telephone: string
+          updated_at: string
+          whatsapp: string
+        }
+        Insert: {
+          conditions_acceptees?: boolean
+          created_at?: string
+          email: string
+          id?: string
+          motivation: string
+          nom: string
+          notes_admin?: string | null
+          pays?: string
+          prenom: string
+          statut?: string
+          telephone: string
+          updated_at?: string
+          whatsapp: string
+        }
+        Update: {
+          conditions_acceptees?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          motivation?: string
+          nom?: string
+          notes_admin?: string | null
+          pays?: string
+          prenom?: string
+          statut?: string
+          telephone?: string
+          updated_at?: string
+          whatsapp?: string
         }
         Relationships: []
       }
