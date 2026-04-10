@@ -298,25 +298,24 @@ const Landing = () => {
         </div>
       </motion.nav>
 
-      {/* Hero Section */}
+      {/* Hero Section — full viewport on mobile */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_hsl(var(--secondary)_/_0.08),_transparent_50%)]" />
         <div className="absolute top-10 right-10 w-[500px] h-[500px] bg-secondary/5 rounded-full blur-[100px]" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[80px]" />
         
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-16 sm:pb-20 relative">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-28 pb-10 sm:pb-20 relative">
           <div className="max-w-3xl">
             <motion.div 
               variants={fadeUp} initial="hidden" animate="visible" custom={0}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-secondary/8 border border-secondary/15 rounded-full mb-8"
+              className="inline-flex items-center gap-2 px-3 py-1.5 bg-secondary/8 border border-secondary/15 rounded-full mb-5 sm:mb-8"
             >
               <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-              <span className="text-secondary text-xs font-semibold tracking-wide uppercase">Plateforme de soumission de projets</span>
+              <span className="text-secondary text-[11px] sm:text-xs font-semibold tracking-wide uppercase">Plateforme de soumission</span>
             </motion.div>
             
             <motion.h1 
               variants={fadeUp} initial="hidden" animate="visible" custom={1}
-              className="text-5xl sm:text-6xl lg:text-7xl font-heading font-bold text-foreground leading-[1.05] tracking-tight mb-6"
+              className="text-[28px] sm:text-5xl lg:text-7xl font-heading font-bold text-foreground leading-[1.1] tracking-tight mb-4 sm:mb-6"
             >
               Soumettez vos projets.
               <br />
@@ -325,7 +324,7 @@ const Landing = () => {
             
             <motion.p 
               variants={fadeUp} initial="hidden" animate="visible" custom={2}
-              className="text-lg sm:text-xl text-muted-foreground max-w-xl leading-relaxed mb-10"
+              className="text-sm sm:text-xl text-muted-foreground max-w-xl leading-relaxed mb-6 sm:mb-10"
             >
               La plateforme centralisée pour soumettre vos travaux, accéder à vos cours et suivre vos résultats en temps réel.
             </motion.p>
@@ -337,7 +336,7 @@ const Landing = () => {
               <Button 
                 size="lg"
                 onClick={() => navigate('/etudiant/login')}
-                className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 h-13 text-base font-semibold rounded-xl shadow-xl shadow-primary/20 group"
+                className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 h-12 sm:h-13 text-sm sm:text-base font-semibold rounded-xl shadow-xl shadow-primary/20 group w-full sm:w-auto touch-manipulation active:scale-95"
               >
                 <LogIn className="mr-2 h-5 w-5" />
                 Se connecter
