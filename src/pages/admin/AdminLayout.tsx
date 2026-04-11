@@ -117,7 +117,7 @@ export default function AdminLayout() {
   );
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-background">
+    <div className="min-h-screen-safe bg-background">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[220px] bg-card border-r border-border flex-col z-30">
         <SidebarContent />
@@ -138,6 +138,9 @@ export default function AdminLayout() {
 
       {/* Main Content */}
       <div className="lg:ml-[220px]">
+        {/* Status bar spacer for standalone/Capacitor */}
+        <div className="status-bar-spacer" />
+
         {/* Mobile top bar - native style */}
         <div className="lg:hidden h-14 border-b border-border/20 glass-heavy flex items-center justify-between px-4 sticky top-0 z-30">
           <div className="flex items-center gap-3">
@@ -157,20 +160,20 @@ export default function AdminLayout() {
           </div>
         </div>
 
-        <div className="p-4 lg:p-8 xl:p-10 pb-[88px] lg:pb-10 max-w-[1400px] overscroll-y-contain">
+        <div className="p-4 lg:p-8 xl:p-10 content-with-bottom-nav lg:pb-10 max-w-[1400px] overscroll-y-contain page-enter">
           <Outlet />
         </div>
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden glass-heavy" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden glass-heavy bottom-nav-safe">
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-        <div className="flex items-center justify-around h-[64px]">
+        <div className="flex items-center justify-around h-[60px]">
           {bottomNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = isNavActive(item.href);
             return (
-              <Link key={item.href} to={item.href} className={`relative flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all duration-200 touch-manipulation ${isActive ? 'text-primary' : 'text-muted-foreground active:scale-90 active:opacity-70'}`}>
+              <Link key={item.href} to={item.href} className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all duration-200 touch-manipulation ${isActive ? 'text-primary' : 'text-muted-foreground active:scale-90 active:opacity-70'}`}>
                 {isActive && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-[3px] rounded-b-full bg-primary" />}
                 <Icon className="h-[22px] w-[22px]" strokeWidth={isActive ? 2.5 : 2} />
                 <span className={`text-[10px] leading-none mt-0.5 ${isActive ? 'font-bold' : 'font-medium'}`}>{item.name}</span>
