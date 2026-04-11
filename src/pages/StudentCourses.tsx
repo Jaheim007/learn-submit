@@ -7,7 +7,8 @@ import { StudentDashboardLayout } from '@/components/StudentDashboardLayout';
 import { BookOpen, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import { motion } from 'framer-motion';
+import { staggerContainer, staggerItem } from '@/lib/animations';
 
 interface CourseMaterial {
   id: string;
@@ -36,149 +37,89 @@ export default function StudentCourses() {
 
   const fetchCourses = async () => {
     try {
-      const { data: studentData } = await supabase
-        .from('students')
-        .select('id')
-        .eq('user_id', user?.id)
-        .single();
-
+      const { data: studentData } = await supabase.from('students').select('id').eq('user_id', user?.id).single();
       if (!studentData) return;
-
-      const { data: enrollments } = await supabase
-        .from('enrollments')
-        .select('class_id')
-        .eq('student_id', studentData.id);
-
+      const { data: enrollments } = await supabase.from('enrollments').select('class_id').eq('student_id', studentData.id);
       if (!enrollments) return;
-
       const classIds = enrollments.map(e => e.class_id);
-
       const { data, error } = await supabase
         .from('course_materials')
-        .select(`
-          id,
-          title,
-          file_name,
-          file_url,
-          description,
-          image_url,
-          class_id,
-          classes (code)
-        `)
+        .select('id, title, file_name, file_url, description, image_url, class_id, classes (code)')
         .in('class_id', classIds);
-
-      if (error) {
-        console.error('Error fetching courses:', error);
-        toast.error('Erreur: ' + error.message);
-      }
-
-      // Group materials by title and class_code
+      if (error) { toast.error('Erreur: ' + error.message); }
       const grouped: { [key: string]: GroupedCourse } = {};
-      
       data?.forEach((c: any) => {
         const key = `${c.title}_${c.class_id}`;
         if (!grouped[key]) {
-          grouped[key] = {
-            id: c.id, // Use first material's ID as representative
-            title: c.title,
-            class_code: c.classes?.code || 'N/A',
-            description: c.description,
-            image_url: c.image_url,
-            materials: []
-          };
+          grouped[key] = { id: c.id, title: c.title, class_code: c.classes?.code || 'N/A', description: c.description, image_url: c.image_url, materials: [] };
         }
-        grouped[key].materials.push({
-          id: c.id,
-          file_name: c.file_name,
-          file_url: c.file_url
-        });
+        grouped[key].materials.push({ id: c.id, file_name: c.file_name, file_url: c.file_url });
       });
-
-      const groupedArray = Object.values(grouped);
-      console.log('Grouped courses:', groupedArray);
-      setGroupedCourses(groupedArray);
-    } catch (error) {
-      toast.error('Erreur lors du chargement');
-    } finally {
-      setLoading(false);
-    }
+      setGroupedCourses(Object.values(grouped));
+    } catch { toast.error('Erreur lors du chargement'); } finally { setLoading(false); }
   };
 
   if (authLoading || loading) return <LoadingScreen />;
 
   return (
     <StudentDashboardLayout>
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-5 lg:mb-8">
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-1">Mes Cours</h1>
-          <p className="text-sm text-muted-foreground">Accédez à vos supports de cours</p>
-        </div>
+      <div className="max-w-2xl mx-auto space-y-5">
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight font-heading">Mes Cours</h1>
+          <p className="text-sm text-muted-foreground mt-1">{groupedCourses.length} cours disponible{groupedCourses.length !== 1 ? 's' : ''}</p>
+        </motion.div>
 
         {groupedCourses.length === 0 ? (
-          <div className="text-center py-12">
-            <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-foreground mb-2">
-              Aucun cours disponible
-            </h3>
-            <p className="text-muted-foreground">
-              Les supports de cours apparaîtront ici une fois publiés
-            </p>
-          </div>
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center py-20">
+            <div className="h-20 w-20 rounded-[22px] bg-muted/60 flex items-center justify-center mb-5">
+              <BookOpen className="h-10 w-10 text-muted-foreground/30" />
+            </div>
+            <h3 className="text-lg font-bold text-foreground mb-1">Aucun cours</h3>
+            <p className="text-sm text-muted-foreground">Les cours apparaîtront ici</p>
+          </motion.div>
         ) : (
-          <div className="grid gap-4 lg:gap-6 grid-cols-1 sm:grid-cols-2">
+          <motion.div variants={staggerContainer} initial="hidden" animate="show" className="space-y-3">
             {groupedCourses.map((course) => (
-              <Card
+              <motion.div
                 key={course.id}
-                className="border-border/50 bg-card/40 backdrop-blur-sm hover:bg-accent/20 transition-all overflow-hidden group cursor-pointer"
+                variants={staggerItem}
                 onClick={() => navigate(`/etudiant/cours/${course.id}`)}
+                className="bg-card rounded-2xl border border-border/50 overflow-hidden touch-manipulation active:scale-[0.98] cursor-pointer transition-all"
               >
-                {/* Course Image */}
-                {course.image_url && (
-                  <div className="relative w-full aspect-video overflow-hidden">
-                    <img 
-                      src={course.image_url} 
-                      alt={course.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+                {course.image_url ? (
+                  <div className="relative h-36 w-full overflow-hidden">
+                    <img src={course.image_url} alt={course.title} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
                     <div className="absolute top-3 left-3">
-                      <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
-                        <BookOpen className="w-3 h-3 mr-1" />
+                      <Badge variant="outline" className="bg-card/90 backdrop-blur-sm border-border/30 text-[11px] font-bold rounded-lg">
+                        {course.class_code}
+                      </Badge>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative h-20 w-full bg-gradient-to-br from-primary/8 via-card to-accent/5">
+                    <div className="absolute -top-6 -right-6 h-20 w-20 rounded-full bg-primary/5" />
+                    <div className="absolute top-3 left-3">
+                      <Badge variant="outline" className="bg-card/90 backdrop-blur-sm border-border/30 text-[11px] font-bold rounded-lg">
                         {course.class_code}
                       </Badge>
                     </div>
                   </div>
                 )}
 
-                {/* Course Content */}
-                <div className="p-6 space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                      {course.title}
-                    </h3>
-                    {!course.image_url && (
-                      <Badge variant="secondary">
-                        {course.class_code}
-                      </Badge>
-                    )}
-                  </div>
-
+                <div className="p-4 space-y-2">
+                  <h3 className="text-base font-bold text-foreground leading-snug line-clamp-2">{course.title}</h3>
                   {course.description && (
-                    <div 
-                      className="text-sm text-muted-foreground line-clamp-2 [&_*]:!m-0 [&_*]:!p-0 [&_*]:!inline"
-                      dangerouslySetInnerHTML={{ __html: course.description }}
-                    />
+                    <div className="text-xs text-muted-foreground line-clamp-2 [&_*]:!m-0 [&_*]:!p-0 [&_*]:!inline" dangerouslySetInnerHTML={{ __html: course.description }} />
                   )}
-
-                  <div className="flex items-center gap-2 pt-2">
-                    <Badge variant="outline" className="text-xs">
-                      <FileText className="w-3 h-3 mr-1" />
-                      {course.materials.length} fichier{course.materials.length > 1 ? 's' : ''}
-                    </Badge>
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <FileText className="h-3.5 w-3.5" />
+                    <span>{course.materials.length} fichier{course.materials.length > 1 ? 's' : ''}</span>
                   </div>
                 </div>
-              </Card>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
     </StudentDashboardLayout>
