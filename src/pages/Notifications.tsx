@@ -1,27 +1,37 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CheckCheck, Bell, AlertCircle, Star, MessageSquare, ArrowLeft } from "lucide-react";
+import { CheckCheck, Bell, AlertCircle, Star, MessageSquare, ArrowLeft, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { staggerContainer, staggerItem } from "@/lib/animations";
 
-const typeIcons = {
+const typeIcons: Record<string, any> = {
   submission_created: Bell,
   status_changed: AlertCircle,
   grade_assigned: Star,
   feedback_added: MessageSquare,
+  course_material_added: BookOpen,
 };
 
-const typeLabels = {
-  submission_created: "Nouvelle soumission",
-  status_changed: "Changement de statut",
-  grade_assigned: "Note attribuée",
-  feedback_added: "Commentaire ajouté",
-  course_material_added: "Nouveau contenu",
+const typeLabels: Record<string, string> = {
+  submission_created: "Soumission",
+  status_changed: "Statut",
+  grade_assigned: "Note",
+  feedback_added: "Commentaire",
+  course_material_added: "Contenu",
+};
+
+const typeColors: Record<string, string> = {
+  submission_created: 'bg-success/15 text-success',
+  status_changed: 'bg-warning/15 text-warning',
+  grade_assigned: 'bg-primary/15 text-primary',
+  feedback_added: 'bg-accent text-accent-foreground',
+  course_material_added: 'bg-primary/15 text-primary',
 };
 
 export default function Notifications() {
@@ -33,15 +43,12 @@ export default function Notifications() {
     queryKey: ['notifications'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      
       if (!user) throw new Error('Not authenticated');
-
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
-      
       if (error) throw error;
       return data;
     }
@@ -53,7 +60,6 @@ export default function Notifications() {
         .from('notifications')
         .update({ read_at: new Date().toISOString() })
         .eq('id', notificationId);
-      
       if (error) throw error;
     },
     onSuccess: () => {
@@ -68,165 +74,118 @@ export default function Notifications() {
         .from('notifications')
         .update({ read_at: new Date().toISOString() })
         .is('read_at', null);
-      
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['unreadNotifications'] });
-      toast({
-        title: "Notifications marquées comme lues",
-        description: "Toutes les notifications ont été marquées comme lues."
-      });
+      toast({ title: "Tout marqué comme lu" });
     }
   });
 
   const unreadCount = notifications.filter(n => !n.read_at).length;
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-6">Notifications</h1>
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="bg-muted/50 h-20" />
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate(-1)}
-            className="mb-4 -ml-2"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour
-          </Button>
-          
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-3xl font-bold tracking-tight">NOTIFICATIONS</h1>
-            {unreadCount > 0 && (
-              <Button 
-                onClick={() => markAllAsReadMutation.mutate()}
-                disabled={markAllAsReadMutation.isPending}
-                variant="ghost"
-                size="sm"
-                className="text-xs"
-              >
-                <CheckCheck className="w-3 h-3 mr-1" />
-                Tout marquer comme lu
-              </Button>
-            )}
+    <div className="min-h-screen min-h-[100dvh] bg-background">
+      {/* Native sticky header */}
+      <div className="sticky top-0 z-30 glass-heavy">
+        <div className="flex items-center justify-between h-14 px-4 max-w-2xl mx-auto">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 -ml-2 rounded-xl text-foreground hover:bg-muted/60 transition-all touch-manipulation active:scale-90"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div>
+              <h1 className="text-[15px] font-bold text-foreground">Notifications</h1>
+              {unreadCount > 0 && (
+                <p className="text-[11px] text-muted-foreground">{unreadCount} non lue{unreadCount > 1 ? 's' : ''}</p>
+              )}
+            </div>
           </div>
           {unreadCount > 0 && (
-            <p className="text-sm text-muted-foreground">
-              {unreadCount} notification{unreadCount > 1 ? 's' : ''} non lue{unreadCount > 1 ? 's' : ''}
-            </p>
+            <button
+              onClick={() => markAllAsReadMutation.mutate()}
+              disabled={markAllAsReadMutation.isPending}
+              className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors touch-manipulation active:scale-95"
+            >
+              Tout lire
+            </button>
           )}
         </div>
+      </div>
 
-        {notifications.length === 0 ? (
-          <Card className="border-0 shadow-sm bg-card">
-            <CardContent className="flex flex-col items-center justify-center py-16">
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                <Bell className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold mb-1">Aucune notification</h3>
-              <p className="text-sm text-muted-foreground">Vous n'avez aucune notification pour le moment.</p>
-            </CardContent>
-          </Card>
-        ) : (
+      <div className="max-w-2xl mx-auto px-4 py-4 pb-24">
+        {isLoading ? (
           <div className="space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-20 rounded-2xl shimmer" />
+            ))}
+          </div>
+        ) : notifications.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center py-20"
+          >
+            <div className="h-20 w-20 rounded-[22px] bg-muted/60 flex items-center justify-center mb-5">
+              <Bell className="h-10 w-10 text-muted-foreground/30" />
+            </div>
+            <h3 className="text-lg font-bold text-foreground mb-1">Aucune notification</h3>
+            <p className="text-sm text-muted-foreground">Vous serez notifié ici</p>
+          </motion.div>
+        ) : (
+          <motion.div variants={staggerContainer} initial="hidden" animate="show" className="space-y-2">
             {notifications.map((notification) => {
-              const Icon = typeIcons[notification.type as keyof typeof typeIcons] || Bell;
+              const Icon = typeIcons[notification.type] || Bell;
               const isUnread = !notification.read_at;
-              
-              const typeColors = {
-                submission_created: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-                status_changed: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-                grade_assigned: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-                feedback_added: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-                course_material_added: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
-              };
-              
+              const colorClass = typeColors[notification.type] || 'bg-muted text-muted-foreground';
+
               return (
-                <Card 
-                  key={notification.id} 
-                  className={`border-0 shadow-sm transition-all hover:shadow-md cursor-pointer ${
-                    isUnread ? 'bg-primary/5' : 'bg-card'
+                <motion.div
+                  key={notification.id}
+                  variants={staggerItem}
+                  onClick={() => { if (isUnread) markAsReadMutation.mutate(notification.id); }}
+                  className={`relative rounded-2xl p-4 transition-all touch-manipulation active:scale-[0.98] cursor-pointer ${
+                    isUnread
+                      ? 'bg-primary/5 border border-primary/10'
+                      : 'bg-card border border-border/40'
                   }`}
-                  onClick={() => {
-                    if (isUnread) {
-                      markAsReadMutation.mutate(notification.id);
-                    }
-                  }}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex gap-3">
-                      <div className="flex-shrink-0">
-                        {isUnread ? (
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                            <div className="w-2 h-2 rounded-full bg-primary" />
-                          </div>
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                            <CheckCheck className="w-4 h-4 text-muted-foreground" />
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2 mb-1">
-                          <Badge 
-                            className={`text-xs font-medium ${
-                              typeColors[notification.type as keyof typeof typeColors] || 'bg-gray-100 text-gray-700'
-                            }`}
-                            variant="secondary"
-                          >
-                            {typeLabels[notification.type as keyof typeof typeLabels] || notification.type}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground whitespace-nowrap flex items-center gap-1">
-                            <span className="inline-block w-3 h-3">⏰</span>
-                            {formatDistanceToNow(new Date(notification.created_at), { 
-                              addSuffix: true,
-                              locale: fr 
-                            })}
-                          </span>
-                        </div>
-                        
-                        <h3 className={`text-sm font-semibold mb-1 ${
-                          isUnread ? 'text-foreground' : 'text-muted-foreground'
-                        }`}>
+                  <div className="flex gap-3">
+                    {/* Icon */}
+                    <div className={`shrink-0 h-10 w-10 rounded-xl flex items-center justify-center ${colorClass}`}>
+                      <Icon className="h-4.5 w-4.5" />
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-0.5">
+                        <h3 className={`text-sm font-semibold leading-tight ${isUnread ? 'text-foreground' : 'text-muted-foreground'}`}>
                           {notification.title}
                         </h3>
-                        
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {notification.body}
-                        </p>
-                        
-                        {notification.metadata && typeof notification.metadata === 'object' && 
-                         Object.keys(notification.metadata).length > 0 && (
-                          <div className="mt-2">
-                            <span className="text-xs text-primary hover:underline cursor-pointer">
-                              Voir les détails
-                            </span>
-                          </div>
+                        {isUnread && (
+                          <span className="shrink-0 h-2 w-2 rounded-full bg-primary mt-1.5" />
                         )}
                       </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mb-1.5">
+                        {notification.body}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 rounded-md border-border/50">
+                          {typeLabels[notification.type] || notification.type}
+                        </Badge>
+                        <span className="text-[10px] text-muted-foreground/60">
+                          {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: fr })}
+                        </span>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         )}
       </div>
     </div>
