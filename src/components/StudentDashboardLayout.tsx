@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface StudentDashboardLayoutProps {
   children: ReactNode;
@@ -35,10 +35,13 @@ export const StudentDashboardLayout = ({ children }: StudentDashboardLayoutProps
   };
 
   return (
-    <div className="min-h-screen min-h-[100dvh] w-full bg-background">
+    <div className="min-h-screen-safe w-full bg-background">
       <StudentSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="lg:ml-[260px]">
+        {/* Status bar spacer for standalone/Capacitor */}
+        <div className="status-bar-spacer" />
+
         {/* Top Bar — iOS-style frosted glass header */}
         <div className="h-14 lg:h-16 glass-heavy border-b border-border/20 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30">
           <button
@@ -81,7 +84,7 @@ export const StudentDashboardLayout = ({ children }: StudentDashboardLayoutProps
 
         {/* Page Content — native scroll with page transition */}
         <motion.main
-          className="p-4 lg:p-8 pb-[88px] lg:pb-8 overscroll-y-contain"
+          className="p-4 lg:p-8 content-with-bottom-nav lg:pb-8 overscroll-y-contain"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}

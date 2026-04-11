@@ -65,6 +65,11 @@
     --sidebar-ring: 248 53% 58%;
     --brand-navy: 228 50% 14%;
     --brand-red: 350 80% 45%;
+    /* Safe area fallbacks */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
   }
 
   .dark {
@@ -149,6 +154,12 @@
     user-select: none;
     -webkit-user-select: none;
   }
+
+  /* Capacitor native: extra status bar padding */
+  .capacitor-native body {
+    padding-top: calc(env(safe-area-inset-top) + 4px);
+  }
+
   /* Allow text selection only in inputs/textareas */
   input, textarea, [contenteditable] {
     user-select: text;
@@ -178,6 +189,11 @@
   ::selection {
     background: hsl(var(--primary) / 0.25);
     color: inherit;
+  }
+
+  /* Standalone (PWA/Capacitor) status bar handling */
+  .standalone .status-bar-spacer {
+    height: env(safe-area-inset-top, 0px);
   }
 }
 
@@ -236,6 +252,28 @@
   .native-btn:active {
     transform: scale(0.95);
     opacity: 0.9;
+  }
+
+  /* Safe area utilities for Capacitor */
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .safe-x {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  /* Bottom nav safe area */
+  .bottom-nav-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4px);
+  }
+
+  /* Content area with bottom nav clearance */
+  .content-with-bottom-nav {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 16px);
   }
 
   .badge-status {
@@ -309,5 +347,33 @@
 
   .native-list-item {
     @apply flex items-center gap-3 px-4 py-3.5 hover:bg-muted/40 transition-colors active:bg-muted/60;
+  }
+
+  /* Page transition for native feel */
+  .page-enter {
+    animation: pageEnter 0.3s ease-out;
+  }
+
+  @keyframes pageEnter {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Haptic feedback indicator (visual) */
+  .haptic-press {
+    transition: transform 80ms ease-out;
+  }
+  .haptic-press:active {
+    transform: scale(0.96);
+  }
+
+  /* Full-height mobile viewport */
+  .h-screen-safe {
+    height: 100vh;
+    height: 100dvh;
+  }
+  .min-h-screen-safe {
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 }

@@ -8,11 +8,16 @@
     <meta name="author" content="Hacktualiz INC" />
 
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#0a0a2e" />
+    <meta name="theme-color" content="#0a0a2e" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f5f5f8" media="(prefers-color-scheme: light)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Hacktualiz" />
     <link rel="apple-touch-icon" href="/pwa-192x192.png" />
+    
+    <!-- Capacitor-ready: disable format detection -->
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://soum1.hackerprof.com" />
@@ -25,6 +30,12 @@
     
     <link rel="canonical" href="https://soum1.hackerprof.com" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <style>
+      /* Prevent FOUC and ensure native-like initial load */
+      html { background: #0a0a2e; }
+      @media (prefers-color-scheme: light) { html { background: #f5f5f8; } }
+    </style>
   </head>
 
   <body>

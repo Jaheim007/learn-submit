@@ -84,7 +84,7 @@ export default function AcademyLayout() {
   );
 
   return (
-    <div className="min-h-screen min-h-[100dvh] w-full relative">
+    <div className="min-h-screen-safe w-full relative">
       <AnimatedBackground />
       
       <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-64 bg-card/80 backdrop-blur-xl border-r border-border/50 z-20 flex-col">
@@ -105,6 +105,9 @@ export default function AcademyLayout() {
       )}
 
       <div className="lg:ml-64 relative z-10">
+        {/* Status bar spacer */}
+        <div className="status-bar-spacer" />
+
         <div className="h-14 lg:h-16 border-b border-border/50 bg-card/95 lg:bg-background/40 backdrop-blur-2xl lg:backdrop-blur-xl flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30 shadow-sm lg:shadow-none">
           <div className="flex items-center gap-3">
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-xl text-foreground hover:bg-muted/60 transition-all touch-manipulation active:scale-90">
@@ -117,13 +120,13 @@ export default function AcademyLayout() {
           </div>
         </div>
         
-        <main className="p-4 lg:p-6 pb-[88px] lg:pb-6 overscroll-y-contain">
+        <main className="p-4 lg:p-6 content-with-bottom-nav lg:pb-6 overscroll-y-contain page-enter">
           <Outlet />
         </main>
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card/95 backdrop-blur-2xl border-t border-border/30 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card/95 backdrop-blur-2xl border-t border-border/30 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] bottom-nav-safe">
         <div className="flex items-center justify-around h-[60px]">
           {bottomNavItems.map((item) => {
             const Icon = item.icon;

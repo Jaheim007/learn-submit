@@ -15,13 +15,12 @@ export const MobileBottomNav = () => {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 lg:hidden glass-heavy"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      className="fixed bottom-0 left-0 right-0 z-50 lg:hidden glass-heavy bottom-nav-safe"
     >
       {/* Top glow line */}
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
       
-      <div className="flex items-center justify-around h-[64px]">
+      <div className="flex items-center justify-around h-[60px]">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -30,7 +29,7 @@ export const MobileBottomNav = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`relative flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all duration-200 touch-manipulation ${
+              className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all duration-200 touch-manipulation ${
                 isActive ? 'text-primary' : 'text-muted-foreground active:scale-90 active:opacity-70'
               }`}
             >
