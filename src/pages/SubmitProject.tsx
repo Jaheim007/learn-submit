@@ -331,7 +331,7 @@ export default function SubmitProject() {
 
   return (
     <StudentDashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-4 lg:space-y-6">
+      <div className="max-w-2xl mx-auto space-y-4">
         {/* Back Button — native style */}
         <button
           onClick={() => navigate('/etudiant/projets')}
