@@ -331,49 +331,30 @@ export default function SubmitProject() {
   return (
     <StudentDashboardLayout>
       <div className="max-w-5xl mx-auto space-y-4 lg:space-y-6">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          size="sm"
+        {/* Back Button — native style */}
+        <button
           onClick={() => navigate('/etudiant/projets')}
-          className="gap-2"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors touch-manipulation active:scale-95"
         >
           <ArrowLeft className="h-4 w-4" />
           Retour
-        </Button>
+        </button>
 
-        {/* Project Hero Section */}
-        <div className="space-y-4 lg:space-y-6">
-          {/* Hero Image or Header */}
+        {/* Project Hero — compact on mobile */}
+        <div className="space-y-3">
           {project.image_url ? (
-            <div className="relative w-full h-48 lg:h-[400px] rounded-xl lg:rounded-2xl overflow-hidden shadow-2xl border border-border/50">
-              <img
-                src={project.image_url}
-                alt={project.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-10">
-                <div className="max-w-3xl">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30 mb-2 lg:mb-4">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                    <span className="text-xs font-semibold text-primary">{project.code}</span>
-                  </div>
-                  <h1 className="text-xl lg:text-5xl font-bold text-foreground leading-tight">
-                    {project.title}
-                  </h1>
-                </div>
+            <div className="relative w-full h-40 lg:h-[300px] rounded-2xl overflow-hidden border border-border/50">
+              <img src={project.image_url} alt={project.title} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <Badge variant="outline" className="bg-card/90 backdrop-blur-sm border-border/30 text-[11px] font-bold rounded-lg mb-2">{project.code}</Badge>
+                <h1 className="text-lg lg:text-2xl font-bold text-foreground leading-tight">{project.title}</h1>
               </div>
             </div>
           ) : (
-            <div className="relative rounded-xl lg:rounded-2xl overflow-hidden border border-border/50 bg-gradient-to-br from-primary/10 via-background to-accent/10 p-5 lg:p-10">
-              <div className="max-w-3xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30 mb-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                  <span className="text-xs font-semibold text-primary">{project.code}</span>
-                </div>
-                <h1 className="text-xl lg:text-5xl font-bold leading-tight">{project.title}</h1>
-              </div>
+            <div className="rounded-2xl border border-border/50 bg-gradient-to-br from-primary/8 via-card to-accent/5 p-4 lg:p-6">
+              <Badge variant="outline" className="bg-card/90 backdrop-blur-sm border-border/30 text-[11px] font-bold rounded-lg mb-2">{project.code}</Badge>
+              <h1 className="text-lg lg:text-2xl font-bold leading-tight">{project.title}</h1>
             </div>
           )}
 
@@ -383,23 +364,17 @@ export default function SubmitProject() {
           )}
         </div>
 
-        {/* Project Description */}
+        {/* Project Description — collapsible on mobile */}
         {project.description && (
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-lg">
-            <CardHeader className="border-b border-border/50">
-              <CardTitle className="flex items-center gap-3 text-2xl">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <FileText className="h-6 w-6 text-primary" />
-                </div>
-                Description du projet
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="prose dark:prose-invert max-w-none">
-                <RichTextRenderer content={project.description} className="text-muted-foreground leading-relaxed text-base" />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="bg-card rounded-2xl border border-border/50 p-4">
+            <h3 className="text-sm font-bold text-foreground mb-2 flex items-center gap-2">
+              <FileText className="h-4 w-4 text-primary" />
+              Description
+            </h3>
+            <div className="prose dark:prose-invert max-w-none text-sm">
+              <RichTextRenderer content={project.description} className="text-muted-foreground leading-relaxed" />
+            </div>
+          </div>
         )}
 
         {/* Submission Form */}
@@ -536,33 +511,30 @@ export default function SubmitProject() {
             </CardContent>
           </Card>
 
-          {/* Submit Button */}
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              size="lg"
-              disabled={submitting || isDeadlineExpired}
-              variant={isDeadlineExpired ? "outline" : "default"}
-              className="gap-2"
-            >
-              {submitting ? (
-                <>
-                  <span className="animate-spin">⏳</span>
-                  {uploadingFile ? `Upload: ${uploadingFile.slice(0, 20)}...` : 'Envoi en cours...'}
-                </>
-              ) : isDeadlineExpired ? (
-                <>
-                  <X className="h-4 w-4" />
-                  Délai expiré - Soumission impossible
-                </>
-              ) : (
-                <>
-                  <Upload className="h-4 w-4" />
-                  Soumettre le projet
-                </>
-              )}
-            </Button>
-          </div>
+          {/* Submit Button — full width, sticky feel on mobile */}
+          <Button
+            type="submit"
+            disabled={submitting || !!isDeadlineExpired}
+            variant={isDeadlineExpired ? "outline" : "default"}
+            className="w-full h-12 rounded-2xl font-semibold text-base shadow-lg shadow-primary/20 native-btn gap-2"
+          >
+            {submitting ? (
+              <>
+                <span className="animate-spin">⏳</span>
+                {uploadingFile ? `Upload: ${uploadingFile.slice(0, 20)}...` : 'Envoi en cours...'}
+              </>
+            ) : isDeadlineExpired ? (
+              <>
+                <X className="h-4 w-4" />
+                Délai expiré
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4" />
+                Soumettre le projet
+              </>
+            )}
+          </Button>
         </form>
       </div>
     </StudentDashboardLayout>
