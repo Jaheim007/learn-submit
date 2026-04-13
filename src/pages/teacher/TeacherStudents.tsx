@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Search, Users } from 'lucide-react';
+import { Search, Users, Mail, Phone, MessageCircle, Github, ChevronRight, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ProfileAvatar } from '@/components/ProfileAvatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Student {
   id: string;
@@ -15,9 +16,13 @@ interface Student {
   phone: string;
   whatsapp: string;
   github_profile: string;
+  avatar_url: string | null;
   className: string;
   classCode: string;
 }
+
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.04 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } } };
 
 export default function TeacherStudents() {
   const { user } = useAuth();
@@ -26,6 +31,7 @@ export default function TeacherStudents() {
   const [search, setSearch] = useState('');
   const [classFilter, setClassFilter] = useState('all');
   const [classes, setClasses] = useState<{ id: number; code: string; title: string }[]>([]);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
   useEffect(() => {
     if (user) loadStudents();
@@ -33,43 +39,26 @@ export default function TeacherStudents() {
 
   const loadStudents = async () => {
     try {
-      // Step 1: Get supervisor's assigned classes
-      const { data: assignments, error: assignError } = await supabase
+      const { data: assignments } = await supabase
         .from('supervisor_class_assignments')
         .select('class_id')
         .eq('supervisor_user_id', user?.id);
 
-      if (assignError) { console.error('Assignments error:', assignError); }
-
       const classIds = assignments?.map(a => a.class_id) || [];
       if (classIds.length === 0) { setLoading(false); return; }
 
-      // Step 2: Get class details (public read)
-      const { data: classData } = await supabase
-        .from('classes')
-        .select('id, code, title')
-        .in('id', classIds);
-      
+      const { data: classData } = await supabase.from('classes').select('id, code, title').in('id', classIds);
       setClasses(classData || []);
       const classMap = new Map((classData || []).map(c => [c.id, c]));
 
-      // Step 3: Get enrollments for those classes
-      const { data: enrollments, error: enrollError } = await supabase
-        .from('enrollments')
-        .select('class_id, student_id')
-        .in('class_id', classIds);
-
-      if (enrollError) { console.error('Enrollments error:', enrollError); }
+      const { data: enrollments } = await supabase.from('enrollments').select('class_id, student_id').in('class_id', classIds);
       if (!enrollments || enrollments.length === 0) { setLoading(false); return; }
 
-      // Step 4: Get student details separately
       const studentIds = [...new Set(enrollments.map(e => e.student_id))];
-      const { data: studentData, error: studentError } = await supabase
+      const { data: studentData } = await supabase
         .from('students')
-        .select('id, full_name, email, phone, whatsapp, github_profile')
+        .select('id, full_name, email, phone, whatsapp, github_profile, avatar_url')
         .in('id', studentIds);
-
-      if (studentError) { console.error('Students error:', studentError); }
 
       const studentMap = new Map((studentData || []).map(s => [s.id, s]));
 
@@ -84,12 +73,22 @@ export default function TeacherStudents() {
           phone: s.phone || '',
           whatsapp: s.whatsapp || '',
           github_profile: s.github_profile || '',
+          avatar_url: s.avatar_url || null,
           className: cls?.title || '',
           classCode: cls?.code || '',
         };
       }).filter(Boolean) as Student[];
 
-      setStudents(studentList);
+      // Deduplicate by student id + class
+      const seen = new Set<string>();
+      const unique = studentList.filter(s => {
+        const key = `${s.id}-${s.classCode}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      setStudents(unique);
     } catch (error) {
       console.error('Error loading students:', error);
     } finally {
@@ -113,24 +112,21 @@ export default function TeacherStudents() {
   }
 
   return (
-    <div className="space-y-5 max-w-[1400px] mx-auto">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Mes Étudiants</h1>
-        <p className="text-sm text-muted-foreground mt-1">Étudiants inscrits dans vos classes</p>
-      </div>
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 max-w-[1400px] mx-auto">
+      <motion.div variants={item}>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground font-heading">Mes Étudiants</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          {filtered.length} étudiant{filtered.length !== 1 ? 's' : ''} dans vos classes
+        </p>
+      </motion.div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
+      <motion.div variants={item} className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 h-10"
-          />
+          <Input placeholder="Rechercher par nom ou email..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 h-11 rounded-xl" />
         </div>
         <Select value={classFilter} onValueChange={setClassFilter}>
-          <SelectTrigger className="w-full sm:w-[200px] h-10">
+          <SelectTrigger className="w-full sm:w-[200px] h-11 rounded-xl">
             <SelectValue placeholder="Filtrer par classe" />
           </SelectTrigger>
           <SelectContent>
@@ -140,73 +136,87 @@ export default function TeacherStudents() {
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </motion.div>
 
-      {/* Desktop Table */}
-      <Card className="hidden lg:block">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            {filtered.length} étudiant{filtered.length !== 1 ? 's' : ''}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {filtered.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground text-sm">Aucun étudiant trouvé</div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Téléphone</TableHead>
-                  <TableHead>WhatsApp</TableHead>
-                  <TableHead>Classe</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((student, idx) => (
-                  <TableRow key={`${student.id}-${idx}`}>
-                    <TableCell className="font-medium">{student.full_name}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{student.email}</TableCell>
-                    <TableCell className="text-sm">{student.phone || '—'}</TableCell>
-                    <TableCell className="text-sm">{student.whatsapp || '—'}</TableCell>
-                    <TableCell><Badge variant="secondary">{student.classCode}</Badge></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Mobile Cards */}
-      <div className="lg:hidden space-y-3">
-        <p className="text-xs text-muted-foreground">{filtered.length} étudiant{filtered.length !== 1 ? 's' : ''}</p>
-        {filtered.length === 0 ? (
-          <Card><CardContent className="py-8 text-center text-muted-foreground text-sm">Aucun étudiant trouvé</CardContent></Card>
-        ) : (
-          filtered.map((student, idx) => (
-            <Card key={`${student.id}-${idx}`} className="touch-manipulation active:scale-[0.99] transition-transform">
-              <CardContent className="p-4 space-y-1.5">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-foreground truncate">{student.full_name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{student.email}</p>
-                  </div>
-                  <Badge variant="secondary" className="text-[10px] shrink-0">{student.classCode}</Badge>
+      {/* Student List */}
+      {filtered.length === 0 ? (
+        <motion.div variants={item} className="rounded-2xl border border-border/30 bg-card/50 backdrop-blur-sm p-10 text-center">
+          <Users className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
+          <p className="text-sm text-muted-foreground">Aucun étudiant trouvé</p>
+        </motion.div>
+      ) : (
+        <motion.div variants={item} className="space-y-2">
+          {filtered.map((student) => (
+            <motion.button
+              key={`${student.id}-${student.classCode}`}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setSelectedStudent(student)}
+              className="w-full text-left rounded-2xl border border-border/30 bg-card/60 backdrop-blur-sm p-4 hover:bg-card/80 transition-all touch-manipulation group flex items-center gap-4"
+            >
+              <ProfileAvatar
+                avatarUrl={student.avatar_url}
+                fullName={student.full_name}
+                size="md"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-semibold text-foreground truncate">{student.full_name}</p>
+                  <Badge variant="secondary" className="text-[10px] shrink-0 rounded-full px-2">{student.classCode}</Badge>
                 </div>
-                {(student.phone || student.whatsapp) && (
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground pt-1">
-                    {student.phone && <span>📞 {student.phone}</span>}
-                    {student.whatsapp && <span>💬 {student.whatsapp}</span>}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))
-        )}
+                <p className="text-xs text-muted-foreground truncate mt-0.5">{student.email}</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+            </motion.button>
+          ))}
+        </motion.div>
+      )}
+
+      {/* Student Detail Modal */}
+      <Dialog open={!!selectedStudent} onOpenChange={() => setSelectedStudent(null)}>
+        <DialogContent className="sm:max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="sr-only">Profil étudiant</DialogTitle>
+          </DialogHeader>
+          {selectedStudent && (
+            <div className="space-y-5">
+              {/* Header */}
+              <div className="flex flex-col items-center text-center">
+                <ProfileAvatar avatarUrl={selectedStudent.avatar_url} fullName={selectedStudent.full_name} size="lg" />
+                <h3 className="text-lg font-bold text-foreground mt-3 font-heading">{selectedStudent.full_name}</h3>
+                <Badge variant="secondary" className="mt-1.5 rounded-full text-xs">{selectedStudent.classCode} — {selectedStudent.className}</Badge>
+              </div>
+
+              {/* Contact Info */}
+              <div className="space-y-1">
+                <ContactRow icon={Mail} label="Email" value={selectedStudent.email} href={`mailto:${selectedStudent.email}`} />
+                {selectedStudent.phone && <ContactRow icon={Phone} label="Téléphone" value={selectedStudent.phone} href={`tel:${selectedStudent.phone}`} />}
+                {selectedStudent.whatsapp && <ContactRow icon={MessageCircle} label="WhatsApp" value={selectedStudent.whatsapp} href={`https://wa.me/${selectedStudent.whatsapp.replace(/\D/g, '')}`} />}
+                {selectedStudent.github_profile && <ContactRow icon={Github} label="GitHub" value={selectedStudent.github_profile} href={selectedStudent.github_profile.startsWith('http') ? selectedStudent.github_profile : `https://github.com/${selectedStudent.github_profile}`} />}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </motion.div>
+  );
+}
+
+function ContactRow({ icon: Icon, label, value, href }: { icon: any; label: string; value: string; href: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-3 rounded-xl p-3 hover:bg-muted/50 transition-colors touch-manipulation group"
+    >
+      <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+        <Icon className="h-4 w-4 text-primary" />
       </div>
-    </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[11px] text-muted-foreground">{label}</p>
+        <p className="text-sm text-foreground truncate">{value}</p>
+      </div>
+      <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+    </a>
   );
 }
