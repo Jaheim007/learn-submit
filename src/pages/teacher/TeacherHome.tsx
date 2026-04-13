@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, FileText, BookOpen, ChevronRight, Clock, FolderOpen, TrendingUp, Sparkles } from 'lucide-react';
+import { Users, FileText, BookOpen, ChevronRight, Clock, FolderOpen, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
