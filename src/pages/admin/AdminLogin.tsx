@@ -75,24 +75,32 @@ export default function AdminLogin() {
     );
   }
 
-  // If user is authenticated but not admin, show inline error (do NOT redirect to student)
+  // If user is authenticated but not admin, show appropriate redirect
   if (user && !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-              <Shield className="h-6 w-6 text-red-600" />
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+              <Shield className="h-6 w-6 text-destructive" />
             </div>
-            <CardTitle className="text-2xl text-red-600">Accès non autorisé</CardTitle>
+            <CardTitle className="text-2xl text-destructive">Accès non autorisé</CardTitle>
             <CardDescription>
-              Cette zone est réservée aux administrateurs. Votre compte n'a pas les privilèges requis.
+              {isAcademy 
+                ? "Votre compte est un compte Académie. Veuillez accéder au portail académique."
+                : "Cette zone est réservée aux administrateurs. Votre compte n'a pas les privilèges requis."
+              }
             </CardDescription>
           </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Vous devez être administrateur pour accéder à cette zone.
-            </p>
+          <CardContent className="text-center space-y-3">
+            {isAcademy && (
+              <Button 
+                onClick={() => navigate('/academy')}
+                className="w-full"
+              >
+                Accéder au portail Académie
+              </Button>
+            )}
             <Button 
               onClick={() => navigate('/')}
               variant="outline"
