@@ -18,7 +18,8 @@ import {
   X,
   Clock,
   Video,
-  MoreHorizontal
+  MoreHorizontal,
+  ScrollText
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -33,6 +34,7 @@ const navigation = [
   { name: 'Tutoriels', href: '/admin/tutorials', icon: Video },
   { name: 'Utilisateurs', href: '/admin/users', icon: Users },
   { name: 'Emails', href: '/admin/emails', icon: Mail },
+  { name: 'Journal', href: '/admin/activity', icon: ScrollText },
   { name: 'Paramètres', href: '/admin/settings', icon: Settings },
 ];
 
