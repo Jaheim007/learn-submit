@@ -56,6 +56,7 @@ const AcademyCourses = lazy(() => import("./pages/academy/AcademyCourses"));
 const AcademyTeachers = lazy(() => import("./pages/academy/AcademyTeachers"));
 const AcademySettings = lazy(() => import("./pages/academy/AcademySettings"));
 const AcademyClasses = lazy(() => import("./pages/academy/AcademyClasses"));
+const AcademyActivityLogs = lazy(() => import("./pages/academy/AcademyActivityLogs"));
 
 const TeacherLayout = lazy(() => import("./pages/teacher/TeacherLayout"));
 const TeacherHome = lazy(() => import("./pages/teacher/TeacherHome"));
@@ -155,6 +156,7 @@ const App = () => (
                 <Route path="courses" element={<AcademyCourses />} />
                 <Route path="classes" element={<AcademyClasses />} />
                 <Route path="teachers" element={<AcademyTeachers />} />
+                <Route path="activity" element={<AcademyActivityLogs />} />
                 <Route path="settings" element={<AcademySettings />} />
               </Route>
               

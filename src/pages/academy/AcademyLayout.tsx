@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, BarChart3, Users, FileText, FolderOpen, UserCheck, Settings, BookOpen, Clock, Folder, Menu, X, MoreHorizontal } from 'lucide-react';
+import { LogOut, BarChart3, Users, FileText, FolderOpen, UserCheck, Settings, BookOpen, Clock, Folder, Menu, X, MoreHorizontal, History } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useState } from 'react';
@@ -27,6 +27,7 @@ export default function AcademyLayout() {
     { path: '/academy/courses', label: 'Cours', icon: BookOpen },
     { path: '/academy/classes', label: 'Classes', icon: Folder },
     { path: '/academy/teachers', label: 'Formateurs', icon: UserCheck },
+    { path: '/academy/activity', label: 'Journal', icon: History },
     { path: '/academy/settings', label: 'Paramètres', icon: Settings },
   ];
 
