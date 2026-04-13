@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, FileText, BookOpen, ChevronRight, Clock, FolderOpen, TrendingUp, Sparkles } from 'lucide-react';
+import { Users, FileText, BookOpen, ChevronRight, Clock, FolderOpen, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -116,7 +116,6 @@ export default function TeacherHome() {
         <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
         <div className="relative">
           <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="h-4 w-4 text-primary" />
             <span className="text-xs font-medium text-primary uppercase tracking-wider">Espace Formateur</span>
           </div>
           <h1 className="text-2xl lg:text-3xl font-bold text-foreground font-heading">
