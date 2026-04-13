@@ -25,7 +25,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 
 const navigation = [
   { name: 'Tableau de bord', href: '/admin', icon: LayoutDashboard },
-  { name: 'En attente', href: '/admin/pending-students', icon: Clock },
+  { name: 'Approbations', href: '/admin/pending-students', icon: Clock },
   { name: 'Étudiants', href: '/admin/students', icon: Users },
   { name: 'Classes', href: '/admin/classes', icon: Layers },
   { name: 'Soumissions', href: '/admin/submissions', icon: FileText },

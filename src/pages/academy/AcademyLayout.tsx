@@ -20,7 +20,7 @@ export default function AcademyLayout() {
 
   const navItems = [
     { path: '/academy', label: 'Tableau de bord', icon: BarChart3 },
-    { path: '/academy/pending-students', label: 'En attente', icon: Clock },
+    { path: '/academy/pending-students', label: 'Approbations', icon: Clock },
     { path: '/academy/students', label: 'Étudiants', icon: Users },
     { path: '/academy/submissions', label: 'Soumissions', icon: FileText },
     { path: '/academy/projects', label: 'Projets', icon: FolderOpen },
