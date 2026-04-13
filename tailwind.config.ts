@@ -18,9 +18,9 @@ export default {
 			}
 		},
 		extend: {
-			fontFamily: {
-				'sans': ['DM Sans', 'system-ui', 'sans-serif'],
-				'heading': ['Clash Display', 'DM Sans', 'system-ui', 'sans-serif'],
+		fontFamily: {
+				'sans': ['Source Sans 3', 'system-ui', 'sans-serif'],
+				'heading': ['IBM Plex Sans', 'Source Sans 3', 'system-ui', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
