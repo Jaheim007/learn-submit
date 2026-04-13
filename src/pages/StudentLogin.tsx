@@ -26,10 +26,11 @@ export default function StudentLogin() {
     const routeUser = async () => {
       try {
         // Check if user has any role assigned
-        const { data: roles } = await supabase.from('user_roles').select('role').eq('user_id', user.id);
+        // Only fetch roles relevant to this platform (hacktualiz)
+        const { data: roles } = await supabase.from('user_roles').select('role, platform').eq('user_id', user.id).in('platform', ['hacktualiz', 'both']);
         const roleList = (roles || []).map((r) => r.role);
         
-        // Route based on assigned role
+        // Route based on assigned role (platform-scoped)
         if (roleList.includes('admin')) { navigate('/admin', { replace: true }); return; }
         if (roleList.includes('academy')) { navigate('/academy', { replace: true }); return; }
         if (roleList.includes('supervisor')) { navigate('/teacher', { replace: true }); return; }
