@@ -62,9 +62,9 @@ export default function AdminClasses() {
       const { data: overviewData } = await supabase.functions.invoke('admin-students-overview');
       if (overviewData?.students) {
         for (const s of overviewData.students) {
-          if (s.class_ids) {
-            for (const cid of s.class_ids) {
-              studentCounts[cid] = (studentCounts[cid] || 0) + 1;
+          if (s.classes) {
+            for (const c of s.classes) {
+              studentCounts[c.id] = (studentCounts[c.id] || 0) + 1;
             }
           }
         }
