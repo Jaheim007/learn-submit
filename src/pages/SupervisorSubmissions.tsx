@@ -84,69 +84,14 @@ export default function SupervisorSubmissions() {
 
   const loadData = async () => {
     try {
-      // Get assigned classes
-      const { data: assignments } = await supabase
-        .from('supervisor_class_assignments')
-        .select('class_id');
+      const { data, error } = await supabase.functions.invoke('teacher-submissions-overview');
 
-      if (!assignments) return;
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-      const assignedClassIds = assignments.map(a => a.class_id);
-
-      // Load submissions from assigned classes only
-      const { data: submissionsData } = await supabase
-        .from('submissions')
-        .select(`
-          *,
-          students!inner (
-            full_name,
-            email,
-            phone,
-            whatsapp,
-            telegram,
-            github_profile
-          ),
-          classes!inner (
-            code,
-            title
-          ),
-          projects!inner (
-            code,
-            title
-          )
-        `)
-        .in('class_id', assignedClassIds)
-        .order('submitted_at', { ascending: false });
-
-      // Load assigned classes
-      const { data: classesData } = await supabase
-        .from('classes')
-        .select('*')
-        .in('id', assignedClassIds)
-        .order('code');
-
-      // Load projects from assigned classes
-      const { data: classProjects } = await supabase
-        .from('class_projects')
-        .select(`
-          project_id,
-          projects (id, code, title)
-        `)
-        .in('class_id', assignedClassIds);
-
-      const projectsData = classProjects?.map(cp => cp.projects as Project) || [];
-
-      // Transform submissions data to match interface
-      const transformedSubmissions = submissionsData?.map(sub => ({
-        ...sub,
-        student: sub.students,
-        class: sub.classes,
-        project: sub.projects
-      })) || [];
-      
-      setSubmissions(transformedSubmissions);
-      setClasses(classesData || []);
-      setProjects(projectsData);
+      setSubmissions(data?.submissions || []);
+      setClasses(data?.classes || []);
+      setProjects(data?.projects || []);
     } catch (error) {
       console.error('Error loading submissions:', error);
     } finally {

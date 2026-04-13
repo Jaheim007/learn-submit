@@ -64,88 +64,13 @@ export default function AdminStudents() {
 
   const loadData = async () => {
     try {
-      // Use direct students table query with simplified enrollments join
-      const [studentsResponse, classesResponse] = await Promise.all([
-        supabase
-          .from('students')
-          .select(`
-            id,
-            user_id,
-            full_name,
-            email,
-            is_active,
-            created_at,
-            phone,
-            whatsapp,
-            telegram,
-            github_profile,
-            avatar_url
-          `)
-          .order('created_at', { ascending: false }),
-        
-        supabase
-          .from('classes')
-          .select('id, code, title')
-          .eq('is_active', true)
-          .order('code')
-      ]);
+      const { data, error } = await supabase.functions.invoke('admin-students-overview');
 
-      if (classesResponse.data) {
-        setClasses(classesResponse.data);
-      }
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-      if (studentsResponse.data) {
-        // Get enrollments and submission counts for each student
-        const studentIds = studentsResponse.data.map(s => s.id);
-        
-        const [enrollmentsResponse, submissionsResponse] = await Promise.all([
-          supabase
-            .from('enrollments')
-            .select(`
-              student_id,
-              classes!inner(id, code, title)
-            `)
-            .in('student_id', studentIds),
-          
-          supabase
-            .from('submissions')
-            .select('student_id')
-            .in('student_id', studentIds)
-        ]);
-
-        const submissionCounts = submissionsResponse.data?.reduce((acc, sub) => {
-          acc[sub.student_id] = (acc[sub.student_id] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>) || {};
-
-        // Group enrollments by student
-        const enrollmentsByStudent = enrollmentsResponse.data?.reduce((acc, enrollment: any) => {
-          if (!acc[enrollment.student_id]) {
-            acc[enrollment.student_id] = [];
-          }
-          acc[enrollment.student_id].push(enrollment.classes);
-          return acc;
-        }, {} as Record<string, any[]>) || {};
-
-        // Format students data
-        const formattedStudents = studentsResponse.data.map((student: any) => ({
-          id: student.id,
-          user_id: student.user_id,
-          full_name: student.full_name,
-          email: student.email,
-          phone: student.phone,
-          whatsapp: student.whatsapp,
-          telegram: student.telegram,
-          github_profile: student.github_profile,
-          avatar_url: student.avatar_url,
-          is_active: student.is_active,
-          created_at: student.created_at,
-          classes: enrollmentsByStudent[student.id] || [],
-          submissions_count: submissionCounts[student.id] || 0,
-        }));
-
-        setStudents(formattedStudents);
-      }
+      setStudents(data?.students || []);
+      setClasses(data?.classes || []);
     } catch (error) {
       console.error('Error loading students:', error);
       toast.error('Erreur lors du chargement des étudiants');
