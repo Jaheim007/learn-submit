@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
     const [{ data: students, error: studentsError }, { data: classes, error: classesError }] = await Promise.all([
       serviceClient
         .from('students')
-        .select('id, user_id, full_name, email, is_active, created_at, phone, whatsapp, telegram, github_profile, avatar_url')
+        .select('id, user_id, full_name, email, is_active, status, created_at, phone, whatsapp, telegram, github_profile, avatar_url')
         .order('created_at', { ascending: false }),
       serviceClient
         .from('classes')

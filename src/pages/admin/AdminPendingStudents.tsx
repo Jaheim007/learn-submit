@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
-import { UserCheck, UserX, Clock, Mail, GraduationCap, BookOpen, Building2, Search, Users, ShieldX, CheckCircle2 } from 'lucide-react';
+import { UserCheck, UserX, Clock, Mail, GraduationCap, BookOpen, Building2, Search, Users, ShieldX } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -19,7 +19,7 @@ interface ManagedUser {
   full_name: string;
   email: string;
   created_at: string;
-  status: 'pending' | 'active' | 'rejected';
+  status: 'pending' | 'rejected';
   roles: string[];
 }
 
@@ -49,50 +49,60 @@ export default function AdminPendingStudents() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [profilesRes, rolesRes, studentsRes, classesRes] = await Promise.all([
+      // Use edge function to bypass RLS and get accurate data
+      const [overviewRes, classesRes, profilesRes, rolesRes] = await Promise.all([
+        supabase.functions.invoke('admin-students-overview'),
+        supabase.from('classes').select('id, code, title').eq('is_active', true).order('code'),
         supabase.from('profiles').select('id, full_name, email, created_at').order('created_at', { ascending: false }),
         supabase.from('user_roles').select('user_id, role'),
-        supabase.from('students').select('user_id, status'),
-        supabase.from('classes').select('id, code, title').eq('is_active', true).order('code'),
       ]);
 
       const profiles = profilesRes.data || [];
       const roles = rolesRes.data || [];
-      const students = studentsRes.data || [];
+      const studentsList = overviewRes.data?.students || [];
 
+      // Build role map
       const rolesByUser = new Map<string, string[]>();
-      roles.forEach(r => {
+      roles.forEach((r: any) => {
         const existing = rolesByUser.get(r.user_id) || [];
         existing.push(r.role);
         rolesByUser.set(r.user_id, existing);
       });
 
-      const studentStatusMap = new Map<string, string>();
-      students.forEach(s => studentStatusMap.set(s.user_id, s.status));
+      // Build student status map from edge function data (bypasses RLS)
+      const studentStatusMap = new Map<string, { status: string; is_active: boolean }>();
+      studentsList.forEach((s: any) => {
+        studentStatusMap.set(s.user_id, { status: s.status || 'active', is_active: s.is_active });
+      });
 
-      const managed: ManagedUser[] = profiles.map(p => {
+      const managed: ManagedUser[] = [];
+      profiles.forEach(p => {
         const userRoles = rolesByUser.get(p.id) || [];
-        const studentStatus = studentStatusMap.get(p.id);
+        const studentInfo = studentStatusMap.get(p.id);
 
-        let status: 'pending' | 'active' | 'rejected';
-        if (studentStatus === 'rejected') {
+        let status: 'pending' | 'rejected' | 'active';
+
+        if (studentInfo?.status === 'rejected') {
           status = 'rejected';
         } else if (userRoles.length === 0) {
           status = 'pending';
-        } else if (studentStatus === 'pending') {
+        } else if (studentInfo?.status === 'pending') {
           status = 'pending';
         } else {
           status = 'active';
         }
 
-        return {
-          id: p.id,
-          full_name: p.full_name || '',
-          email: p.email,
-          created_at: p.created_at,
-          status,
-          roles: userRoles,
-        };
+        // Only keep pending and rejected users
+        if (status === 'pending' || status === 'rejected') {
+          managed.push({
+            id: p.id,
+            full_name: p.full_name || '',
+            email: p.email,
+            created_at: p.created_at,
+            status,
+            roles: userRoles,
+          });
+        }
       });
 
       setAllUsers(managed);
@@ -117,7 +127,6 @@ export default function AdminPendingStudents() {
 
   const counts = useMemo(() => ({
     pending: allUsers.filter(u => u.status === 'pending').length,
-    active: allUsers.filter(u => u.status === 'active').length,
     rejected: allUsers.filter(u => u.status === 'rejected').length,
   }), [allUsers]);
 
@@ -182,14 +191,12 @@ export default function AdminPendingStudents() {
   const handleReactivate = async (user: ManagedUser) => {
     setProcessing(true);
     try {
-      // Reactivate: set student status back to active
-      const { error } = await supabase
-        .from('students')
-        .update({ status: 'active', is_active: true })
-        .eq('user_id', user.id);
+      const { data, error } = await supabase.functions.invoke('approve-pending-user', {
+        body: { user_id: user.id, action: 'approve', role: 'student', class_ids: [] },
+      });
       if (error) throw error;
 
-      toast.success(`${user.full_name || user.email} a été réactivé`);
+      toast.success(`${user.full_name || user.email} a été remis en attente pour réapprobation`);
       loadData();
     } catch (error: any) {
       toast.error(error?.message || 'Erreur lors de la réactivation');
@@ -250,20 +257,16 @@ export default function AdminPendingStudents() {
             </>
           )}
 
-          {user.status === 'active' && (
-            <Badge variant="outline" className="self-start sm:self-center bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] border-[hsl(var(--success))]/20 whitespace-nowrap">
-              <CheckCircle2 className="h-3 w-3 mr-1" />Actif
-            </Badge>
-          )}
-
           {user.status === 'rejected' && (
             <>
               <Badge variant="outline" className="self-start sm:self-center bg-destructive/10 text-destructive border-destructive/20 whitespace-nowrap">
                 <ShieldX className="h-3 w-3 mr-1" />Refusé
               </Badge>
-              <Button size="sm" variant="outline" onClick={() => handleReactivate(user)} disabled={processing} className="native-btn touch-manipulation">
-                <UserCheck className="h-4 w-4 mr-1" /> Réactiver
-              </Button>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => openApproval(user)} className="native-btn touch-manipulation">
+                  <UserCheck className="h-4 w-4 mr-1" /> Approuver
+                </Button>
+              </div>
             </>
           )}
         </div>
@@ -279,7 +282,7 @@ export default function AdminPendingStudents() {
           Gestion des utilisateurs
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Approuver, rechercher et gérer tous les utilisateurs de la plateforme
+          Approuver les nouveaux utilisateurs et gérer les comptes refusés
         </p>
       </div>
 
@@ -294,34 +297,29 @@ export default function AdminPendingStudents() {
         />
       </div>
 
-      {/* Tabs */}
+      {/* Tabs — only pending and rejected */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full grid grid-cols-3 h-12">
+        <TabsList className="w-full grid grid-cols-2 h-12">
           <TabsTrigger value="pending" className="gap-1.5 touch-manipulation text-sm">
             <Clock className="h-4 w-4" />
-            <span className="hidden sm:inline">En attente</span>
+            En attente
             <Badge variant="secondary" className="ml-1 text-xs px-1.5 py-0">{counts.pending}</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="active" className="gap-1.5 touch-manipulation text-sm">
-            <CheckCircle2 className="h-4 w-4" />
-            <span className="hidden sm:inline">Actifs</span>
-            <Badge variant="secondary" className="ml-1 text-xs px-1.5 py-0">{counts.active}</Badge>
           </TabsTrigger>
           <TabsTrigger value="rejected" className="gap-1.5 touch-manipulation text-sm">
             <ShieldX className="h-4 w-4" />
-            <span className="hidden sm:inline">Refusés</span>
+            Refusés
             <Badge variant="secondary" className="ml-1 text-xs px-1.5 py-0">{counts.rejected}</Badge>
           </TabsTrigger>
         </TabsList>
 
-        {['pending', 'active', 'rejected'].map(tab => (
+        {['pending', 'rejected'].map(tab => (
           <TabsContent key={tab} value={tab} className="mt-4">
             {filtered.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
                   <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground/20" />
                   <p className="text-muted-foreground font-medium">
-                    {searchTerm ? 'Aucun résultat trouvé' : `Aucun utilisateur ${tab === 'pending' ? 'en attente' : tab === 'active' ? 'actif' : 'refusé'}`}
+                    {searchTerm ? 'Aucun résultat trouvé' : `Aucun utilisateur ${tab === 'pending' ? 'en attente' : 'refusé'}`}
                   </p>
                 </CardContent>
               </Card>
