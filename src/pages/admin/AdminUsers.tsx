@@ -18,6 +18,8 @@ interface UserEntry {
   email: string;
   created_at: string;
   role: 'supervisor' | 'admin' | 'academy';
+  platform?: string;
+  platforms?: Record<string, string>;
   classes?: { id: number; code: string; title: string }[];
 }
 
@@ -41,7 +43,7 @@ export default function AdminUsers() {
 
   // Admin form
   const [isAdminDialogOpen, setIsAdminDialogOpen] = useState(false);
-  const [adminForm, setAdminForm] = useState({ email: '', full_name: '', role: 'academy' as 'admin' | 'academy' });
+  const [adminForm, setAdminForm] = useState({ email: '', full_name: '', role: 'academy' as 'admin' | 'academy', platform: 'hacktualiz' as 'hacktualiz' | 'groupformation' | 'both' });
 
   useEffect(() => { loadData(); }, []);
 
@@ -138,13 +140,13 @@ export default function AdminUsers() {
     }
     try {
       const { data, error } = await supabase.functions.invoke('assign-user-role', {
-        body: { email: adminForm.email.trim(), full_name: adminForm.full_name.trim() || null, role: adminForm.role }
+        body: { email: adminForm.email.trim(), full_name: adminForm.full_name.trim() || null, role: adminForm.role, platform: adminForm.platform }
       });
       if (error) { toast.error(error.message); return; }
       if (data?.error) { toast.error(data.error); return; }
       toast.success('Rôle assigné avec succès');
       setIsAdminDialogOpen(false);
-      setAdminForm({ email: '', full_name: '', role: 'academy' });
+      setAdminForm({ email: '', full_name: '', role: 'academy', platform: 'hacktualiz' });
       loadData();
     } catch (error) {
       console.error(error);
@@ -282,7 +284,7 @@ export default function AdminUsers() {
         {/* Admins Tab */}
         <TabsContent value="admins" className="space-y-4">
           <div className="flex justify-end">
-            <Button onClick={() => { setAdminForm({ email: '', full_name: '', role: 'academy' }); setIsAdminDialogOpen(true); }}>
+            <Button onClick={() => { setAdminForm({ email: '', full_name: '', role: 'academy', platform: 'hacktualiz' }); setIsAdminDialogOpen(true); }}>
               <Plus className="h-4 w-4 mr-2" />
               Ajouter un administrateur
             </Button>
@@ -296,6 +298,7 @@ export default function AdminUsers() {
                     <TableHead>Nom</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Rôle</TableHead>
+                    <TableHead>Plateforme</TableHead>
                     <TableHead>Créé le</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -309,6 +312,18 @@ export default function AdminUsers() {
                         <Badge variant={a.role === 'admin' ? 'default' : 'secondary'}>
                           {a.role === 'admin' ? 'Admin' : 'Académique'}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {a.platforms && Object.entries(a.platforms).map(([role, plat]) => (
+                            <Badge key={role} variant="outline" className="text-xs">
+                              {plat === 'both' ? '🌐 Toutes' : plat === 'hacktualiz' ? '🎓 Hacktualiz' : '📋 GroupFormation'}
+                            </Badge>
+                          ))}
+                          {!a.platforms && (
+                            <Badge variant="outline" className="text-xs">🌐 Toutes</Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {new Date(a.created_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'short', day: 'numeric' })}
@@ -348,7 +363,7 @@ export default function AdminUsers() {
                   ))}
                   {admins.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                         Aucun administrateur trouvé
                       </TableCell>
                     </TableRow>
@@ -472,6 +487,38 @@ export default function AdminUsers() {
                     onChange={() => setAdminForm(prev => ({ ...prev, role: 'admin' }))}
                   />
                   <span className="text-sm">Admin</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <Label>Plateforme</Label>
+              <div className="flex gap-3 mt-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="admin-platform"
+                    checked={adminForm.platform === 'hacktualiz'}
+                    onChange={() => setAdminForm(prev => ({ ...prev, platform: 'hacktualiz' }))}
+                  />
+                  <span className="text-sm">🎓 Hacktualiz</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="admin-platform"
+                    checked={adminForm.platform === 'groupformation'}
+                    onChange={() => setAdminForm(prev => ({ ...prev, platform: 'groupformation' }))}
+                  />
+                  <span className="text-sm">📋 GroupFormation</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="admin-platform"
+                    checked={adminForm.platform === 'both'}
+                    onChange={() => setAdminForm(prev => ({ ...prev, platform: 'both' }))}
+                  />
+                  <span className="text-sm">🌐 Les deux</span>
                 </label>
               </div>
             </div>

@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, full_name, role } = await req.json();
+    const { email, full_name, role, platform = 'hacktualiz' } = await req.json();
 
     if (!email || !role) {
       return new Response(JSON.stringify({ error: 'email and role are required' }), {
@@ -38,6 +38,14 @@ Deno.serve(async (req) => {
     const validRoles = ['admin', 'academy', 'supervisor'];
     if (!validRoles.includes(role)) {
       return new Response(JSON.stringify({ error: `Invalid role. Must be one of: ${validRoles.join(', ')}` }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const validPlatforms = ['hacktualiz', 'groupformation', 'both'];
+    if (!validPlatforms.includes(platform)) {
+      return new Response(JSON.stringify({ error: `Invalid platform. Must be one of: ${validPlatforms.join(', ')}` }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -81,7 +89,6 @@ Deno.serve(async (req) => {
     }
 
     // Find or pre-register the user by email
-    // First check if user already exists in profiles
     const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
       .select('id')
@@ -93,21 +100,17 @@ Deno.serve(async (req) => {
     if (existingProfile) {
       targetUserId = existingProfile.id;
     } else {
-      // Check auth.users via admin API
       const { data: listRes } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
       const found = listRes?.users?.find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
 
       if (found) {
         targetUserId = found.id;
-        // Ensure profile exists
         await supabaseAdmin.from('profiles').upsert({
           id: found.id,
           email: email.toLowerCase(),
           full_name: full_name || null,
         });
       } else {
-        // User doesn't exist yet — pre-register with a placeholder
-        // They will complete registration when they log in via OAuth/OTP
         const tempPassword = crypto.randomUUID();
         const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
           email: email.toLowerCase(),
@@ -126,7 +129,6 @@ Deno.serve(async (req) => {
 
         targetUserId = newUser.user.id;
 
-        // Create profile
         await supabaseAdmin.from('profiles').upsert({
           id: targetUserId,
           email: email.toLowerCase(),
@@ -135,12 +137,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Assign the role (upsert to avoid duplicates)
+    // Assign the role with platform
     const { error: roleError } = await supabaseAdmin
       .from('user_roles')
       .upsert(
-        { user_id: targetUserId, role },
-        { onConflict: 'user_id,role' }
+        { user_id: targetUserId, role, platform },
+        { onConflict: 'user_id,role,platform' }
       );
 
     if (roleError) {
@@ -156,7 +158,7 @@ Deno.serve(async (req) => {
       await supabaseAdmin.from('profiles').update({ full_name }).eq('id', targetUserId);
     }
 
-    console.log(`Role '${role}' assigned to ${email} (${targetUserId})`);
+    console.log(`Role '${role}' (platform: ${platform}) assigned to ${email} (${targetUserId})`);
 
     return new Response(JSON.stringify({ success: true, user_id: targetUserId }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

@@ -46,17 +46,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Get all staff roles
+    // Get all staff roles - only those relevant to hacktualiz
     const { data: staffRoles, error: rolesError } = await serviceClient
-      .from('user_roles').select('user_id, role').in('role', ['admin', 'academy', 'supervisor']);
+      .from('user_roles').select('user_id, role, platform')
+      .in('role', ['admin', 'academy', 'supervisor'])
+      .in('platform', ['hacktualiz', 'both']);
     if (rolesError) throw rolesError;
 
     const uniqueUserIds = [...new Set((staffRoles || []).map(r => r.user_id))];
 
-    // Get user info from auth.users via admin API
+    // Get user info from profiles first
     const userInfoMap = new Map<string, { email: string; full_name: string; created_at: string }>();
 
-    // Fetch from profiles first
     const { data: profiles } = await serviceClient
       .from('profiles').select('id, full_name, email, created_at').in('id', uniqueUserIds);
     (profiles || []).forEach(p => {
@@ -98,34 +99,38 @@ Deno.serve(async (req) => {
         .filter(a => a.supervisor_user_id === uid)
         .map(a => classMap.get(a.class_id))
         .filter(Boolean);
+      const userRoles = (staffRoles || []).filter(r => r.user_id === uid);
       return {
         user_id: uid,
         full_name: info?.full_name || '',
         email: info?.email || '',
         created_at: info?.created_at || '',
         role: 'supervisor',
+        platform: userRoles.find(r => r.role === 'supervisor')?.platform || 'both',
         classes: assignedClasses,
       };
     });
 
     const adminAcademyRoles = (staffRoles || []).filter(r => r.role === 'admin' || r.role === 'academy');
-    const adminMap = new Map<string, string[]>();
+    const adminMap = new Map<string, { roles: string[]; platforms: Record<string, string> }>();
     adminAcademyRoles.forEach(r => {
-      const existing = adminMap.get(r.user_id) || [];
-      existing.push(r.role);
+      const existing = adminMap.get(r.user_id) || { roles: [], platforms: {} };
+      existing.roles.push(r.role);
+      existing.platforms[r.role] = r.platform;
       adminMap.set(r.user_id, existing);
     });
 
-    const admins = [...adminMap.entries()].map(([uid, roles]) => {
+    const admins = [...adminMap.entries()].map(([uid, data]) => {
       const info = userInfoMap.get(uid);
-      const primaryRole = roles.includes('admin') ? 'admin' : 'academy';
+      const primaryRole = data.roles.includes('admin') ? 'admin' : 'academy';
       return {
         user_id: uid,
         full_name: info?.full_name || '',
         email: info?.email || '',
         created_at: info?.created_at || '',
         role: primaryRole,
-        roles,
+        roles: data.roles,
+        platforms: data.platforms,
       };
     });
 

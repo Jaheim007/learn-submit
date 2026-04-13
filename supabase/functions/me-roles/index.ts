@@ -6,7 +6,6 @@ const corsHeaders = {
 };
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -24,7 +23,6 @@ Deno.serve(async (req) => {
       },
     });
 
-    // Get user from auth header
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
@@ -34,6 +32,8 @@ Deno.serve(async (req) => {
           roles: [],
           isAdmin: false,
           isSupervisor: false,
+          isTeacher: false,
+          isAcademy: false,
           error: 'Unauthorized'
         }),
         { 
@@ -45,11 +45,12 @@ Deno.serve(async (req) => {
 
     console.log('Fetching roles for user:', user.id);
 
-    // Fetch user roles using anon key (policy allows users to read their own roles)
+    // Fetch user roles filtered by platform = 'hacktualiz' or 'both'
     const { data: roleData, error: roleError } = await supabase
       .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id);
+      .select('role, platform')
+      .eq('user_id', user.id)
+      .in('platform', ['hacktualiz', 'both']);
 
     if (roleError) {
       console.error('Error fetching roles:', roleError);
@@ -58,6 +59,8 @@ Deno.serve(async (req) => {
           roles: [],
           isAdmin: false,
           isSupervisor: false,
+          isTeacher: false,
+          isAcademy: false,
           error: 'Failed to fetch roles'
         }),
         { 
@@ -68,7 +71,7 @@ Deno.serve(async (req) => {
     }
 
     const roles = roleData?.map(r => r.role) || [];
-    console.log('Found roles:', roles);
+    console.log('Found roles (hacktualiz):', roles);
 
     return new Response(
       JSON.stringify({ 
@@ -91,6 +94,8 @@ Deno.serve(async (req) => {
         roles: [],
         isAdmin: false,
         isSupervisor: false,
+        isTeacher: false,
+        isAcademy: false,
         error: 'Internal server error'
       }),
       { 
