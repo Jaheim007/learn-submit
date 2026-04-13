@@ -18,7 +18,7 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, user, authLoading } = useAuth();
-  const { isAdmin, isLoading: rolesLoading, refetch: refetchRoles } = useRoles();
+  const { isAdmin, isAcademy, isLoading: rolesLoading, refetch: refetchRoles } = useRoles();
   const navigate = useNavigate();
 
   // Redirect logic
