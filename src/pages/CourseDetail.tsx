@@ -161,27 +161,28 @@ export default function CourseDetail() {
 
   return (
     <StudentDashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
         {/* Back Button */}
         <Button 
           variant="ghost" 
           onClick={() => navigate('/etudiant/cours')}
-          className="mb-4"
+          className="mb-2 sm:mb-4 touch-manipulation"
+          size="sm"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft className="w-4 h-4 mr-1.5" />
           Retour aux cours
         </Button>
 
         {/* Course Image Hero */}
         {course.image_url && (
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-border/50 bg-gradient-to-br from-primary/5 to-secondary/5">
+          <div className="relative w-full aspect-video rounded-lg sm:rounded-xl overflow-hidden border border-border/50 bg-gradient-to-br from-primary/5 to-secondary/5">
             <img 
               src={course.image_url} 
               alt={course.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute top-4 left-4">
-              <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
+            <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
+              <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm text-[10px] sm:text-xs">
                 <BookOpen className="w-3 h-3 mr-1" />
                 {course.class_code}
               </Badge>
@@ -191,13 +192,13 @@ export default function CourseDetail() {
 
         {/* Course Info Card */}
         <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
-          <CardContent className="p-6 space-y-4">
+          <CardContent className="p-4 sm:p-6 space-y-3 sm:space-y-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
+              <h1 className="text-xl sm:text-3xl font-bold text-foreground mb-1.5 sm:mb-2">
                 {course.title}
               </h1>
               {!course.image_url && (
-                <Badge variant="secondary" className="mb-4">
+                <Badge variant="secondary" className="mb-3 sm:mb-4 text-[10px] sm:text-xs">
                   <BookOpen className="w-3 h-3 mr-1" />
                   {course.class_code}
                 </Badge>
@@ -206,7 +207,7 @@ export default function CourseDetail() {
 
             {course.description && (
               <div 
-                className="prose prose-sm max-w-none dark:prose-invert text-muted-foreground leading-relaxed [&_p]:mb-3 [&_strong]:text-foreground [&_a]:text-primary"
+                className="prose prose-sm max-w-none dark:prose-invert text-muted-foreground leading-relaxed [&_p]:mb-2 sm:[&_p]:mb-3 [&_strong]:text-foreground [&_a]:text-primary text-sm"
                 dangerouslySetInnerHTML={{ __html: course.description }}
               />
             )}
@@ -215,23 +216,23 @@ export default function CourseDetail() {
 
         {/* Course Materials */}
         <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
-          <CardContent className="p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-primary" />
-              Fichiers du cours ({course.materials.length})
+          <CardContent className="p-4 sm:p-6">
+            <h2 className="text-base sm:text-xl font-semibold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
+              <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              Fichiers ({course.materials.length})
             </h2>
             
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {course.materials.map((material) => (
                 <div
                   key={material.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border/50 bg-background/50 hover:bg-accent/50 transition-colors"
+                  className="flex items-center justify-between gap-2 p-3 sm:p-4 rounded-lg border border-border/50 bg-background/50 hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.99]"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <FileText className="w-5 h-5 text-primary" />
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     </div>
-                    <span className="font-medium text-foreground">
+                    <span className="text-xs sm:text-sm font-medium text-foreground truncate">
                       {material.file_name}
                     </span>
                   </div>
@@ -239,15 +240,17 @@ export default function CourseDetail() {
                     onClick={() => downloadFile(material.file_url, material.file_name)}
                     size="sm"
                     variant="default"
+                    className="shrink-0 touch-manipulation h-8 text-xs sm:text-sm"
                   >
-                    <Download className="w-4 h-4 mr-2" />
-                    Télécharger
+                    <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Télécharger</span>
+                    <span className="sm:hidden">DL</span>
                   </Button>
                 </div>
               ))}
 
               {course.materials.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-6 sm:py-8 text-muted-foreground text-sm">
                   Aucun fichier disponible pour ce cours
                 </div>
               )}

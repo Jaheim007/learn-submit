@@ -592,11 +592,11 @@ export default function AdminProjects() {
 
       {/* Create Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" onInteractOutside={(e) => e.preventDefault()}>
-          <DialogHeader>
-            <DialogTitle>Créer un projet</DialogTitle>
+        <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col p-0" onInteractOutside={(e) => e.preventDefault()}>
+          <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 shrink-0">
+            <DialogTitle className="text-base sm:text-lg">Créer un projet</DialogTitle>
           </DialogHeader>
-          <div className="overflow-y-auto flex-1 pr-2">
+          <div className="overflow-y-auto flex-1 px-4 sm:px-6 pb-4 sm:pb-6">
             {projectFormContent}
           </div>
         </DialogContent>
@@ -604,11 +604,11 @@ export default function AdminProjects() {
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" onInteractOutside={(e) => e.preventDefault()}>
-          <DialogHeader>
-            <DialogTitle>Modifier le projet</DialogTitle>
+        <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col p-0" onInteractOutside={(e) => e.preventDefault()}>
+          <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 shrink-0">
+            <DialogTitle className="text-base sm:text-lg">Modifier le projet</DialogTitle>
           </DialogHeader>
-          <div className="overflow-y-auto flex-1 pr-2">
+          <div className="overflow-y-auto flex-1 px-4 sm:px-6 pb-4 sm:pb-6">
             {projectFormContent}
           </div>
         </DialogContent>

@@ -150,52 +150,52 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 w-[95vw] sm:w-auto">
         {/* Header */}
-        <div className="bg-primary/5 border-b px-6 py-5">
+        <div className="bg-primary/5 border-b px-4 sm:px-6 py-4 sm:py-5">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">
+            <DialogTitle className="text-base sm:text-xl font-semibold">
               Révision de soumission
             </DialogTitle>
           </DialogHeader>
-          <div className="flex flex-wrap items-center gap-2 mt-3">
-            <Badge variant="outline" className="text-xs font-medium">{submission.student.full_name || submission.student.email}</Badge>
-            <span className="text-muted-foreground text-xs">•</span>
-            <Badge variant="secondary" className="text-xs">{submission.class.code}</Badge>
-            <span className="text-muted-foreground text-xs">•</span>
-            <span className="text-xs text-muted-foreground">{submission.project.title}</span>
-            <span className="text-muted-foreground text-xs">•</span>
-            <span className="text-xs text-muted-foreground">v{submission.version}</span>
-            <span className="text-muted-foreground text-xs">•</span>
-            <span className="text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2 sm:mt-3">
+            <Badge variant="outline" className="text-[10px] sm:text-xs font-medium">{submission.student.full_name || submission.student.email}</Badge>
+            <span className="text-muted-foreground text-[10px] sm:text-xs">•</span>
+            <Badge variant="secondary" className="text-[10px] sm:text-xs">{submission.class.code}</Badge>
+            <span className="text-muted-foreground text-[10px] sm:text-xs">•</span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground">{submission.project.title}</span>
+            <span className="text-muted-foreground text-[10px] sm:text-xs hidden sm:inline">•</span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground hidden sm:inline">v{submission.version}</span>
+            <span className="text-muted-foreground text-[10px] sm:text-xs hidden sm:inline">•</span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground hidden sm:inline">
               {new Date(submission.submitted_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
         </div>
 
         {/* Scrollable content */}
-        <div className="overflow-y-auto flex-1 px-6 py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="overflow-y-auto flex-1 px-4 sm:px-6 py-4 sm:py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
             {/* Left column — Student submission content */}
-            <div className="space-y-5">
-              <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Contenu de la soumission</h4>
+            <div className="space-y-4 sm:space-y-5">
+              <h4 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground">Contenu de la soumission</h4>
               
               {/* Description */}
               {submission.description ? (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Description du projet</Label>
-                  <div className="p-4 bg-muted/50 rounded-xl border text-sm leading-relaxed">
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label className="text-xs sm:text-sm font-medium">Description du projet</Label>
+                  <div className="p-3 sm:p-4 bg-muted/50 rounded-xl border text-sm leading-relaxed">
                     <RichTextRenderer content={submission.description} />
                   </div>
                 </div>
               ) : (
-                <div className="p-4 bg-muted/30 rounded-xl border border-dashed text-sm text-muted-foreground italic text-center">
+                <div className="p-3 sm:p-4 bg-muted/30 rounded-xl border border-dashed text-sm text-muted-foreground italic text-center">
                   Aucune description fournie
                 </div>
               )}
 
               {/* Links */}
               {submission.links.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Liens soumis ({submission.links.length})</Label>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label className="text-xs sm:text-sm font-medium">Liens soumis ({submission.links.length})</Label>
                   <div className="space-y-2">
                     {submission.links.map((link, index) => (
                       <a 
@@ -203,10 +203,10 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
                         href={link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 bg-muted/40 rounded-lg border hover:bg-muted/70 transition-colors group"
+                        className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-muted/40 rounded-lg border hover:bg-muted/70 transition-colors group touch-manipulation"
                       >
                         <ExternalLink className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span className="text-sm text-primary truncate group-hover:underline">{link}</span>
+                        <span className="text-xs sm:text-sm text-primary truncate group-hover:underline">{link}</span>
                       </a>
                     ))}
                   </div>
@@ -215,23 +215,23 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
 
               {/* Files */}
               {submission.files.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Fichiers soumis ({submission.files.length})</Label>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label className="text-xs sm:text-sm font-medium">Fichiers soumis ({submission.files.length})</Label>
                   <div className="space-y-2">
                     {submission.files.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between gap-3 p-3 bg-muted/40 rounded-lg border">
-                        <div className="flex items-center gap-3 min-w-0">
+                      <div key={index} className="flex items-center justify-between gap-2 sm:gap-3 p-2.5 sm:p-3 bg-muted/40 rounded-lg border">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                           <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <span className="text-sm truncate">{file.split('/').pop()}</span>
+                          <span className="text-xs sm:text-sm truncate">{file.split('/').pop()}</span>
                         </div>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="flex-shrink-0 gap-1.5"
+                          className="flex-shrink-0 gap-1.5 h-8 text-xs touch-manipulation"
                           onClick={() => downloadFile(file, submission.id)}
                         >
                           <Download className="h-3.5 w-3.5" />
-                          Télécharger
+                          <span className="hidden sm:inline">Télécharger</span>
                         </Button>
                       </div>
                     ))}
@@ -240,20 +240,20 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
               )}
 
               {submission.links.length === 0 && submission.files.length === 0 && !submission.description && (
-                <div className="p-6 bg-muted/30 rounded-xl border border-dashed text-center">
-                  <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">Aucun contenu soumis</p>
+                <div className="p-5 sm:p-6 bg-muted/30 rounded-xl border border-dashed text-center">
+                  <FileText className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-xs sm:text-sm text-muted-foreground">Aucun contenu soumis</p>
                 </div>
               )}
             </div>
 
             {/* Right column — Evaluation */}
-            <div className="space-y-5">
-              <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Évaluation</h4>
+            <div className="space-y-4 sm:space-y-5">
+              <h4 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground">Évaluation</h4>
 
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="status" className="text-sm font-medium">Statut</Label>
+              <div className="space-y-3 sm:space-y-4">
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label htmlFor="status" className="text-xs sm:text-sm font-medium">Statut</Label>
                   <Select value={status} onValueChange={setStatus}>
                     <SelectTrigger className="h-11">
                       <SelectValue />
@@ -275,8 +275,8 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="grade" className="text-sm font-medium">Note (/20)</Label>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label htmlFor="grade" className="text-xs sm:text-sm font-medium">Note (/20)</Label>
                   <Input
                     id="grade"
                     type="number"
@@ -290,15 +290,15 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="feedback" className="text-sm font-medium">Commentaires & Feedback</Label>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label htmlFor="feedback" className="text-xs sm:text-sm font-medium">Commentaires & Feedback</Label>
                   <RichTextEditor
                     value={feedback}
                     onChange={setFeedback}
-                    placeholder="Donnez un feedback détaillé à l'étudiant sur son travail, les points forts, les axes d'amélioration..."
-                    minHeight="180px"
+                    placeholder="Donnez un feedback détaillé à l'étudiant..."
+                    minHeight="140px"
                   />
-                  <p className="text-xs text-muted-foreground">Ce commentaire sera visible par l'étudiant</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Ce commentaire sera visible par l'étudiant</p>
                 </div>
               </div>
             </div>
@@ -306,10 +306,10 @@ function ReviewModal({ submission, isOpen, onClose, onUpdate }: ReviewModalProps
         </div>
 
         {/* Footer actions */}
-        <div className="border-t px-6 py-4 flex items-center justify-end gap-3 bg-background">
-          <Button variant="outline" onClick={onClose}>Annuler</Button>
-          <Button onClick={handleSubmit} disabled={loading}>
-            {loading ? 'Enregistrement...' : 'Enregistrer l\'évaluation'}
+        <div className="border-t px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-end gap-2 sm:gap-3 bg-background shrink-0">
+          <Button variant="outline" onClick={onClose} size="sm" className="touch-manipulation">Annuler</Button>
+          <Button onClick={handleSubmit} disabled={loading} size="sm" className="touch-manipulation">
+            {loading ? 'Enregistrement...' : 'Enregistrer'}
           </Button>
         </div>
       </DialogContent>
