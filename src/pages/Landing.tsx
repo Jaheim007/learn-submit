@@ -213,9 +213,9 @@ const PlatformSlider = () => {
           <div className="flex items-center justify-center gap-4 mt-10">
             <button
               onClick={() => goTo((current - 1 + slides.length) % slides.length)}
-              className="w-9 h-9 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              className="w-11 h-11 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground touch-manipulation active:scale-90"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5" />
             </button>
             <div className="flex gap-2">
               {slides.map((_, i) => (
@@ -228,9 +228,9 @@ const PlatformSlider = () => {
             </div>
             <button
               onClick={() => goTo((current + 1) % slides.length)}
-              className="w-9 h-9 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              className="w-11 h-11 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground touch-manipulation active:scale-90"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5" />
             </button>
           </div>
         </div>
