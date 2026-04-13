@@ -43,7 +43,7 @@ export default function AdminUsers() {
 
   // Admin form
   const [isAdminDialogOpen, setIsAdminDialogOpen] = useState(false);
-  const [adminForm, setAdminForm] = useState({ email: '', full_name: '', role: 'academy' as 'admin' | 'academy' });
+  const [adminForm, setAdminForm] = useState({ email: '', full_name: '', role: 'academy' as 'admin' | 'academy', platform: 'hacktualiz' as 'hacktualiz' | 'groupformation' | 'both' });
 
   useEffect(() => { loadData(); }, []);
 
