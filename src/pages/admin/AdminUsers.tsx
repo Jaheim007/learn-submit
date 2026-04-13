@@ -490,6 +490,38 @@ export default function AdminUsers() {
                 </label>
               </div>
             </div>
+            <div>
+              <Label>Plateforme</Label>
+              <div className="flex gap-3 mt-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="admin-platform"
+                    checked={adminForm.platform === 'hacktualiz'}
+                    onChange={() => setAdminForm(prev => ({ ...prev, platform: 'hacktualiz' }))}
+                  />
+                  <span className="text-sm">🎓 Hacktualiz</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="admin-platform"
+                    checked={adminForm.platform === 'groupformation'}
+                    onChange={() => setAdminForm(prev => ({ ...prev, platform: 'groupformation' }))}
+                  />
+                  <span className="text-sm">📋 GroupFormation</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="admin-platform"
+                    checked={adminForm.platform === 'both'}
+                    onChange={() => setAdminForm(prev => ({ ...prev, platform: 'both' }))}
+                  />
+                  <span className="text-sm">🌐 Les deux</span>
+                </label>
+              </div>
+            </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setIsAdminDialogOpen(false)}>Annuler</Button>
               <Button type="submit">Assigner le rôle</Button>
