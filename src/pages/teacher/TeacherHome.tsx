@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, FileText, BookOpen, ChevronRight, Clock, FolderOpen } from 'lucide-react';
+import { Users, FileText, BookOpen, ChevronRight, Clock, FolderOpen, TrendingUp, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Badge } from '@/components/ui/badge';
 
 interface ClassInfo {
   id: number;
@@ -23,19 +22,22 @@ interface Stats {
   totalSubmissions: number;
 }
 
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
+const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
+
 export default function TeacherHome() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState<Stats>({
-    myClasses: [],
-    myStudents: 0,
-    pendingSubmissions: 0,
-    totalSubmissions: 0,
-  });
+  const [stats, setStats] = useState<Stats>({ myClasses: [], myStudents: 0, pendingSubmissions: 0, totalSubmissions: 0 });
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<{ full_name: string } | null>(null);
 
   useEffect(() => {
-    if (user) loadStats();
+    if (user) {
+      loadStats();
+      supabase.from('profiles').select('full_name').eq('id', user.id).single()
+        .then(({ data }) => { if (data) setProfile(data); });
+    }
   }, [user]);
 
   const loadStats = async () => {
@@ -46,7 +48,6 @@ export default function TeacherHome() {
         .eq('supervisor_user_id', user?.id);
 
       const classIds = assignments?.map(a => a.class_id) || [];
-
       if (classIds.length === 0) {
         setStats({ myClasses: [], myStudents: 0, pendingSubmissions: 0, totalSubmissions: 0 });
         setLoading(false);
@@ -63,22 +64,13 @@ export default function TeacherHome() {
         const classEnrollments = enrollments?.filter(e => e.class_id === a.class_id) || [];
         const classSubs = submissions?.filter(s => s.class_id === a.class_id) || [];
         const pending = classSubs.filter(s => s.status === 'Reçu' || s.status === 'En révision').length;
-        return {
-          id: cls.id,
-          code: cls.code,
-          title: cls.title,
-          studentCount: classEnrollments.length,
-          submissionCount: classSubs.length,
-          pendingCount: pending,
-        };
+        return { id: cls.id, code: cls.code, title: cls.title, studentCount: classEnrollments.length, submissionCount: classSubs.length, pendingCount: pending };
       });
-
-      const pendingCount = submissions?.filter(s => s.status === 'Reçu' || s.status === 'En révision').length || 0;
 
       setStats({
         myClasses,
         myStudents: enrollments?.length || 0,
-        pendingSubmissions: pendingCount,
+        pendingSubmissions: submissions?.filter(s => s.status === 'Reçu' || s.status === 'En révision').length || 0,
         totalSubmissions: submissions?.length || 0,
       });
     } catch (error) {
@@ -86,6 +78,13 @@ export default function TeacherHome() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const greeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Bonjour';
+    if (hour < 18) return 'Bon après-midi';
+    return 'Bonsoir';
   };
 
   if (loading) {
@@ -96,142 +95,138 @@ export default function TeacherHome() {
     );
   }
 
+  const statCards = [
+    { label: 'Mes Classes', value: stats.myClasses.length, icon: BookOpen, color: 'from-indigo-500/20 to-indigo-600/5', iconColor: 'text-indigo-400' },
+    { label: 'Étudiants', value: stats.myStudents, icon: Users, color: 'from-emerald-500/20 to-emerald-600/5', iconColor: 'text-emerald-400' },
+    { label: 'À réviser', value: stats.pendingSubmissions, icon: Clock, color: 'from-amber-500/20 to-amber-600/5', iconColor: 'text-amber-400', highlight: stats.pendingSubmissions > 0 },
+    { label: 'Soumissions', value: stats.totalSubmissions, icon: FileText, color: 'from-violet-500/20 to-violet-600/5', iconColor: 'text-violet-400' },
+  ];
+
+  const quickActions = [
+    { label: 'Réviser', sub: `${stats.pendingSubmissions} en attente`, icon: FileText, path: '/teacher/submissions', gradient: 'from-primary/10 to-primary/5' },
+    { label: 'Étudiants', sub: `${stats.myStudents} actifs`, icon: Users, path: '/teacher/students', gradient: 'from-emerald-500/10 to-emerald-600/5' },
+    { label: 'Projets', sub: 'Gérer', icon: FolderOpen, path: '/teacher/projects', gradient: 'from-violet-500/10 to-violet-600/5' },
+    { label: 'Cours', sub: 'Contenu', icon: BookOpen, path: '/teacher/courses', gradient: 'from-amber-500/10 to-amber-600/5' },
+  ];
+
   return (
-    <div className="space-y-8 max-w-[1400px] mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Dashboard Formateur</h1>
-        <p className="text-muted-foreground mt-1">Vue d'ensemble de vos classes et soumissions</p>
-      </div>
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-[1400px] mx-auto">
+      {/* Hero Greeting */}
+      <motion.div variants={item} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-primary/5 to-transparent border border-primary/10 p-6 lg:p-8">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
+        <div className="relative">
+          <div className="flex items-center gap-2 mb-1">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-xs font-medium text-primary uppercase tracking-wider">Espace Formateur</span>
+          </div>
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground font-heading">
+            {greeting()}, {profile?.full_name?.split(' ')[0] || 'Formateur'} 👋
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1.5">
+            {stats.pendingSubmissions > 0
+              ? `Vous avez ${stats.pendingSubmissions} soumission${stats.pendingSubmissions > 1 ? 's' : ''} en attente de révision`
+              : 'Tout est à jour. Votre tableau de bord est clean ✨'}
+          </p>
+        </div>
+      </motion.div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Mes Classes</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.myClasses.length}</div>
-            <p className="text-xs text-muted-foreground">Classes assignées</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Étudiants</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.myStudents}</div>
-            <p className="text-xs text-muted-foreground">Dans vos classes</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">À réviser</CardTitle>
-            <Clock className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{stats.pendingSubmissions}</div>
-            <p className="text-xs text-muted-foreground">En attente de révision</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Soumissions</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalSubmissions}</div>
-            <p className="text-xs text-muted-foreground">Total reçues</p>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Stats Grid */}
+      <motion.div variants={item} className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        {statCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <motion.div
+              key={card.label}
+              whileTap={{ scale: 0.97 }}
+              className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${card.color} border border-border/30 p-4 lg:p-5 touch-manipulation ${card.highlight ? 'ring-1 ring-amber-500/30' : ''}`}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className={`h-10 w-10 rounded-xl bg-background/60 backdrop-blur-sm flex items-center justify-center ${card.iconColor}`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                {card.highlight && (
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                  </span>
+                )}
+              </div>
+              <p className="text-2xl lg:text-3xl font-bold text-foreground font-heading">{card.value}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{card.label}</p>
+            </motion.div>
+          );
+        })}
+      </motion.div>
 
-      {/* Assigned Classes */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Mes Classes Assignées</h2>
+      {/* Classes Section */}
+      <motion.div variants={item}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-foreground font-heading flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-primary" />
+            Mes Classes
+          </h2>
+        </div>
         {stats.myClasses.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <BookOpen className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
-              <p className="text-muted-foreground">Aucune classe assignée pour le moment</p>
-              <p className="text-sm text-muted-foreground mt-1">Contactez l'administration pour être assigné à des classes.</p>
-            </CardContent>
-          </Card>
+          <div className="rounded-2xl border border-border/30 bg-card/50 backdrop-blur-sm p-8 text-center">
+            <BookOpen className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
+            <p className="text-sm text-muted-foreground">Aucune classe assignée</p>
+          </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-2">
             {stats.myClasses.map((cls) => (
-              <Card key={cls.id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{cls.code}</CardTitle>
-                      <CardDescription>{cls.title}</CardDescription>
-                    </div>
-                    {cls.pendingCount > 0 && (
-                      <Badge variant="destructive" className="text-xs">
-                        {cls.pendingCount} en attente
-                      </Badge>
-                    )}
+              <motion.button
+                key={cls.id}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => navigate('/teacher/submissions')}
+                className="w-full text-left rounded-2xl border border-border/30 bg-card/60 backdrop-blur-sm p-5 hover:bg-card/80 transition-all touch-manipulation group"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 className="font-bold text-foreground font-heading text-base">{cls.code}</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">{cls.title}</p>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Users className="h-3.5 w-3.5" /> {cls.studentCount} étudiants
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <FileText className="h-3.5 w-3.5" /> {cls.submissionCount} soumissions
-                      </span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate('/teacher/submissions')}
-                      className="text-xs"
-                    >
-                      Voir <ChevronRight className="h-3 w-3 ml-1" />
-                    </Button>
+                  {cls.pendingCount > 0 && (
+                    <Badge variant="destructive" className="text-[10px] px-2 py-0.5 rounded-full">
+                      {cls.pendingCount} en attente
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-4 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {cls.studentCount}</span>
+                    <span className="flex items-center gap-1"><FileText className="h-3 w-3" /> {cls.submissionCount}</span>
                   </div>
-                </CardContent>
-              </Card>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary transition-colors" />
+                </div>
+              </motion.button>
             ))}
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/teacher/submissions')}>
-          <CardContent className="pt-6 text-center">
-            <FileText className="h-8 w-8 mx-auto text-primary mb-2" />
-            <p className="font-medium text-sm">Réviser les soumissions</p>
-            <p className="text-xs text-muted-foreground mt-1">{stats.pendingSubmissions} en attente</p>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/teacher/students')}>
-          <CardContent className="pt-6 text-center">
-            <Users className="h-8 w-8 mx-auto text-primary mb-2" />
-            <p className="font-medium text-sm">Voir les étudiants</p>
-            <p className="text-xs text-muted-foreground mt-1">{stats.myStudents} étudiants actifs</p>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/teacher/projects')}>
-          <CardContent className="pt-6 text-center">
-            <FolderOpen className="h-8 w-8 mx-auto text-primary mb-2" />
-            <p className="font-medium text-sm">Gérer les projets</p>
-            <p className="text-xs text-muted-foreground mt-1">Créer & assigner</p>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/teacher/courses')}>
-          <CardContent className="pt-6 text-center">
-            <BookOpen className="h-8 w-8 mx-auto text-primary mb-2" />
-            <p className="font-medium text-sm">Gérer les cours</p>
-            <p className="text-xs text-muted-foreground mt-1">Contenu pédagogique</p>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+      <motion.div variants={item}>
+        <h2 className="text-lg font-bold text-foreground font-heading mb-4">Accès rapide</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {quickActions.map((action) => {
+            const Icon = action.icon;
+            return (
+              <motion.button
+                key={action.label}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate(action.path)}
+                className={`rounded-2xl bg-gradient-to-br ${action.gradient} border border-border/20 p-4 lg:p-5 text-center hover:border-primary/30 transition-all touch-manipulation group`}
+              >
+                <div className="h-10 w-10 rounded-xl bg-background/50 backdrop-blur-sm flex items-center justify-center mx-auto mb-2.5 group-hover:bg-primary/10 transition-colors">
+                  <Icon className="h-5 w-5 text-primary" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">{action.label}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{action.sub}</p>
+              </motion.button>
+            );
+          })}
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
