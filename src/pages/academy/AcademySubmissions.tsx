@@ -71,7 +71,7 @@ export default function AcademySubmissions() {
       if (selectedProject !== 'all') query = query.eq('project_id', parseInt(selectedProject));
       if (selectedStatus !== 'all') {
         const dbStatus = statusMap[selectedStatus];
-        if (dbStatus) query = query.eq('status', dbStatus);
+        if (dbStatus) query = query.eq('status', dbStatus as any);
       }
 
       const [submissionsRes, classesRes, projectsRes] = await Promise.all([
