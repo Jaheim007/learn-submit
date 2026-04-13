@@ -58,12 +58,12 @@ export default function StudentLogin() {
   }, [user, navigate]);
 
   const handleGoogleSignIn = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/etudiant/login` } });
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/login` } });
     if (error) toast.error('Impossible de se connecter avec Google');
   };
 
   const handleGithubSignIn = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'github', options: { redirectTo: `${window.location.origin}/etudiant/login` } });
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'github', options: { redirectTo: `${window.location.origin}/login` } });
     if (error) toast.error('Impossible de se connecter avec GitHub');
   };
 
