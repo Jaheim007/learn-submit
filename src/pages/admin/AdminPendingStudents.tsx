@@ -70,13 +70,21 @@ export default function AdminPendingStudents() {
       });
 
       // Build student status map from edge function data (bypasses RLS)
-      const studentStatusMap = new Map<string, { id: string; status: string; is_active: boolean }>();
+      const studentStatusMap = new Map<string, { id: string; status: string; is_active: boolean; full_name: string; email: string; created_at: string }>();
       studentsList.forEach((s: any) => {
-        studentStatusMap.set(s.user_id, { id: s.id, status: s.status || 'active', is_active: s.is_active });
+        studentStatusMap.set(s.user_id, { id: s.id, status: s.status || 'active', is_active: s.is_active, full_name: s.full_name, email: s.email, created_at: s.created_at });
       });
 
+      // Build profile map for quick lookup
+      const profileMap = new Map<string, { full_name: string; email: string; created_at: string }>();
+      profiles.forEach(p => profileMap.set(p.id, { full_name: p.full_name || '', email: p.email, created_at: p.created_at }));
+
       const managed: ManagedUser[] = [];
+      const processedUserIds = new Set<string>();
+
+      // First pass: iterate profiles (covers pending users without student records)
       profiles.forEach(p => {
+        processedUserIds.add(p.id);
         const userRoles = rolesByUser.get(p.id) || [];
         const studentInfo = studentStatusMap.get(p.id);
 
@@ -85,7 +93,6 @@ export default function AdminPendingStudents() {
         if (studentInfo?.status === 'rejected') {
           status = 'rejected';
         } else if (studentInfo && !studentInfo.is_active && studentInfo.status !== 'rejected') {
-          // Student exists, has been deactivated (is_active = false), but NOT rejected
           status = 'deactivated';
         } else if (userRoles.length === 0) {
           status = 'pending';
@@ -95,7 +102,6 @@ export default function AdminPendingStudents() {
           status = 'active';
         }
 
-        // Keep pending, rejected, and deactivated users
         if (status === 'pending' || status === 'rejected' || status === 'deactivated') {
           managed.push({
             id: p.id,
@@ -105,6 +111,33 @@ export default function AdminPendingStudents() {
             status,
             roles: userRoles,
             student_id: studentInfo?.id,
+          });
+        }
+      });
+
+      // Second pass: students from edge function who have NO profile (catches inactive/rejected students without profiles)
+      studentsList.forEach((s: any) => {
+        if (processedUserIds.has(s.user_id)) return;
+        const userRoles = rolesByUser.get(s.user_id) || [];
+
+        let status: 'pending' | 'rejected' | 'deactivated' | 'active';
+        if (s.status === 'rejected') {
+          status = 'rejected';
+        } else if (!s.is_active) {
+          status = 'deactivated';
+        } else {
+          status = 'active';
+        }
+
+        if (status === 'rejected' || status === 'deactivated') {
+          managed.push({
+            id: s.user_id,
+            full_name: s.full_name || '',
+            email: s.email || '',
+            created_at: s.created_at,
+            status,
+            roles: userRoles,
+            student_id: s.id,
           });
         }
       });
