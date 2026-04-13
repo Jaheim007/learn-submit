@@ -95,6 +95,36 @@ async function sendEmail(to: string, subject: string, html: string) {
   return res.json();
 }
 
+// Send push notification to a specific user via FCM tokens
+async function sendPushToUser(userId: string, title: string, body: string, data?: Record<string, string>) {
+  try {
+    const { data: tokens } = await supabase
+      .from('fcm_tokens')
+      .select('token')
+      .eq('user_id', userId);
+
+    if (!tokens || tokens.length === 0) return;
+
+    // Call our push notification edge function
+    const pushUrl = `${SUPABASE_URL}/functions/v1/send-push-notification`;
+    await fetch(pushUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      body: JSON.stringify({
+        user_ids: [userId],
+        title,
+        body,
+        data: data || {},
+      }),
+    });
+  } catch (e) {
+    console.error('Push notification error for user', userId, e);
+  }
+}
+
 function wrap(title: string, content: string, ctaUrl?: string, ctaText?: string): string {
   const cta = ctaUrl
     ? `<div style="text-align:center;margin:25px 0"><a href="${ctaUrl}" style="background:linear-gradient(135deg,#6c5ce7,#4f46e5);color:white;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:600;display:inline-block">${ctaText || "Accéder à la plateforme"}</a></div>`
@@ -119,7 +149,7 @@ async function handleNewProject(data: Record<string, any>) {
 
   const { data: enrollments } = await supabase
     .from("enrollments")
-    .select("students!inner(email, full_name)")
+    .select("students!inner(email, full_name, user_id)")
     .in("class_id", classIds);
 
   let sent = 0, errors = 0;
@@ -147,6 +177,16 @@ async function handleNewProject(data: Record<string, any>) {
         )
       );
       sent++;
+
+      // Push notification enrichie
+      if (student.user_id) {
+        await sendPushToUser(
+          student.user_id,
+          `📁 Nouveau projet : ${projectTitle}`,
+          `Le projet "${projectTitle}" (${projectCode}) vient d'être ajouté. Deadline : ${deadlineStr}`,
+          { url: '/etudiant/projets', project_code: projectCode }
+        );
+      }
     } catch { errors++; }
   }
   return { sent, errors };
@@ -194,11 +234,14 @@ async function handleDeadlineReminder(data: Record<string, any>) {
       const hoursLeft = Math.round((deadlineDate.getTime() - now.getTime()) / (60 * 60 * 1000));
       const timeLabel = hoursLeft <= 1 ? "moins d'1 heure" : hoursLeft <= 6 ? `${hoursLeft} heures` : `${Math.round(hoursLeft / 24)} jour(s)`;
 
+      // Personalized urgency emoji
+      const urgencyEmoji = hoursLeft <= 1 ? "🚨" : hoursLeft <= 6 ? "⏰" : hoursLeft <= 24 ? "⚠️" : "📋";
+
       try {
         await sendEmail(
           student.email,
-          `⏰ Rappel : ${project.title} — il reste ${timeLabel}`,
-          wrap("⏰ Rappel de deadline",
+          `${urgencyEmoji} Rappel : ${project.title} — il reste ${timeLabel}`,
+          wrap(`${urgencyEmoji} Rappel de deadline`,
             `<p>Bonjour <strong>${student.full_name || "Étudiant"}</strong>,</p>
             <p>Il vous reste <strong>${timeLabel}</strong> pour soumettre le projet :</p>
             <div style="background:#fff3e0;border-radius:8px;padding:16px;margin:16px 0;border-left:4px solid #f59e0b">
@@ -211,13 +254,24 @@ async function handleDeadlineReminder(data: Record<string, any>) {
         );
         sent++;
 
+        // In-app notification enrichie
         await supabase.from("notifications").insert({
           user_id: student.user_id,
-          title: `⏰ Rappel — ${project.title}`,
-          body: `Il reste ${timeLabel} pour soumettre "${project.title}".`,
+          title: `${urgencyEmoji} ${project.title} — ${timeLabel} restant`,
+          body: `Il reste ${timeLabel} pour soumettre "${project.title}" (${project.code}). Soumettez maintenant !`,
           type: "deadline_reminder",
-          metadata: { project_id: project.id },
+          metadata: { project_id: project.id, project_code: project.code, hours_left: hoursLeft },
         });
+
+        // Push notification enrichie avec nom du projet et temps restant
+        if (student.user_id) {
+          await sendPushToUser(
+            student.user_id,
+            `${urgencyEmoji} ${project.title} — ${timeLabel}`,
+            `${student.full_name || "Étudiant"}, il vous reste ${timeLabel} pour soumettre "${project.title}". Ne manquez pas la deadline !`,
+            { url: '/etudiant/projets', project_code: project.code, hours_left: hoursLeft.toString() }
+          );
+        }
       } catch { errors++; }
     }
   }
@@ -225,7 +279,7 @@ async function handleDeadlineReminder(data: Record<string, any>) {
 }
 
 async function handleSubmissionReceived(data: Record<string, any>) {
-  const { studentEmail, studentName, projectTitle, projectCode } = data;
+  const { studentEmail, studentName, projectTitle, projectCode, userId } = data;
   if (!studentEmail) return { sent: 0, errors: 0 };
 
   try {
@@ -239,16 +293,30 @@ async function handleSubmissionReceived(data: Record<string, any>) {
         "https://learn-submit.lovable.app/etudiant/soumissions", "Voir mes soumissions"
       )
     );
+
+    // Push notification
+    if (userId) {
+      await sendPushToUser(
+        userId,
+        `✅ Soumission reçue — ${projectTitle}`,
+        `Votre soumission pour "${projectTitle}" (${projectCode}) a été reçue avec succès.`,
+        { url: '/etudiant/soumissions' }
+      );
+    }
+
     return { sent: 1, errors: 0 };
   } catch { return { sent: 0, errors: 1 }; }
 }
 
 async function handleSubmissionGraded(data: Record<string, any>) {
-  const { studentEmail, studentName, projectTitle, grade, status, feedback } = data;
+  const { studentEmail, studentName, projectTitle, grade, status, feedback, userId } = data;
   if (!studentEmail) return { sent: 0, errors: 0 };
 
   const statusLabels: Record<string, string> = {
     approved: "✅ Validé", rejected: "❌ Refusé", reviewing: "🔍 En révision", in_review: "🔍 En révision", resubmit: "🔄 À resoumettre",
+  };
+  const statusEmoji: Record<string, string> = {
+    approved: "✅", rejected: "❌", reviewing: "🔍", in_review: "🔍", resubmit: "🔄",
   };
 
   try {
@@ -266,6 +334,18 @@ async function handleSubmissionGraded(data: Record<string, any>) {
         "https://learn-submit.lovable.app/etudiant/soumissions", "Voir le détail"
       )
     );
+
+    // Push notification enrichie avec note et statut
+    if (userId) {
+      const gradeStr = grade != null ? ` — Note : ${grade}/20` : "";
+      await sendPushToUser(
+        userId,
+        `${statusEmoji[status] || "📊"} ${projectTitle} — ${statusLabels[status] || status}`,
+        `Votre soumission pour "${projectTitle}" : ${statusLabels[status] || status}${gradeStr}`,
+        { url: '/etudiant/soumissions' }
+      );
+    }
+
     return { sent: 1, errors: 0 };
   } catch { return { sent: 0, errors: 1 }; }
 }
@@ -277,7 +357,7 @@ async function handleNewCourse(data: Record<string, any>) {
 
   const { data: enrollments } = await supabase
     .from("enrollments")
-    .select("students!inner(email, full_name)")
+    .select("students!inner(email, full_name, user_id)")
     .eq("class_id", classId);
 
   let sent = 0, errors = 0;
@@ -302,13 +382,23 @@ async function handleNewCourse(data: Record<string, any>) {
         )
       );
       sent++;
+
+      // Push notification
+      if (student.user_id) {
+        await sendPushToUser(
+          student.user_id,
+          `📚 Nouveau cours disponible`,
+          `"${actualTitle}" est maintenant disponible. Accédez-y dès maintenant !`,
+          { url: '/etudiant/cours' }
+        );
+      }
     } catch { errors++; }
   }
   return { sent, errors };
 }
 
 async function handleWelcomeStudent(data: Record<string, any>) {
-  const { email, fullName } = data;
+  const { email, fullName, userId } = data;
   if (!email) return { sent: 0, errors: 0 };
 
   try {
@@ -328,6 +418,11 @@ async function handleWelcomeStudent(data: Record<string, any>) {
         "https://learn-submit.lovable.app/login", "Accéder à la plateforme"
       )
     );
+
+    if (userId) {
+      await sendPushToUser(userId, "🎉 Bienvenue sur Hacktualiz !", `Bienvenue ${fullName || ""} ! Votre compte est en cours de validation.`, { url: '/' });
+    }
+
     return { sent: 1, errors: 0 };
   } catch { return { sent: 0, errors: 1 }; }
 }
