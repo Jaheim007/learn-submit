@@ -48,54 +48,19 @@ export default function AdminUsers() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Load classes
-      const { data: classesData } = await supabase
-        .from('classes')
-        .select('id, code, title')
-        .eq('is_active', true)
-        .order('code');
-      setClasses(classesData || []);
+      const { data, error } = await supabase.functions.invoke('admin-staff-overview');
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-      // Load supervisors
-      const { data: supervisorRoles } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'supervisor');
-
-      if (supervisorRoles && supervisorRoles.length > 0) {
-        const ids = supervisorRoles.map(r => r.user_id);
-        const { data: profiles } = await supabase.from('profiles').select('id, full_name, email, created_at').in('id', ids);
-        const { data: assignments } = await supabase.from('supervisor_class_assignments').select('supervisor_user_id, class_id').in('supervisor_user_id', ids);
-
-        setSupervisors((profiles || []).map(p => {
-          const assignedClasses = (assignments || [])
-            .filter(a => a.supervisor_user_id === p.id)
-            .map(a => classesData?.find(c => c.id === a.class_id))
-            .filter(Boolean) as ClassItem[];
-          return { user_id: p.id, full_name: p.full_name || '', email: p.email, created_at: p.created_at, role: 'supervisor', classes: assignedClasses };
-        }));
-      } else {
-        setSupervisors([]);
-      }
-
-      // Load admins (admin + academy roles)
-      const { data: adminRoles } = await supabase
-        .from('user_roles')
-        .select('user_id, role')
-        .in('role', ['admin', 'academy']);
-
-      if (adminRoles && adminRoles.length > 0) {
-        const uniqueIds = [...new Set(adminRoles.map(r => r.user_id))];
-        const { data: profiles } = await supabase.from('profiles').select('id, full_name, email, created_at').in('id', uniqueIds);
-        
-        setAdmins((profiles || []).map(p => {
-          const roles = adminRoles.filter(r => r.user_id === p.id).map(r => r.role);
-          const primaryRole = roles.includes('admin') ? 'admin' : 'academy';
-          return { user_id: p.id, full_name: p.full_name || '', email: p.email, created_at: p.created_at, role: primaryRole as 'admin' | 'academy' };
-        }));
-      } else {
-        setAdmins([]);
-      }
+      setClasses(data.classes || []);
+      setSupervisors((data.supervisors || []).map((s: any) => ({
+        ...s,
+        role: 'supervisor' as const,
+      })));
+      setAdmins((data.admins || []).map((a: any) => ({
+        ...a,
+        role: a.role as 'admin' | 'academy',
+      })));
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Erreur lors du chargement');
