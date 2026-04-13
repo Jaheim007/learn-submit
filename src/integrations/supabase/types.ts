@@ -3274,6 +3274,10 @@ export type Database = {
           would_recommend: boolean
         }[]
       }
+      get_student_ids_for_user: {
+        Args: { p_user_id: string }
+        Returns: string[]
+      }
       get_training_forms_stats: {
         Args: { access_reason: string; date_from?: string; date_to?: string }
         Returns: Json
