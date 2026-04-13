@@ -6,24 +6,37 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
+/**
+ * choose-class is NOW admin-only.
+ * Students cannot self-assign classes — only admins can do this
+ * via the approve-pending-user flow.
+ */
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const supabaseClient = createClient(
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
-    // Get the authenticated user
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
+    // Verify caller identity
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authorization required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const authClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    )
+    const { data: { user }, error: authError } = await authClient.auth.getUser()
     if (authError || !user) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
@@ -31,9 +44,22 @@ serve(async (req) => {
       )
     }
 
-    const { class_id } = await req.json()
+    // ADMIN-ONLY: check caller has admin role
+    const { data: adminRole } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .in('role', ['admin', 'academy'])
 
-    // Validate input
+    if (!adminRole || adminRole.length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'Access denied. Admin or Academy role required. Students are assigned to classes by administrators.' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const { class_id, student_user_id } = await req.json()
+
     if (!class_id || typeof class_id !== 'number') {
       return new Response(
         JSON.stringify({ error: 'Invalid class_id' }),
@@ -41,10 +67,13 @@ serve(async (req) => {
       )
     }
 
-    // Validate class exists and is open for signup
-    const { data: classData, error: classError } = await supabaseClient
+    // Target user is either specified or the caller
+    const targetUserId = student_user_id || user.id;
+
+    // Validate class exists and is active
+    const { data: classData, error: classError } = await supabaseAdmin
       .from('classes')
-      .select('id, code, title, is_open_for_signup')
+      .select('id, code, title')
       .eq('id', class_id)
       .eq('is_active', true)
       .single()
@@ -56,106 +85,39 @@ serve(async (req) => {
       )
     }
 
-    if (!classData.is_open_for_signup) {
-      return new Response(
-        JSON.stringify({ error: 'Les inscriptions pour ce groupe sont fermées. Veuillez choisir un groupe de la 2ème Session.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Use the service role client for admin operations
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-    )
-
-    // Check if student exists and get current class
+    // Get existing student record
     const { data: existingStudent } = await supabaseAdmin
       .from('students')
       .select('id, primary_class_id')
-      .eq('user_id', user.id)
+      .eq('user_id', targetUserId)
       .single()
 
-    // Check if user is admin
-    const { data: userRole } = await supabaseAdmin
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('role', 'admin')
-      .single()
-
-    const isAdmin = !!userRole
-
-    // If student has a class already set and is not admin, return error
-    if (existingStudent?.primary_class_id && !isAdmin) {
+    if (!existingStudent) {
       return new Response(
-        JSON.stringify({ error: 'Class is immutable' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Student record not found. Approve the user first.' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Start transaction-like operations
-    let studentId: string
+    // Update student class
+    await supabaseAdmin
+      .from('students')
+      .update({ primary_class_id: class_id })
+      .eq('user_id', targetUserId)
 
-    if (existingStudent) {
-      // Update existing student
-      const { error: updateError } = await supabaseAdmin
-        .from('students')
-        .update({ primary_class_id: class_id })
-        .eq('user_id', user.id)
-
-      if (updateError) {
-        console.error('Error updating student:', updateError)
-        return new Response(
-          JSON.stringify({ error: 'Failed to update profile' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
-      studentId = existingStudent.id
-    } else {
-      // Create new student profile
-      const { data: newStudent, error: insertError } = await supabaseAdmin
-        .from('students')
-        .insert({
-          user_id: user.id,
-          email: user.email,
-          full_name: user.user_metadata?.full_name || '',
-          primary_class_id: class_id
-        })
-        .select('id')
-        .single()
-
-      if (insertError || !newStudent) {
-        console.error('Error creating student:', insertError)
-        return new Response(
-          JSON.stringify({ error: 'Failed to create profile' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
-      studentId = newStudent.id
-    }
-
-    // Create enrollment (ignore if already exists)
-    const { error: enrollmentError } = await supabaseAdmin
+    // Create enrollment
+    await supabaseAdmin
       .from('enrollments')
       .upsert({
-        student_id: studentId,
+        student_id: existingStudent.id,
         class_id: class_id
       }, {
         onConflict: 'student_id,class_id',
         ignoreDuplicates: true
       })
 
-    if (enrollmentError) {
-      console.error('Error creating enrollment:', enrollmentError)
-      // Don't fail here as the main operation succeeded
-    }
-
     return new Response(
-      JSON.stringify({
-        primary_class_id: class_id,
-        class: classData
-      }),
+      JSON.stringify({ primary_class_id: class_id, class: classData }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
