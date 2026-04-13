@@ -1683,6 +1683,7 @@ export type Database = {
           allow_resubmit: boolean | null
           code: string
           created_at: string
+          created_by: string | null
           deadline_at: string | null
           description: string | null
           due_at: string | null
@@ -1696,6 +1697,7 @@ export type Database = {
           allow_resubmit?: boolean | null
           code: string
           created_at?: string
+          created_by?: string | null
           deadline_at?: string | null
           description?: string | null
           due_at?: string | null
@@ -1709,6 +1711,7 @@ export type Database = {
           allow_resubmit?: boolean | null
           code?: string
           created_at?: string
+          created_by?: string | null
           deadline_at?: string | null
           description?: string | null
           due_at?: string | null

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { Eye, Calendar, FileText } from 'lucide-react';
+import { Eye, Calendar, FileText, User } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { RichTextRenderer } from '@/components/ui/rich-text-editor';
@@ -18,6 +18,8 @@ interface Project {
   is_active: boolean;
   created_at: string;
   image_url?: string;
+  created_by?: string;
+  created_by_name?: string;
   classes: { id: number; code: string; title: string }[];
   submissions_count: number;
 }
@@ -33,13 +35,15 @@ export default function AcademyProjects() {
       const projectsResponse = await supabase
         .from('projects')
         .select(`
-          id, title, description, deadline_at, is_active, created_at, image_url,
+          id, title, description, deadline_at, is_active, created_at, image_url, created_by,
           class_projects!inner(classes!inner(id, code, title))
         `)
         .order('created_at', { ascending: false });
 
       if (projectsResponse.data) {
         const projectIds = projectsResponse.data.map(p => p.id);
+
+        // Get submission counts
         const submissionsResponse = await supabase
           .from('submissions')
           .select('project_id')
@@ -49,6 +53,21 @@ export default function AcademyProjects() {
           acc[sub.project_id] = (acc[sub.project_id] || 0) + 1;
           return acc;
         }, {} as Record<number, number>) || {};
+
+        // Get creator names from profiles
+        const creatorIds = [...new Set(projectsResponse.data.map((p: any) => p.created_by).filter(Boolean))];
+        let creatorNames: Record<string, string> = {};
+        if (creatorIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, full_name, email')
+            .in('id', creatorIds);
+          if (profiles) {
+            profiles.forEach(p => {
+              creatorNames[p.id] = p.full_name || p.email;
+            });
+          }
+        }
 
         const transformedProjects = projectsResponse.data.map((item: any) => {
           const classesArray = Array.isArray(item.class_projects)
@@ -63,6 +82,8 @@ export default function AcademyProjects() {
             is_active: item.is_active,
             created_at: item.created_at,
             image_url: item.image_url,
+            created_by: item.created_by,
+            created_by_name: item.created_by ? creatorNames[item.created_by] || 'Inconnu' : null,
             classes: classesArray,
             submissions_count: submissionCounts[item.id] || 0,
           };
@@ -134,6 +155,13 @@ export default function AcademyProjects() {
                   ))}
                 </div>
 
+                {project.created_by_name && (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <User className="h-3 w-3" />
+                    <span>Créé par <span className="font-medium text-foreground">{project.created_by_name}</span></span>
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3.5 w-3.5" />
@@ -181,6 +209,10 @@ export default function AcademyProjects() {
                 <p><strong>Date limite :</strong> {new Date(selectedProject.deadline_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                 <p><strong>Soumissions :</strong> {selectedProject.submissions_count}</p>
                 <p><strong>Statut :</strong> {selectedProject.is_active ? 'Actif' : 'Inactif'}</p>
+                {selectedProject.created_by_name && (
+                  <p><strong>Créé par :</strong> {selectedProject.created_by_name}</p>
+                )}
+                <p><strong>Date de création :</strong> {new Date(selectedProject.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
               </div>
               {selectedProject.description && (
                 <div className="p-3 bg-muted/50 rounded-lg border text-sm">

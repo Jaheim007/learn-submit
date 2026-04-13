@@ -1,0 +1,1 @@
+ALTER TABLE public.projects ADD COLUMN created_by uuid REFERENCES auth.users(id) DEFAULT NULL;
