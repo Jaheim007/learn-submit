@@ -5,8 +5,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
-// This function approves a pending user by assigning them a role
-// Only Super Admins can call this
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -30,7 +28,6 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-    // Verify caller is admin
     const callerClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
       auth: { autoRefreshToken: false, persistSession: false }
@@ -46,7 +43,6 @@ Deno.serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false }
     });
 
-    // Check caller is admin
     const { data: callerRoles } = await adminClient
       .from('user_roles')
       .select('role')
@@ -59,6 +55,13 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Get caller profile for audit log
+    const { data: callerProfile } = await adminClient
+      .from('profiles')
+      .select('full_name, email')
+      .eq('id', caller.id)
+      .single();
+
     const { user_id, role, class_ids = [], action } = await req.json();
 
     if (!user_id || !action) {
@@ -67,7 +70,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Get profile
     const { data: profile } = await adminClient
       .from('profiles')
       .select('full_name, email')
@@ -80,9 +82,25 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Helper to write audit log
+    const logActivity = async (logAction: string, entityType: string, details: Record<string, unknown>) => {
+      try {
+        await adminClient.from('activity_logs').insert({
+          action: logAction,
+          entity_type: entityType,
+          entity_id: user_id,
+          user_id: caller.id,
+          user_name: callerProfile?.full_name || callerProfile?.email || 'Admin',
+          user_email: callerProfile?.email,
+          details,
+        });
+      } catch (e) {
+        console.warn('Activity log write failed:', e);
+      }
+    };
+
     // ===== REJECT =====
     if (action === 'reject') {
-      // Remove existing student record if any
       const { data: existingStudent } = await adminClient
         .from('students')
         .select('id')
@@ -93,8 +111,15 @@ Deno.serve(async (req) => {
         await adminClient.from('students').update({ status: 'rejected', is_active: false }).eq('user_id', user_id);
       }
 
-      // Don't assign any role — user stays in limbo
-      console.log(`User ${user_id} (${profile.email}) rejected`);
+      await logActivity('student_status_changed', 'student', {
+        student: profile.full_name || profile.email,
+        email: profile.email,
+        old_status: 'pending',
+        new_status: 'rejected',
+        approved_by: callerProfile?.full_name || callerProfile?.email,
+      });
+
+      console.log(`User ${user_id} (${profile.email}) rejected by ${callerProfile?.email}`);
       return new Response(JSON.stringify({ success: true, message: 'User rejected' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -114,13 +139,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Map frontend role names to DB role names
     const dbRole = role === 'teacher' ? 'supervisor' : role;
 
-    // Remove any existing roles (clean slate)
     await adminClient.from('user_roles').delete().eq('user_id', user_id);
 
-    // Assign the new role
     const { error: roleError } = await adminClient
       .from('user_roles')
       .insert({ user_id, role: dbRole });
@@ -135,10 +157,8 @@ Deno.serve(async (req) => {
     // ===== ROLE-SPECIFIC SETUP =====
 
     if (role === 'student') {
-      // Remove any existing student record
       await adminClient.from('students').delete().eq('user_id', user_id);
 
-      // Create active student record
       const { data: student, error: studentError } = await adminClient
         .from('students')
         .insert({
@@ -159,7 +179,6 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Create enrollments
       if (class_ids.length > 0 && student) {
         const enrollments = class_ids.map((classId: number) => ({
           student_id: student.id,
@@ -169,11 +188,27 @@ Deno.serve(async (req) => {
         if (enrollError) console.error('Enrollment error:', enrollError);
       }
 
-      console.log(`User ${user_id} approved as STUDENT in ${class_ids.length} class(es)`);
+      // Get class names for the log
+      let classNames: string[] = [];
+      if (class_ids.length > 0) {
+        const { data: classes } = await adminClient.from('classes').select('title').in('id', class_ids);
+        classNames = (classes || []).map((c: { title: string }) => c.title);
+      }
+
+      await logActivity('student_status_changed', 'student', {
+        student: profile.full_name || profile.email,
+        email: profile.email,
+        old_status: 'pending',
+        new_status: 'active',
+        role: 'student',
+        classes: classNames.join(', '),
+        approved_by: callerProfile?.full_name || callerProfile?.email,
+      });
+
+      console.log(`User ${user_id} approved as STUDENT by ${callerProfile?.email}`);
     }
 
     if (role === 'teacher') {
-      // Create supervisor class assignments
       await adminClient.from('supervisor_class_assignments').delete().eq('supervisor_user_id', user_id);
       
       if (class_ids.length > 0) {
@@ -185,11 +220,29 @@ Deno.serve(async (req) => {
         if (assignError) console.error('Assignment error:', assignError);
       }
 
-      console.log(`User ${user_id} approved as TEACHER for ${class_ids.length} class(es)`);
+      await logActivity('student_status_changed', 'student', {
+        student: profile.full_name || profile.email,
+        email: profile.email,
+        old_status: 'pending',
+        new_status: 'active',
+        role: 'teacher',
+        approved_by: callerProfile?.full_name || callerProfile?.email,
+      });
+
+      console.log(`User ${user_id} approved as TEACHER by ${callerProfile?.email}`);
     }
 
     if (role === 'academy') {
-      console.log(`User ${user_id} approved as ACADEMY`);
+      await logActivity('student_status_changed', 'student', {
+        student: profile.full_name || profile.email,
+        email: profile.email,
+        old_status: 'pending',
+        new_status: 'active',
+        role: 'academy',
+        approved_by: callerProfile?.full_name || callerProfile?.email,
+      });
+
+      console.log(`User ${user_id} approved as ACADEMY by ${callerProfile?.email}`);
     }
 
     // Send notification
