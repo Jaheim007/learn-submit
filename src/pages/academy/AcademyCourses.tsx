@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BookOpen, FileText, Calendar, Layers, Download, Eye } from 'lucide-react';
+import { BookOpen, FileText, Calendar, Layers, Download, Eye, User } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { RichTextRenderer } from '@/components/ui/rich-text-editor';
 import { toast } from 'sonner';
@@ -18,6 +18,8 @@ interface CourseMaterial {
   image_url: string | null;
   class_id: number;
   created_at: string;
+  uploaded_by: string;
+  uploaded_by_name?: string;
   classes: { title: string };
 }
 
@@ -34,7 +36,29 @@ export default function AcademyCourses() {
       .from('course_materials')
       .select('*, classes (title)')
       .order('created_at', { ascending: false });
-    if (data) setMaterials(data as any);
+
+    if (data) {
+      // Get uploader names from profiles
+      const uploaderIds = [...new Set(data.map((m: any) => m.uploaded_by).filter(Boolean))];
+      let uploaderNames: Record<string, string> = {};
+      if (uploaderIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', uploaderIds);
+        if (profiles) {
+          profiles.forEach(p => {
+            uploaderNames[p.id] = p.full_name || p.email;
+          });
+        }
+      }
+
+      const enriched = data.map((m: any) => ({
+        ...m,
+        uploaded_by_name: m.uploaded_by ? uploaderNames[m.uploaded_by] || 'Inconnu' : null,
+      }));
+      setMaterials(enriched);
+    }
     setLoading(false);
   };
 
@@ -115,6 +139,12 @@ export default function AcademyCourses() {
                             <RichTextRenderer content={material.description} className="[&_*]:!text-muted-foreground [&_*]:!text-xs" />
                           </div>
                         )}
+                        {material.uploaded_by_name && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1.5">
+                            <User className="h-3 w-3" />
+                            <span className="font-medium text-foreground">{material.uploaded_by_name}</span>
+                          </div>
+                        )}
                         <div className="flex items-center justify-between mt-3">
                           <span className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Calendar className="h-3 w-3" />
@@ -150,7 +180,15 @@ export default function AcademyCourses() {
               {selectedCourse.image_url && (
                 <img src={selectedCourse.image_url} alt={selectedCourse.title} className="w-full rounded-lg" />
               )}
-              <Badge variant="secondary"><Layers className="h-3 w-3 mr-1" />{selectedCourse.classes?.title}</Badge>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary"><Layers className="h-3 w-3 mr-1" />{selectedCourse.classes?.title}</Badge>
+              </div>
+              {selectedCourse.uploaded_by_name && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <User className="h-4 w-4" />
+                  <span>Publié par <span className="font-medium text-foreground">{selectedCourse.uploaded_by_name}</span> le {new Date(selectedCourse.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                </div>
+              )}
               {selectedCourse.description && (
                 <div className="p-3 bg-muted/50 rounded-lg border text-sm">
                   <RichTextRenderer content={selectedCourse.description} />
