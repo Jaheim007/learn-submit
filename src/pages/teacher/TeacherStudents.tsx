@@ -39,56 +39,13 @@ export default function TeacherStudents() {
 
   const loadStudents = async () => {
     try {
-      const { data: assignments } = await supabase
-        .from('supervisor_class_assignments')
-        .select('class_id')
-        .eq('supervisor_user_id', user?.id);
+      const { data, error } = await supabase.functions.invoke('teacher-students-overview');
 
-      const classIds = assignments?.map(a => a.class_id) || [];
-      if (classIds.length === 0) { setLoading(false); return; }
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-      const { data: classData } = await supabase.from('classes').select('id, code, title').in('id', classIds);
-      setClasses(classData || []);
-      const classMap = new Map((classData || []).map(c => [c.id, c]));
-
-      const { data: enrollments } = await supabase.from('enrollments').select('class_id, student_id').in('class_id', classIds);
-      if (!enrollments || enrollments.length === 0) { setLoading(false); return; }
-
-      const studentIds = [...new Set(enrollments.map(e => e.student_id))];
-      const { data: studentData } = await supabase
-        .from('students')
-        .select('id, full_name, email, phone, whatsapp, github_profile, avatar_url')
-        .in('id', studentIds);
-
-      const studentMap = new Map((studentData || []).map(s => [s.id, s]));
-
-      const studentList: Student[] = enrollments.map(e => {
-        const s = studentMap.get(e.student_id);
-        const cls = classMap.get(e.class_id);
-        if (!s) return null;
-        return {
-          id: s.id,
-          full_name: s.full_name || 'Sans nom',
-          email: s.email || '',
-          phone: s.phone || '',
-          whatsapp: s.whatsapp || '',
-          github_profile: s.github_profile || '',
-          avatar_url: s.avatar_url || null,
-          className: cls?.title || '',
-          classCode: cls?.code || '',
-        };
-      }).filter(Boolean) as Student[];
-
-      // Deduplicate by student id + class
-      const seen = new Set<string>();
-      const unique = studentList.filter(s => {
-        const key = `${s.id}-${s.classCode}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-
-      setStudents(unique);
+      setClasses(data?.classes || []);
+      setStudents(data?.students || []);
     } catch (error) {
       console.error('Error loading students:', error);
     } finally {
