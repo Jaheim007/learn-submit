@@ -140,13 +140,13 @@ export default function AdminUsers() {
     }
     try {
       const { data, error } = await supabase.functions.invoke('assign-user-role', {
-        body: { email: adminForm.email.trim(), full_name: adminForm.full_name.trim() || null, role: adminForm.role }
+        body: { email: adminForm.email.trim(), full_name: adminForm.full_name.trim() || null, role: adminForm.role, platform: adminForm.platform }
       });
       if (error) { toast.error(error.message); return; }
       if (data?.error) { toast.error(data.error); return; }
       toast.success('Rôle assigné avec succès');
       setIsAdminDialogOpen(false);
-      setAdminForm({ email: '', full_name: '', role: 'academy' });
+      setAdminForm({ email: '', full_name: '', role: 'academy', platform: 'hacktualiz' });
       loadData();
     } catch (error) {
       console.error(error);
