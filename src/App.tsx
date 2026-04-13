@@ -10,25 +10,23 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 
-// Guards are kept eager (small + needed immediately)
+// Guards
 import StudentGuard from "./components/StudentGuard";
 import AdminGuard from "./components/admin/AdminGuard";
 import AcademyGuard from "./components/academy/AcademyGuard";
 import TeacherGuard from "./components/teacher/TeacherGuard";
 
-// Lazy-loaded pages — each becomes its own chunk
+// Lazy-loaded pages
 const Index = lazy(() => import("./pages/Index"));
 const Landing = lazy(() => import("./pages/Landing"));
-// Auth page removed for security — redirects to unified login
 const AuthRedirect = lazy(() => import("./pages/AuthRedirect"));
 const StudentLogin = lazy(() => import("./pages/StudentLogin"));
-const StudentRegister = lazy(() => import("./pages/StudentRegister"));
+const PendingApproval = lazy(() => import("./pages/PendingApproval"));
 const Profile = lazy(() => import("./pages/Profile"));
 const StudentProjects = lazy(() => import("./pages/StudentProjects"));
 const SubmitProject = lazy(() => import("./pages/SubmitProject"));
 const StudentSubmissions = lazy(() => import("./pages/StudentSubmissions"));
 const StudentLeaderboard = lazy(() => import("./pages/StudentLeaderboard"));
-const StudentPending = lazy(() => import("./pages/StudentPending"));
 const StudentRejected = lazy(() => import("./pages/StudentRejected"));
 const StudentCourses = lazy(() => import("./pages/StudentCourses"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail"));
@@ -46,12 +44,8 @@ const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminPendingStudents = lazy(() => import("./pages/admin/AdminPendingStudents"));
 const AdminCourses = lazy(() => import("./pages/admin/AdminCourses"));
 const AdminClasses = lazy(() => import("./pages/admin/AdminClasses"));
-const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
-const AdminRegister = lazy(() => import("./pages/admin/AdminRegister"));
-const AdminAcademyUsers = lazy(() => import("./pages/admin/AdminAcademyUsers"));
 const AdminEmails = lazy(() => import("./pages/admin/AdminEmails"));
 
-const AcademyLogin = lazy(() => import("./pages/academy/AcademyLogin"));
 const AcademyLayout = lazy(() => import("./pages/academy/AcademyLayout"));
 const AcademyHome = lazy(() => import("./pages/academy/AcademyHome"));
 const AcademyStudents = lazy(() => import("./pages/academy/AcademyStudents"));
@@ -63,7 +57,6 @@ const AcademyTeachers = lazy(() => import("./pages/academy/AcademyTeachers"));
 const AcademySettings = lazy(() => import("./pages/academy/AcademySettings"));
 const AcademyClasses = lazy(() => import("./pages/academy/AcademyClasses"));
 
-const TeacherLogin = lazy(() => import("./pages/teacher/TeacherLogin"));
 const TeacherLayout = lazy(() => import("./pages/teacher/TeacherLayout"));
 const TeacherHome = lazy(() => import("./pages/teacher/TeacherHome"));
 const TeacherStudents = lazy(() => import("./pages/teacher/TeacherStudents"));
@@ -104,17 +97,27 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/old-home" element={<Index />} />
-              <Route path="/auth" element={<Navigate to="/etudiant/login" replace />} />
               <Route path="/auth-redirect" element={<AuthRedirect />} />
               
-              {/* Student setup and auth routes */}
+              {/* ===== UNIFIED LOGIN & PENDING ===== */}
+              <Route path="/login" element={<StudentLogin />} />
+              <Route path="/pending" element={<PendingApproval />} />
+              
+              {/* Legacy routes → redirect to unified login */}
+              <Route path="/auth" element={<Navigate to="/login" replace />} />
+              <Route path="/etudiant/login" element={<Navigate to="/login" replace />} />
+              <Route path="/etudiant/register" element={<Navigate to="/login" replace />} />
+              <Route path="/etudiant/pending" element={<Navigate to="/pending" replace />} />
+              <Route path="/teacher/login" element={<Navigate to="/login" replace />} />
+              <Route path="/academy/login" element={<Navigate to="/login" replace />} />
+              <Route path="/admin/login" element={<Navigate to="/login" replace />} />
+              <Route path="/admin/register" element={<Navigate to="/login" replace />} />
+              
+              {/* Student setup routes */}
               <Route path="/student/setup" element={<StudentSetup />} />
               <Route path="/student/signin" element={<StudentSignin />} />
               
-              {/* Student auth routes */}
-              <Route path="/etudiant/login" element={<StudentLogin />} />
-              <Route path="/etudiant/register" element={<StudentRegister />} />
-              <Route path="/etudiant/pending" element={<StudentPending />} />
+              {/* Student auth */}
               <Route path="/etudiant/rejected" element={<StudentRejected />} />
               
               {/* Student protected routes */}
@@ -127,10 +130,6 @@ const App = () => (
               <Route path="/etudiant/cours/:courseId" element={<StudentGuard><CourseDetail /></StudentGuard>} />
               <Route path="/etudiant/tutoriels" element={<StudentGuard><StudentTutorials /></StudentGuard>} />
 
-              {/* Legacy admin auth URLs redirected to unified auth */}
-              <Route path="/admin/login" element={<Navigate to="/auth" replace />} />
-              <Route path="/admin/register" element={<Navigate to="/auth" replace />} />
-              
               {/* Admin dashboard routes */}
               <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
                 <Route index element={<AdminHome />} />
@@ -142,13 +141,11 @@ const App = () => (
                 <Route path="tutorials" element={<TeacherTutorials />} />
                 <Route path="classes" element={<AdminClasses />} />
                 <Route path="users" element={<AdminUsers />} />
-                {/* academy-users merged into users */}
                 <Route path="emails" element={<AdminEmails />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
               
               {/* Academy Routes */}
-              <Route path="/academy/login" element={<AcademyLogin />} />
               <Route path="/academy" element={<AcademyGuard><AcademyLayout /></AcademyGuard>}>
                 <Route index element={<AcademyHome />} />
                 <Route path="pending-students" element={<AcademyPendingStudents />} />
@@ -162,7 +159,6 @@ const App = () => (
               </Route>
               
               {/* Teacher Routes */}
-              <Route path="/teacher/login" element={<TeacherLogin />} />
               <Route path="/teacher" element={<TeacherGuard><TeacherLayout /></TeacherGuard>}>
                 <Route index element={<TeacherHome />} />
                 <Route path="students" element={<TeacherStudents />} />
@@ -179,7 +175,6 @@ const App = () => (
               <Route path="/forbidden" element={<Forbidden />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/test" element={<TestDashboard />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
             </Suspense>

@@ -17,7 +17,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Try to get user from auth header first
+    // Get user from auth header
     let user = null;
     const authHeader = req.headers.get('Authorization');
     
@@ -31,7 +31,7 @@ serve(async (req) => {
       user = authUser;
     }
 
-    // Fallback: check if user_id was passed in body (from StudentGuard)
+    // Fallback: check if user_id was passed in body
     if (!user) {
       try {
         const body = await req.json();
@@ -46,21 +46,18 @@ serve(async (req) => {
       throw new Error('User not authenticated');
     }
 
-    console.log('Processing OAuth signup for user:', user.id);
+    console.log('Processing signup for user:', user.id, user.email);
 
-    // supabaseAdmin already created above
-
-    // Check if user already has a pre-assigned role (admin, academy, supervisor, teacher)
+    // Check if user already has any role assigned
     const { data: existingRoles } = await supabaseAdmin
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id);
 
     const roleList = (existingRoles || []).map(r => r.role);
-    const hasNonStudentRole = roleList.some(r => ['admin', 'academy', 'supervisor', 'teacher'].includes(r));
 
-    if (hasNonStudentRole) {
-      console.log('User already has a pre-assigned role:', roleList, '- skipping student creation');
+    if (roleList.length > 0) {
+      console.log('User already has roles:', roleList, '- skipping');
       
       // Ensure profile exists
       await supabaseAdmin.from('profiles').upsert({
@@ -70,27 +67,27 @@ serve(async (req) => {
       });
 
       return new Response(
-        JSON.stringify({ message: 'User has pre-assigned role, skipping student creation', roles: roleList }),
+        JSON.stringify({ message: 'User already has roles', roles: roleList }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Check if student profile already exists
-    const { data: existingStudent } = await supabaseAdmin
-      .from('students')
+    // Check if profile already exists
+    const { data: existingProfile } = await supabaseAdmin
+      .from('profiles')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('id', user.id)
       .maybeSingle();
 
-    if (existingStudent) {
-      console.log('Student profile already exists');
+    if (existingProfile) {
+      console.log('Profile already exists, user is pending role assignment');
       return new Response(
-        JSON.stringify({ message: 'Student profile already exists', student_id: existingStudent.id }),
+        JSON.stringify({ message: 'Profile exists, pending role assignment', status: 'pending' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Extract metadata from OAuth provider
+    // Extract metadata
     const fullName = user.user_metadata?.full_name || 
                      user.user_metadata?.name || 
                      user.user_metadata?.user_name ||
@@ -98,54 +95,22 @@ serve(async (req) => {
                      'User';
     
     const email = user.email || '';
-    const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
-    const githubProfile = user.user_metadata?.user_name 
-      ? `https://github.com/${user.user_metadata.user_name}`
-      : null;
 
-    console.log('Creating student profile with:', { fullName, email, avatarUrl, githubProfile });
+    console.log('Creating profile (pending role assignment):', { fullName, email });
 
-    // Create student profile with pending status
-    const { data: student, error: studentError } = await supabaseAdmin
-      .from('students')
-      .insert({
-        user_id: user.id,
-        email: email,
-        full_name: fullName,
-        avatar_url: avatarUrl,
-        github_profile: githubProfile,
-        is_active: false,
-        status: 'pending',
-      })
-      .select()
-      .single();
-
-    if (studentError) {
-      console.error('Error creating student profile:', studentError);
-      throw studentError;
-    }
-
-    // Create profile entry
+    // ONLY create a profile entry — NO student record, NO role
+    // The Super Admin will assign the role later
     await supabaseAdmin.from('profiles').upsert({
       id: user.id,
       email: email,
       full_name: fullName,
     });
 
-    // Assign student role
-    await supabaseAdmin
-      .from('user_roles')
-      .upsert(
-        { user_id: user.id, role: 'student' },
-        { onConflict: 'user_id,role' }
-      );
-
-    console.log('OAuth signup completed - student pending approval');
+    console.log('Profile created — user is now pending role assignment by Super Admin');
 
     return new Response(
       JSON.stringify({ 
-        message: 'Student profile created successfully',
-        student_id: student.id,
+        message: 'Profile created, pending role assignment by admin',
         status: 'pending'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 201 }

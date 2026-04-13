@@ -25,25 +25,34 @@ export default function StudentLogin() {
     if (!user) return;
     const routeUser = async () => {
       try {
+        // Check if user has any role assigned
         const { data: roles } = await supabase.from('user_roles').select('role').eq('user_id', user.id);
         const roleList = (roles || []).map((r) => r.role);
+        
+        // Route based on assigned role
         if (roleList.includes('admin')) { navigate('/admin', { replace: true }); return; }
         if (roleList.includes('academy')) { navigate('/academy', { replace: true }); return; }
         if (roleList.includes('supervisor')) { navigate('/teacher', { replace: true }); return; }
-      } catch (err) { console.error('Error checking roles:', err); }
-
-      const { data: student } = await supabase.from('students').select('id, status').eq('user_id', user.id).maybeSingle();
-      if (!student) {
+        
+        // If student role, check student record status
+        if (roleList.includes('student')) {
+          const { data: student } = await supabase.from('students').select('id, status').eq('user_id', user.id).maybeSingle();
+          if (student?.status === 'rejected') { navigate('/etudiant/rejected', { replace: true }); return; }
+          if (student?.status === 'active') { navigate('/etudiant/projets', { replace: true }); return; }
+          navigate('/pending', { replace: true }); return;
+        }
+        
+        // No role at all — ensure profile exists then go to pending
         try {
           const { data: sessionData } = await supabase.auth.getSession();
           const token = sessionData.session?.access_token;
           if (token) { await supabase.functions.invoke('handle-oauth-signup', { headers: { Authorization: `Bearer ${token}` } }); }
         } catch (err) { console.error('OAuth signup handler error:', err); }
-        navigate('/etudiant/pending', { replace: true }); return;
+        navigate('/pending', { replace: true });
+      } catch (err) { 
+        console.error('Error checking roles:', err);
+        navigate('/pending', { replace: true });
       }
-      if (student.status === 'rejected') navigate('/etudiant/rejected', { replace: true });
-      else if (student.status === 'active') navigate('/etudiant/projets', { replace: true });
-      else navigate('/etudiant/pending', { replace: true });
     };
     routeUser();
   }, [user, navigate]);
