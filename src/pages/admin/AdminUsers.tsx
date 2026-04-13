@@ -298,6 +298,7 @@ export default function AdminUsers() {
                     <TableHead>Nom</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Rôle</TableHead>
+                    <TableHead>Plateforme</TableHead>
                     <TableHead>Créé le</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -311,6 +312,18 @@ export default function AdminUsers() {
                         <Badge variant={a.role === 'admin' ? 'default' : 'secondary'}>
                           {a.role === 'admin' ? 'Admin' : 'Académique'}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {a.platforms && Object.entries(a.platforms).map(([role, plat]) => (
+                            <Badge key={role} variant="outline" className="text-xs">
+                              {plat === 'both' ? '🌐 Toutes' : plat === 'hacktualiz' ? '🎓 Hacktualiz' : '📋 GroupFormation'}
+                            </Badge>
+                          ))}
+                          {!a.platforms && (
+                            <Badge variant="outline" className="text-xs">🌐 Toutes</Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {new Date(a.created_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'short', day: 'numeric' })}
