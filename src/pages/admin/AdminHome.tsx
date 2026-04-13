@@ -50,24 +50,43 @@ export default function AdminHome() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Wait for auth to be ready before loading dashboard
+    const loadDashboard = async () => {
+      try {
+        // First try getting session
+        let session = (await supabase.auth.getSession()).data.session;
+        
+        // If no session on soft refresh, wait for auth state change
+        if (!session) {
+          const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, s) => {
+            if (s) {
+              subscription.unsubscribe();
+              const { data: result, error } = await supabase.functions.invoke('admin-dashboard-stats', {
+                headers: { Authorization: `Bearer ${s.access_token}` },
+              });
+              if (!error && result) setData(result);
+              setLoading(false);
+            }
+          });
+          // Timeout after 5s
+          setTimeout(() => { subscription.unsubscribe(); setLoading(false); }, 5000);
+          return;
+        }
+
+        const { data: result, error } = await supabase.functions.invoke('admin-dashboard-stats', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (error) throw error;
+        setData(result);
+      } catch (e) {
+        console.error('Dashboard load error:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadDashboard();
   }, []);
-
-  const loadDashboard = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      const { data: result, error } = await supabase.functions.invoke('admin-dashboard-stats', {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (error) throw error;
-      setData(result);
-    } catch (e) {
-      console.error('Dashboard load error:', e);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading || !data) {
     return (
