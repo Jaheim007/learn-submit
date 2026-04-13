@@ -57,14 +57,18 @@ export default function AdminClasses() {
 
       if (classesError) throw classesError;
 
-      const { data: enrollments } = await supabase
-        .from('enrollments')
-        .select('class_id');
-
-      const studentCounts = enrollments?.reduce((acc, e) => {
-        acc[e.class_id] = (acc[e.class_id] || 0) + 1;
-        return acc;
-      }, {} as Record<number, number>) || {};
+      // Use edge function to bypass RLS for enrollment counts
+      let studentCounts: Record<number, number> = {};
+      const { data: overviewData } = await supabase.functions.invoke('admin-students-overview');
+      if (overviewData?.students) {
+        for (const s of overviewData.students) {
+          if (s.class_ids) {
+            for (const cid of s.class_ids) {
+              studentCounts[cid] = (studentCounts[cid] || 0) + 1;
+            }
+          }
+        }
+      }
 
       const formattedClasses = (classesData || []).map(c => ({
         ...c,

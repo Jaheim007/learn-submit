@@ -143,6 +143,7 @@ const App = () => (
                 <Route path="classes" element={<AdminClasses />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="emails" element={<AdminEmails />} />
+                <Route path="activity" element={<AcademyActivityLogs />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
               

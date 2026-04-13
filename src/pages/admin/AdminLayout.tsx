@@ -33,6 +33,7 @@ const navigation = [
   { name: 'Tutoriels', href: '/admin/tutorials', icon: Video },
   { name: 'Utilisateurs', href: '/admin/users', icon: Users },
   { name: 'Emails', href: '/admin/emails', icon: Mail },
+  { name: 'Journal', href: '/admin/activity', icon: MoreHorizontal },
   { name: 'Paramètres', href: '/admin/settings', icon: Settings },
 ];
 
