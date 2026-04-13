@@ -71,6 +71,7 @@ const SupervisorDashboard = lazy(() => import("./pages/SupervisorDashboard"));
 const SupervisorSubmissions = lazy(() => import("./pages/SupervisorSubmissions"));
 const TestDashboard = lazy(() => import("./pages/TestDashboard"));
 const Notifications = lazy(() => import("./pages/Notifications"));
+const Install = lazy(() => import("./pages/Install"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Forbidden = lazy(() => import("./pages/Forbidden"));
 
@@ -177,6 +178,7 @@ const App = () => (
               <Route path="/superviseur/soumissions" element={<SupervisorSubmissions />} />
               <Route path="/forbidden" element={<Forbidden />} />
               <Route path="/notifications" element={<Notifications />} />
+              <Route path="/install" element={<Install />} />
               <Route path="/test" element={<TestDashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
