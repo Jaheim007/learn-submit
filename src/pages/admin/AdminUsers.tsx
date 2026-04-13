@@ -18,6 +18,8 @@ interface UserEntry {
   email: string;
   created_at: string;
   role: 'supervisor' | 'admin' | 'academy';
+  platform?: string;
+  platforms?: Record<string, string>;
   classes?: { id: number; code: string; title: string }[];
 }
 
