@@ -284,7 +284,7 @@ export default function AdminUsers() {
         {/* Admins Tab */}
         <TabsContent value="admins" className="space-y-4">
           <div className="flex justify-end">
-            <Button onClick={() => { setAdminForm({ email: '', full_name: '', role: 'academy' }); setIsAdminDialogOpen(true); }}>
+            <Button onClick={() => { setAdminForm({ email: '', full_name: '', role: 'academy', platform: 'hacktualiz' }); setIsAdminDialogOpen(true); }}>
               <Plus className="h-4 w-4 mr-2" />
               Ajouter un administrateur
             </Button>
