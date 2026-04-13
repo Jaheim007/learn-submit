@@ -64,7 +64,7 @@ export default function StudentProjects() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      navigate('/login');
     } else if (user) {
       fetchData();
     }
@@ -348,10 +348,10 @@ export default function StudentProjects() {
                       <div className={`rounded-xl p-3 bg-gradient-to-br ${
                         deadlineInfo.urgent 
                           ? 'from-destructive/20 via-destructive/10 to-destructive/20 border border-destructive/50 animate-pulse' 
-                          : 'from-emerald-500/20 via-emerald-600/10 to-emerald-700/20 border border-emerald-500/50'
+                          : 'from-success/20 via-success/10 to-success/20 border border-success/50'
                       }`}>
                         <p className={`text-[10px] font-medium uppercase tracking-wider text-center mb-2 ${
-                          deadlineInfo.urgent ? 'text-destructive' : 'text-emerald-600'
+                          deadlineInfo.urgent ? 'text-destructive' : 'text-success'
                         }`}>
                           ⏰ Temps restant
                         </p>
@@ -364,12 +364,12 @@ export default function StudentProjects() {
                           ].map((unit) => (
                             <div key={unit.label} className="text-center">
                               <div className={`bg-background/80 backdrop-blur-sm rounded-lg py-1.5 px-1 border shadow-lg ${
-                                deadlineInfo.urgent ? 'border-destructive/30 shadow-destructive/20' : 'border-emerald-500/30 shadow-emerald-500/20'
+                                deadlineInfo.urgent ? 'border-destructive/30 shadow-destructive/20' : 'border-success/30 shadow-success/20'
                               }`}>
-                                <div className={`text-lg font-bold ${deadlineInfo.urgent ? 'text-destructive' : 'text-emerald-600'}`}>
+                                <div className={`text-lg font-bold ${deadlineInfo.urgent ? 'text-destructive' : 'text-success'}`}>
                                   {unit.val}
                                 </div>
-                                <div className={`text-[7px] uppercase tracking-wide font-semibold mt-0.5 ${deadlineInfo.urgent ? 'text-destructive/70' : 'text-emerald-700'}`}>
+                                <div className={`text-[7px] uppercase tracking-wide font-semibold mt-0.5 ${deadlineInfo.urgent ? 'text-destructive/70' : 'text-success/70'}`}>
                                   {unit.label}
                                 </div>
                               </div>

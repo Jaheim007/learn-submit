@@ -19,10 +19,10 @@ const Index = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Button onClick={() => navigate('/etudiant/register')} className="bg-secondary hover:bg-secondary-hover text-secondary-foreground px-6 h-11">
+          <Button onClick={() => navigate('/login')} className="bg-secondary hover:bg-secondary-hover text-secondary-foreground px-6 h-11">
             Créer un compte
           </Button>
-          <Button onClick={() => navigate('/etudiant/login')} variant="outline" className="h-11">
+          <Button onClick={() => navigate('/login')} variant="outline" className="h-11">
             Se connecter
           </Button>
         </div>

@@ -213,9 +213,9 @@ const PlatformSlider = () => {
           <div className="flex items-center justify-center gap-4 mt-10">
             <button
               onClick={() => goTo((current - 1 + slides.length) % slides.length)}
-              className="w-9 h-9 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              className="w-11 h-11 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground touch-manipulation active:scale-90"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5" />
             </button>
             <div className="flex gap-2">
               {slides.map((_, i) => (
@@ -228,9 +228,9 @@ const PlatformSlider = () => {
             </div>
             <button
               onClick={() => goTo((current + 1) % slides.length)}
-              className="w-9 h-9 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              className="w-11 h-11 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground touch-manipulation active:scale-90"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -287,7 +287,7 @@ const Landing = () => {
             </Button>
             <Button 
               size="sm"
-              onClick={() => navigate('/etudiant/login')}
+              onClick={() => navigate('/login')}
               className="bg-gradient-primary hover:opacity-90 text-primary-foreground rounded-xl font-semibold h-9 px-4 touch-manipulation active:scale-95"
             >
               <LogIn className="h-4 w-4 mr-1.5" />
@@ -335,7 +335,7 @@ const Landing = () => {
             >
               <Button 
                 size="lg"
-                onClick={() => navigate('/etudiant/login')}
+                onClick={() => navigate('/login')}
                 className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 h-12 sm:h-13 text-sm sm:text-base font-semibold rounded-xl shadow-xl shadow-primary/20 group w-full sm:w-auto touch-manipulation active:scale-95"
               >
                 <LogIn className="mr-2 h-5 w-5" />
@@ -598,7 +598,7 @@ const Landing = () => {
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button 
                   size="lg"
-                  onClick={() => navigate('/etudiant/login')}
+                  onClick={() => navigate('/login')}
                   variant="secondary"
                   className="h-12 px-8 text-base font-semibold rounded-xl"
                 >

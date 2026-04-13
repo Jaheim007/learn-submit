@@ -45,65 +45,42 @@ export function DeadlineCountdown({ deadline, className }: DeadlineCountdownProp
 
   if (isExpired) {
     return (
-      <Card className={`bg-gradient-to-br from-red-500/20 via-red-600/10 to-red-700/20 border-red-500 p-6 animate-pulse ${className}`}>
+      <Card className={`bg-gradient-to-br from-destructive/20 via-destructive/10 to-destructive/20 border-destructive/50 p-6 animate-pulse ${className}`}>
         <div className="text-center">
-          <h3 className="text-lg font-bold text-red-500 mb-4 uppercase tracking-wider animate-bounce">
+          <h3 className="text-lg font-bold text-destructive mb-4 uppercase tracking-wider animate-bounce">
             ⚠️ Délai Expiré ⚠️
           </h3>
-          <p className="text-red-400 font-semibold">Le temps de soumission est écoulé</p>
+          <p className="text-destructive/80 font-semibold">Le temps de soumission est écoulé</p>
         </div>
       </Card>
     );
   }
 
   return (
-    <Card className={`bg-gradient-to-br from-green-500/20 via-green-600/10 to-emerald-700/20 border-green-500/50 p-6 ${className}`}>
+    <Card className={`bg-gradient-to-br from-success/20 via-success/10 to-success/20 border-success/50 p-6 ${className}`}>
       <div className="text-center mb-4">
-        <h3 className="text-sm font-medium text-green-600 uppercase tracking-wider">
+        <h3 className="text-sm font-medium text-success uppercase tracking-wider">
           ⏰ Temps restant
         </h3>
       </div>
       <div className="grid grid-cols-4 gap-4">
-        <div className="text-center">
-          <div className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-green-500/30 shadow-lg shadow-green-500/20">
-            <div className="text-3xl font-bold text-green-600">
-              {timeLeft.days}
-            </div>
-            <div className="text-xs text-green-700 mt-1 uppercase tracking-wide font-semibold">
-              Jours
-            </div>
-          </div>
-        </div>
-        <div className="text-center">
-          <div className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-green-500/30 shadow-lg shadow-green-500/20">
-            <div className="text-3xl font-bold text-green-600">
-              {timeLeft.hours}
-            </div>
-            <div className="text-xs text-green-700 mt-1 uppercase tracking-wide font-semibold">
-              Heures
+        {[
+          { val: timeLeft.days, label: 'Jours' },
+          { val: timeLeft.hours, label: 'Heures' },
+          { val: timeLeft.minutes, label: 'Minutes' },
+          { val: timeLeft.seconds, label: 'Secondes' },
+        ].map((unit) => (
+          <div key={unit.label} className="text-center">
+            <div className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-success/30 shadow-lg shadow-success/20">
+              <div className="text-3xl font-bold text-success">
+                {unit.val}
+              </div>
+              <div className="text-xs text-success/70 mt-1 uppercase tracking-wide font-semibold">
+                {unit.label}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="text-center">
-          <div className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-green-500/30 shadow-lg shadow-green-500/20">
-            <div className="text-3xl font-bold text-green-600">
-              {timeLeft.minutes}
-            </div>
-            <div className="text-xs text-green-700 mt-1 uppercase tracking-wide font-semibold">
-              Minutes
-            </div>
-          </div>
-        </div>
-        <div className="text-center">
-          <div className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-green-500/30 shadow-lg shadow-green-500/20">
-            <div className="text-3xl font-bold text-green-600">
-              {timeLeft.seconds}
-            </div>
-            <div className="text-xs text-green-700 mt-1 uppercase tracking-wide font-semibold">
-              Secondes
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
     </Card>
   );
