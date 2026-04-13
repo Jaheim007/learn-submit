@@ -392,13 +392,14 @@ export default function AdminCourses() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {materials.map((material) => (
-              <Card key={material.id} className="group overflow-hidden hover:shadow-md transition-all duration-200">
-                <div className="flex">
+              <Card key={material.id} className="group overflow-hidden hover:shadow-md transition-all duration-200 touch-manipulation active:scale-[0.99]">
+                {/* Mobile: vertical layout / Desktop: horizontal */}
+                <div className="flex flex-col sm:flex-row">
                   {/* Image or accent bar */}
                   {material.image_url ? (
-                    <div className="w-32 flex-shrink-0 bg-muted">
+                    <div className="w-full sm:w-32 h-32 sm:h-auto flex-shrink-0 bg-muted">
                       <img 
                         src={material.image_url} 
                         alt={material.title}
@@ -406,18 +407,18 @@ export default function AdminCourses() {
                       />
                     </div>
                   ) : (
-                    <div className="w-2 flex-shrink-0 bg-primary rounded-l-lg" />
+                    <div className="hidden sm:block w-2 flex-shrink-0 bg-primary rounded-l-lg" />
                   )}
 
-                  <div className="flex-1 p-5 min-w-0">
+                  <div className="flex-1 p-4 sm:p-5 min-w-0">
                     {/* Title & group */}
-                    <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-start justify-between gap-2 mb-2 sm:mb-3">
                       <div className="min-w-0">
-                        <h3 className="font-semibold text-foreground leading-snug line-clamp-2 text-[15px]">
+                        <h3 className="font-semibold text-foreground leading-snug line-clamp-2 text-sm sm:text-[15px]">
                           {material.title}
                         </h3>
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-full">
+                        <div className="flex items-center gap-2 mt-1 sm:mt-1.5">
+                          <Badge variant="secondary" className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full">
                             <Layers className="h-3 w-3 mr-1" />
                             {material.classes.title}
                           </Badge>
@@ -427,34 +428,34 @@ export default function AdminCourses() {
 
                     {/* Description preview */}
                     {material.description && (
-                      <div className="mb-3 text-sm text-muted-foreground line-clamp-2">
-                        <RichTextRenderer content={material.description} className="[&_*]:!text-muted-foreground [&_*]:!text-sm !line-clamp-2" />
+                      <div className="mb-2 sm:mb-3 text-xs sm:text-sm text-muted-foreground line-clamp-2">
+                        <RichTextRenderer content={material.description} className="[&_*]:!text-muted-foreground [&_*]:!text-xs sm:[&_*]:!text-sm !line-clamp-2" />
                       </div>
                     )}
 
                     {/* Meta row */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <FileText className="h-3.5 w-3.5" />
-                          {material.file_name}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-muted-foreground min-w-0">
+                        <span className="flex items-center gap-1 truncate">
+                          <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
+                          <span className="truncate">{material.file_name}</span>
                         </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3.5 w-3.5" />
-                          {new Date(material.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        <span className="flex items-center gap-1 shrink-0">
+                          <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                          {new Date(material.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                         </span>
                       </div>
 
-                      {/* Actions */}
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownload(material.file_url, material.file_name)} title="Télécharger">
-                          <Download className="h-4 w-4" />
+                      {/* Actions — always visible on mobile */}
+                      <div className="flex items-center gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 touch-manipulation" onClick={() => handleDownload(material.file_url, material.file_name)} title="Télécharger">
+                          <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditClick(material)} title="Modifier">
-                          <Edit className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8 touch-manipulation" onClick={() => handleEditClick(material)} title="Modifier">
+                          <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDeleteClick(material.id, material.file_url)} title="Supprimer">
-                          <Trash2 className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive touch-manipulation" onClick={() => handleDeleteClick(material.id, material.file_url)} title="Supprimer">
+                          <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         </Button>
                       </div>
                     </div>
@@ -486,13 +487,13 @@ export default function AdminCourses() {
 
       {/* Edit Course Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-[600px] w-[95vw] max-h-[85vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
-            <DialogTitle>Modifier le cours</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">Modifier le cours</DialogTitle>
             <DialogDescription>Modifiez les informations du cours</DialogDescription>
           </DialogHeader>
-          <div className="space-y-5 py-4">
-            <div className="space-y-2">
+          <div className="space-y-4 sm:space-y-5 py-2 sm:py-4">
+            <div className="space-y-1.5 sm:space-y-2">
               <Label htmlFor="edit-title">Titre du cours</Label>
               <Input
                 id="edit-title"
@@ -506,7 +507,7 @@ export default function AdminCourses() {
               currentImageUrl={editingMaterial?.image_url}
               onImageReady={(file) => setEditFormData({ ...editFormData, image: file })}
             />
-            <div className="space-y-2">
+            <div className="space-y-1.5 sm:space-y-2">
               <Label>Description</Label>
               <RichTextEditor
                 value={editFormData.description}
@@ -516,9 +517,9 @@ export default function AdminCourses() {
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>Annuler</Button>
-            <Button onClick={handleEditSave}>Enregistrer</Button>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="touch-manipulation">Annuler</Button>
+            <Button onClick={handleEditSave} className="touch-manipulation">Enregistrer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
