@@ -287,7 +287,7 @@ const Landing = () => {
             </Button>
             <Button 
               size="sm"
-              onClick={() => navigate('/etudiant/login')}
+              onClick={() => navigate('/login')}
               className="bg-gradient-primary hover:opacity-90 text-primary-foreground rounded-xl font-semibold h-9 px-4 touch-manipulation active:scale-95"
             >
               <LogIn className="h-4 w-4 mr-1.5" />
@@ -335,7 +335,7 @@ const Landing = () => {
             >
               <Button 
                 size="lg"
-                onClick={() => navigate('/etudiant/login')}
+                onClick={() => navigate('/login')}
                 className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8 h-12 sm:h-13 text-sm sm:text-base font-semibold rounded-xl shadow-xl shadow-primary/20 group w-full sm:w-auto touch-manipulation active:scale-95"
               >
                 <LogIn className="mr-2 h-5 w-5" />
@@ -598,7 +598,7 @@ const Landing = () => {
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button 
                   size="lg"
-                  onClick={() => navigate('/etudiant/login')}
+                  onClick={() => navigate('/login')}
                   variant="secondary"
                   className="h-12 px-8 text-base font-semibold rounded-xl"
                 >

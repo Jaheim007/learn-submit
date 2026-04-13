@@ -64,7 +64,7 @@ export default function StudentProjects() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      navigate('/login');
     } else if (user) {
       fetchData();
     }
