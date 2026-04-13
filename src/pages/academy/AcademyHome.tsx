@@ -79,7 +79,7 @@ export default function AcademyHome() {
       approvedSubmissions: subs.filter(s => s.status === 'approved').length,
       rejectedSubmissions: subs.filter(s => s.status === 'rejected').length,
       receivedSubmissions: subs.filter(s => s.status === 'received').length,
-      reviewingSubmissions: subs.filter(s => s.status === 'reviewing').length,
+      reviewingSubmissions: subs.filter(s => s.status === 'in_review').length,
     });
   };
 
