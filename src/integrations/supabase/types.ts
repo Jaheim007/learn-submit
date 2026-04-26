@@ -101,6 +101,249 @@ export type Database = {
         }
         Relationships: []
       }
+      afrodash_daily_rewards: {
+        Row: {
+          bonus_item: string | null
+          claimed_date: string
+          cowries_awarded: number
+          created_at: string
+          day_of_streak: number
+          id: string
+          player_id: string
+        }
+        Insert: {
+          bonus_item?: string | null
+          claimed_date: string
+          cowries_awarded?: number
+          created_at?: string
+          day_of_streak?: number
+          id?: string
+          player_id: string
+        }
+        Update: {
+          bonus_item?: string | null
+          claimed_date?: string
+          cowries_awarded?: number
+          created_at?: string
+          day_of_streak?: number
+          id?: string
+          player_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "afrodash_daily_rewards_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "afrodash_leaderboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "afrodash_daily_rewards_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "afrodash_players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      afrodash_game_sessions: {
+        Row: {
+          character_used: string
+          cowries_earned: number
+          created_at: string
+          death_cause: string | null
+          distance: number
+          duration_seconds: number
+          environment: string
+          id: string
+          player_id: string
+          powerups_used: Json
+          score: number
+        }
+        Insert: {
+          character_used?: string
+          cowries_earned?: number
+          created_at?: string
+          death_cause?: string | null
+          distance?: number
+          duration_seconds?: number
+          environment?: string
+          id?: string
+          player_id: string
+          powerups_used?: Json
+          score: number
+        }
+        Update: {
+          character_used?: string
+          cowries_earned?: number
+          created_at?: string
+          death_cause?: string | null
+          distance?: number
+          duration_seconds?: number
+          environment?: string
+          id?: string
+          player_id?: string
+          powerups_used?: Json
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "afrodash_game_sessions_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "afrodash_leaderboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "afrodash_game_sessions_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "afrodash_players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      afrodash_players: {
+        Row: {
+          active_character: string
+          avatar_url: string | null
+          best_streak: number
+          country: string | null
+          created_at: string
+          current_streak: number
+          games_played: number
+          high_score: number
+          id: string
+          language: string
+          last_played_at: string | null
+          total_cowries: number
+          total_distance: number
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          active_character?: string
+          avatar_url?: string | null
+          best_streak?: number
+          country?: string | null
+          created_at?: string
+          current_streak?: number
+          games_played?: number
+          high_score?: number
+          id: string
+          language?: string
+          last_played_at?: string | null
+          total_cowries?: number
+          total_distance?: number
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          active_character?: string
+          avatar_url?: string | null
+          best_streak?: number
+          country?: string | null
+          created_at?: string
+          current_streak?: number
+          games_played?: number
+          high_score?: number
+          id?: string
+          language?: string
+          last_played_at?: string | null
+          total_cowries?: number
+          total_distance?: number
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      afrodash_purchases: {
+        Row: {
+          balance_after: number
+          balance_before: number
+          cost_cowries: number
+          created_at: string
+          id: string
+          item_id: string
+          item_type: string
+          player_id: string
+        }
+        Insert: {
+          balance_after: number
+          balance_before: number
+          cost_cowries: number
+          created_at?: string
+          id?: string
+          item_id: string
+          item_type: string
+          player_id: string
+        }
+        Update: {
+          balance_after?: number
+          balance_before?: number
+          cost_cowries?: number
+          created_at?: string
+          id?: string
+          item_id?: string
+          item_type?: string
+          player_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "afrodash_purchases_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "afrodash_leaderboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "afrodash_purchases_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "afrodash_players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      afrodash_unlocks: {
+        Row: {
+          id: string
+          item_id: string
+          item_type: string
+          player_id: string
+          unlocked_at: string
+        }
+        Insert: {
+          id?: string
+          item_id: string
+          item_type: string
+          player_id: string
+          unlocked_at?: string
+        }
+        Update: {
+          id?: string
+          item_id?: string
+          item_type?: string
+          player_id?: string
+          unlocked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "afrodash_unlocks_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "afrodash_leaderboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "afrodash_unlocks_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "afrodash_players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       applications: {
         Row: {
           created_at: string
@@ -3159,7 +3402,20 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      afrodash_leaderboard: {
+        Row: {
+          active_character: string | null
+          avatar_url: string | null
+          country: string | null
+          games_played: number | null
+          high_score: number | null
+          id: string | null
+          rank: number | null
+          total_distance: number | null
+          username: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       chatbot_claim_prospect: {
