@@ -7,12 +7,12 @@ const corsHeaders = {
 };
 
 // Generate ZEGOCLOUD token
-function generateToken04(
+async function generateToken04(
   appId: number,
   userId: string,
   serverSecret: string,
   effectiveTimeInSeconds: number
-): string {
+): Promise<string> {
   const time = Math.floor(Date.now() / 1000);
   const payload = {
     app_id: appId,
@@ -31,18 +31,16 @@ function generateToken04(
   const key = encoder.encode(serverSecret);
   const data = encoder.encode(message);
   
-  return crypto.subtle.importKey(
+  const cryptoKey = await crypto.subtle.importKey(
     'raw',
     key,
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign']
-  ).then(cryptoKey => 
-    crypto.subtle.sign('HMAC', cryptoKey, data)
-  ).then(signature => {
-    const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
-    return `${message}.${signatureBase64}`;
-  });
+  );
+  const signature = await crypto.subtle.sign('HMAC', cryptoKey, data);
+  const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
+  return `${message}.${signatureBase64}`;
 }
 
 serve(async (req: Request) => {
@@ -63,8 +61,8 @@ serve(async (req: Request) => {
     }
 
     // Verify user
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    const authToken = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(authToken);
     
     if (userError || !user) {
       throw new Error('Unauthorized');
@@ -80,12 +78,12 @@ serve(async (req: Request) => {
     }
 
     // Token valid for 24 hours
-    const token = await generateToken04(appId, userId, serverSecret, 86400);
+    const zegoToken = await generateToken04(appId, userId, serverSecret, 86400);
 
     console.log('Generated ZEGOCLOUD token for user:', userId);
 
     return new Response(
-      JSON.stringify({ token }),
+      JSON.stringify({ token: zegoToken }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 

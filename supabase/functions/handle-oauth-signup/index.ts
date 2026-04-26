@@ -115,10 +115,11 @@ serve(async (req) => {
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 201 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in handle-oauth-signup:', error);
+    const message = error instanceof Error ? error.message : 'Unexpected error';
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
     );
   }
