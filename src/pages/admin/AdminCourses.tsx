@@ -238,11 +238,10 @@ export default function AdminCourses() {
           .from('course-materials')
           .upload(imagePath, editFormData.image, { cacheControl: '3600', upsert: false });
         if (imageError) throw new Error(`Erreur image: ${imageError.message}`);
-        const { data: { publicUrl } } = supabase.storage.from('course-materials').getPublicUrl(imagePath);
-        imageUrl = publicUrl;
+        imageUrl = imagePath;
         if (editingMaterial.image_url) {
-          const oldImagePath = editingMaterial.image_url.split('/').slice(-2).join('/');
-          await supabase.storage.from('course-materials').remove([oldImagePath]);
+          const oldImagePath = getCourseImagePath(editingMaterial.image_url);
+          if (oldImagePath) await supabase.storage.from('course-materials').remove([oldImagePath]);
         }
       }
 
@@ -417,10 +416,10 @@ export default function AdminCourses() {
                 {/* Mobile: vertical layout / Desktop: horizontal */}
                 <div className="flex flex-col sm:flex-row">
                   {/* Image or accent bar */}
-                  {material.image_url ? (
+                  {material.image_src ? (
                     <div className="w-full sm:w-32 h-32 sm:h-auto flex-shrink-0 bg-muted">
                       <img 
-                        src={material.image_url} 
+                        src={material.image_src} 
                         alt={material.title}
                         className="w-full h-full object-cover"
                       />
@@ -523,7 +522,7 @@ export default function AdminCourses() {
             </div>
             <ImageCropper
               label="Nouvelle image (optionnel)"
-              currentImageUrl={editingMaterial?.image_url}
+              currentImageUrl={editingMaterial?.image_src || undefined}
               onImageReady={(file) => setEditFormData({ ...editFormData, image: file })}
             />
             <div className="space-y-1.5 sm:space-y-2">
