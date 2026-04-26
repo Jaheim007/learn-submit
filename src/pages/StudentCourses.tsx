@@ -22,6 +22,7 @@ interface GroupedCourse {
   class_code: string;
   description: string | null;
   image_url: string | null;
+  image_src?: string | null;
   materials: CourseMaterial[];
 }
 
@@ -34,6 +35,16 @@ export default function StudentCourses() {
   useEffect(() => {
     if (user) fetchCourses();
   }, [user]);
+
+  const getCourseImageSrc = async (value: string | null) => {
+    if (!value) return null;
+    const path = value.includes('/storage/v1/object/')
+      ? value.split('/course-materials/')[1]?.split('?')[0]
+      : value;
+    if (!path) return null;
+    const { data } = await supabase.storage.from('course-materials').createSignedUrl(path, 600);
+    return data?.signedUrl || null;
+  };
 
   const fetchCourses = async () => {
     try {
@@ -55,7 +66,11 @@ export default function StudentCourses() {
         }
         grouped[key].materials.push({ id: c.id, file_name: c.file_name, file_url: c.file_url });
       });
-      setGroupedCourses(Object.values(grouped));
+      const courses = await Promise.all(Object.values(grouped).map(async (course) => ({
+        ...course,
+        image_src: await getCourseImageSrc(course.image_url),
+      })));
+      setGroupedCourses(courses);
     } catch { toast.error('Erreur lors du chargement'); } finally { setLoading(false); }
   };
 
@@ -86,9 +101,9 @@ export default function StudentCourses() {
                 onClick={() => navigate(`/etudiant/cours/${course.id}`)}
                 className="bg-card rounded-2xl border border-border/50 overflow-hidden touch-manipulation active:scale-[0.98] cursor-pointer transition-all"
               >
-                {course.image_url ? (
+                {course.image_src ? (
                   <div className="relative h-36 w-full overflow-hidden">
-                    <img src={course.image_url} alt={course.title} className="w-full h-full object-cover" />
+                    <img src={course.image_src} alt={course.title} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
                     <div className="absolute top-3 left-3">
                       <Badge variant="outline" className="bg-card/90 backdrop-blur-sm border-border/30 text-[11px] font-bold rounded-lg">
