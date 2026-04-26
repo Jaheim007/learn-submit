@@ -38,6 +38,7 @@ interface CourseMaterial {
   file_type: string;
   file_url: string;
   image_url: string | null;
+  image_src?: string | null;
   class_id: number;
   created_at: string;
   classes: {
@@ -81,6 +82,19 @@ export default function AdminCourses() {
     fetchMaterials();
   }, []);
 
+  const getCourseImagePath = (value: string | null) => {
+    if (!value) return null;
+    if (!value.includes('/storage/v1/object/')) return value;
+    return value.split('/course-materials/')[1]?.split('?')[0] || null;
+  };
+
+  const getCourseImageSrc = async (value: string | null) => {
+    const path = getCourseImagePath(value);
+    if (!path) return null;
+    const { data } = await supabase.storage.from('course-materials').createSignedUrl(path, 600);
+    return data?.signedUrl || null;
+  };
+
   const fetchClasses = async () => {
     const { data } = await supabase
       .from('classes')
@@ -96,7 +110,13 @@ export default function AdminCourses() {
       .from('course_materials')
       .select(`*, classes (title)`)
       .order('created_at', { ascending: false });
-    if (data) setMaterials(data as any);
+    if (data) {
+      const enriched = await Promise.all((data as any[]).map(async (material) => ({
+        ...material,
+        image_src: await getCourseImageSrc(material.image_url),
+      })));
+      setMaterials(enriched as CourseMaterial[]);
+    }
     setLoading(false);
   };
 
@@ -131,8 +151,7 @@ export default function AdminCourses() {
           .from('course-materials')
           .upload(imagePath, formData.image, { cacheControl: '3600', upsert: false });
         if (imageError) throw new Error(`Erreur image: ${imageError.message}`);
-        const { data: { publicUrl } } = supabase.storage.from('course-materials').getPublicUrl(imagePath);
-        imageUrl = publicUrl;
+        imageUrl = imagePath;
       }
 
       const courseGroupId = crypto.randomUUID();
