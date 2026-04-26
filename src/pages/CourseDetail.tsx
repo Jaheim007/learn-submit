@@ -20,6 +20,7 @@ interface CourseDetail {
   title: string;
   description: string | null;
   image_url: string | null;
+  image_src?: string | null;
   class_code: string;
   materials: CourseMaterial[];
 }
@@ -36,6 +37,16 @@ export default function CourseDetail() {
       fetchCourseDetail();
     }
   }, [user, courseId]);
+
+  const getCourseImageSrc = async (value: string | null) => {
+    if (!value) return null;
+    const path = value.includes('/storage/v1/object/')
+      ? value.split('/course-materials/')[1]?.split('?')[0]
+      : value;
+    if (!path) return null;
+    const { data } = await supabase.storage.from('course-materials').createSignedUrl(path, 600);
+    return data?.signedUrl || null;
+  };
 
   const fetchCourseDetail = async () => {
     try {
@@ -77,6 +88,7 @@ export default function CourseDetail() {
           title: data.title,
           description: data.description,
           image_url: data.image_url,
+          image_src: await getCourseImageSrc(data.image_url),
           class_code: (data.classes as any)?.code || 'N/A',
           materials: materials || []
         });
@@ -174,10 +186,10 @@ export default function CourseDetail() {
         </Button>
 
         {/* Course Image Hero */}
-        {course.image_url && (
+        {course.image_src && (
           <div className="relative w-full aspect-video rounded-lg sm:rounded-xl overflow-hidden border border-border/50 bg-gradient-to-br from-primary/5 to-secondary/5">
             <img 
-              src={course.image_url} 
+              src={course.image_src} 
               alt={course.title}
               className="w-full h-full object-cover"
             />
