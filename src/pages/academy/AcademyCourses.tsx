@@ -16,6 +16,7 @@ interface CourseMaterial {
   file_type: string;
   file_url: string;
   image_url: string | null;
+  image_src?: string | null;
   class_id: number;
   created_at: string;
   uploaded_by: string;
@@ -29,6 +30,19 @@ export default function AcademyCourses() {
   const [selectedCourse, setSelectedCourse] = useState<CourseMaterial | null>(null);
 
   useEffect(() => { fetchMaterials(); }, []);
+
+  const getCourseImagePath = (value: string | null) => {
+    if (!value) return null;
+    if (!value.includes('/storage/v1/object/')) return value;
+    return value.split('/course-materials/')[1]?.split('?')[0] || null;
+  };
+
+  const getCourseImageSrc = async (value: string | null) => {
+    const path = getCourseImagePath(value);
+    if (!path) return null;
+    const { data } = await supabase.storage.from('course-materials').createSignedUrl(path, 600);
+    return data?.signedUrl || null;
+  };
 
   const fetchMaterials = async () => {
     setLoading(true);
@@ -57,7 +71,11 @@ export default function AcademyCourses() {
         ...m,
         uploaded_by_name: m.uploaded_by ? uploaderNames[m.uploaded_by] || 'Inconnu' : null,
       }));
-      setMaterials(enriched);
+      const withImages = await Promise.all(enriched.map(async (material: any) => ({
+        ...material,
+        image_src: await getCourseImageSrc(material.image_url),
+      })));
+      setMaterials(withImages);
     }
     setLoading(false);
   };
@@ -125,9 +143,9 @@ export default function AcademyCourses() {
                 {courses.map((material) => (
                   <Card key={material.id} className="group overflow-hidden hover:shadow-md transition-all">
                     <div className="flex">
-                      {material.image_url ? (
+                      {material.image_src ? (
                         <div className="w-28 flex-shrink-0 bg-muted">
-                          <img src={material.image_url} alt={material.title} className="w-full h-full object-cover" />
+                          <img src={material.image_src} alt={material.title} className="w-full h-full object-cover" />
                         </div>
                       ) : (
                         <div className="w-2 flex-shrink-0 bg-primary rounded-l-lg" />
@@ -177,8 +195,8 @@ export default function AcademyCourses() {
           </DialogHeader>
           {selectedCourse && (
             <div className="space-y-4">
-              {selectedCourse.image_url && (
-                <img src={selectedCourse.image_url} alt={selectedCourse.title} className="w-full rounded-lg" />
+              {selectedCourse.image_src && (
+                <img src={selectedCourse.image_src} alt={selectedCourse.title} className="w-full rounded-lg" />
               )}
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary"><Layers className="h-3 w-3 mr-1" />{selectedCourse.classes?.title}</Badge>
