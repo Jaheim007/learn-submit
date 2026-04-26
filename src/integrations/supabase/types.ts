@@ -3432,6 +3432,10 @@ export type Database = {
         Args: { p_id: string; p_session_id: string }
         Returns: Json
       }
+      chatbot_prospect_exists: {
+        Args: { _prospect_id: string }
+        Returns: boolean
+      }
       chatbot_restore: {
         Args: { p_email: string; p_new_session_id: string }
         Returns: Json
@@ -3544,6 +3548,10 @@ export type Database = {
       is_academy: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       is_admin_user: { Args: { uid?: string }; Returns: boolean }
+      is_chat_participant: {
+        Args: { _conversation_id: string; _user_id?: string }
+        Returns: boolean
+      }
       is_member_of_org: {
         Args: { _org_id: string; _user_id?: string }
         Returns: boolean
