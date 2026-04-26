@@ -25,6 +25,7 @@ interface CourseMaterial {
   file_type: string;
   file_url: string;
   image_url: string | null;
+  image_src?: string | null;
   class_id: number;
   course_group_id: string | null;
   created_at: string;
@@ -60,6 +61,19 @@ export default function TeacherCourses() {
     if (user) loadData();
   }, [user]);
 
+  const getCourseImagePath = (value: string | null) => {
+    if (!value) return null;
+    if (!value.includes('/storage/v1/object/')) return value;
+    return value.split('/course-materials/')[1]?.split('?')[0] || null;
+  };
+
+  const getCourseImageSrc = async (value: string | null) => {
+    const path = getCourseImagePath(value);
+    if (!path) return null;
+    const { data } = await supabase.storage.from('course-materials').createSignedUrl(path, 600);
+    return data?.signedUrl || null;
+  };
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -78,7 +92,11 @@ export default function TeacherCourses() {
         .select('*, classes(title)')
         .order('created_at', { ascending: false });
 
-      setMaterials((mats as any) || []);
+      const enriched = await Promise.all(((mats as any[]) || []).map(async (material) => ({
+        ...material,
+        image_src: await getCourseImageSrc(material.image_url),
+      })));
+      setMaterials(enriched as CourseMaterial[]);
     } catch (error) {
       console.error('Error loading courses:', error);
     } finally {
@@ -102,8 +120,7 @@ export default function TeacherCourses() {
           .from('course-materials')
           .upload(imagePath, formData.image, { cacheControl: '3600', upsert: false });
         if (imageError) throw new Error(`Erreur image: ${imageError.message}`);
-        const { data: { publicUrl } } = supabase.storage.from('course-materials').getPublicUrl(imagePath);
-        imageUrl = publicUrl;
+        imageUrl = imagePath;
       }
 
       const courseGroupId = crypto.randomUUID();
@@ -302,8 +319,8 @@ export default function TeacherCourses() {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex gap-4 items-start flex-1">
-                      {first.image_url && (
-                        <img src={first.image_url} alt="" className="w-16 h-16 rounded-lg object-cover" />
+                      {first.image_src && (
+                        <img src={first.image_src} alt="" className="w-16 h-16 rounded-lg object-cover" />
                       )}
                       <div className="flex-1">
                         <CardTitle className="text-lg">{first.title}</CardTitle>
