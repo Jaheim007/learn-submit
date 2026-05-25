@@ -28,7 +28,8 @@ async function resumableUpload(file: File, bucket: string, filePath: string, onP
         authorization: `Bearer ${session.access_token}`,
         'x-upsert': 'true',
       },
-      uploadDataDuringCreation: true,
+      // Keep the creation request metadata-only so large files are sent via 6 MB PATCH chunks.
+      uploadDataDuringCreation: false,
       removeFingerprintOnSuccess: true,
       metadata: {
         bucketName: bucket,
@@ -37,7 +38,14 @@ async function resumableUpload(file: File, bucket: string, filePath: string, onP
         cacheControl: '3600',
       },
       chunkSize: 6 * 1024 * 1024, // 6 MB chunks (required by Supabase TUS)
-      onError: (err) => reject(err),
+      onError: (err) => {
+        const message = err?.message || '';
+        if (message.includes('413') || message.toLowerCase().includes('maximum size exceeded')) {
+          reject(new Error('Le serveur a refusé la création de l’upload. Réessayez maintenant que l’envoi se fait bien en morceaux.'));
+          return;
+        }
+        reject(err);
+      },
       onProgress: (sent, total) => onProgress(Math.round((sent / total) * 100)),
       onSuccess: () => resolve(),
     });
