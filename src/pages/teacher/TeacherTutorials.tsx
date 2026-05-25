@@ -258,8 +258,11 @@ export default function TeacherTutorials() {
                 </div>
               )}
               <Button onClick={handleSubmit} disabled={submitting} className="w-full">
-                {submitting ? 'Envoi en cours...' : 'Ajouter le tutoriel'}
+                {submitting ? (uploadProgress > 0 ? `Upload ${uploadProgress}%...` : 'Envoi en cours...') : 'Ajouter le tutoriel'}
               </Button>
+              {submitting && uploadProgress > 0 && (
+                <Progress value={uploadProgress} className="mt-2" />
+              )}
             </div>
           </DialogContent>
         </Dialog>
