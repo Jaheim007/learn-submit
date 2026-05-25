@@ -70,6 +70,7 @@ export default function TeacherTutorials() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [playingVideo, setPlayingVideo] = useState<Tutorial | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   // Form state
   const [title, setTitle] = useState('');
