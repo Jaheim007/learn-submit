@@ -65,7 +65,8 @@ export default function StudentTutorials() {
   };
 
   const getSignedUrl = async (filePath: string) => {
-    const { data } = await supabase.storage.from('tutorials').createSignedUrl(filePath, 3600);
+    // 24h signed URL → permet au CDN/navigateur de mettre en cache et de réutiliser les byte-ranges
+    const { data } = await supabase.storage.from('tutorials').createSignedUrl(filePath, 60 * 60 * 24);
     return data?.signedUrl;
   };
 
