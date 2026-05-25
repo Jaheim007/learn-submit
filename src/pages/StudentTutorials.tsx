@@ -65,7 +65,8 @@ export default function StudentTutorials() {
   };
 
   const getSignedUrl = async (filePath: string) => {
-    const { data } = await supabase.storage.from('tutorials').createSignedUrl(filePath, 3600);
+    // 24h signed URL → permet au CDN/navigateur de mettre en cache et de réutiliser les byte-ranges
+    const { data } = await supabase.storage.from('tutorials').createSignedUrl(filePath, 60 * 60 * 24);
     return data?.signedUrl;
   };
 
@@ -191,7 +192,13 @@ export default function StudentTutorials() {
                 <iframe src={extractEmbedUrl(playingVideo.video_url)} className="w-full h-full" allowFullScreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" />
               )}
               {playingVideo?.video_type === 'upload' && playingVideo.video_url && (
-                <video src={playingVideo.video_url} controls autoPlay className="w-full h-full" />
+                <video
+                  src={playingVideo.video_url}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full"
+                />
               )}
             </div>
           </DialogContent>
