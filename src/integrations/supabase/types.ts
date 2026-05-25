@@ -3202,6 +3202,7 @@ export type Database = {
           description: string | null
           file_name: string | null
           file_path: string | null
+          group_id: string
           id: string
           thumbnail_url: string | null
           title: string
@@ -3216,6 +3217,7 @@ export type Database = {
           description?: string | null
           file_name?: string | null
           file_path?: string | null
+          group_id?: string
           id?: string
           thumbnail_url?: string | null
           title: string
@@ -3230,6 +3232,7 @@ export type Database = {
           description?: string | null
           file_name?: string | null
           file_path?: string | null
+          group_id?: string
           id?: string
           thumbnail_url?: string | null
           title?: string
