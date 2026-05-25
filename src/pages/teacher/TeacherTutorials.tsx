@@ -118,7 +118,7 @@ export default function TeacherTutorials() {
   };
 
   const getSignedUrl = async (filePath: string) => {
-    const { data } = await supabase.storage.from('tutorials').createSignedUrl(filePath, 3600);
+    const { data } = await supabase.storage.from('tutorials').createSignedUrl(filePath, 60 * 60 * 24);
     return data?.signedUrl;
   };
 
