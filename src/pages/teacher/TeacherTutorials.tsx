@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import * as tus from 'tus-js-client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,11 +7,47 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Plus, Trash2, Video, Link as LinkIcon, Upload, Play, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+
+const SUPABASE_URL = 'https://ucgaxcnfvrbhsxxcwceo.supabase.co';
+
+async function resumableUpload(file: File, bucket: string, filePath: string, onProgress: (p: number) => void): Promise<void> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Non authentifié');
+
+  return new Promise((resolve, reject) => {
+    const upload = new tus.Upload(file, {
+      endpoint: `${SUPABASE_URL}/storage/v1/upload/resumable`,
+      retryDelays: [0, 3000, 5000, 10000, 20000],
+      headers: {
+        authorization: `Bearer ${session.access_token}`,
+        'x-upsert': 'true',
+      },
+      uploadDataDuringCreation: true,
+      removeFingerprintOnSuccess: true,
+      metadata: {
+        bucketName: bucket,
+        objectName: filePath,
+        contentType: file.type || 'video/mp4',
+        cacheControl: '3600',
+      },
+      chunkSize: 6 * 1024 * 1024, // 6 MB chunks (required by Supabase TUS)
+      onError: (err) => reject(err),
+      onProgress: (sent, total) => onProgress(Math.round((sent / total) * 100)),
+      onSuccess: () => resolve(),
+    });
+
+    upload.findPreviousUploads().then((prev) => {
+      if (prev.length) upload.resumeFromPreviousUpload(prev[0]);
+      upload.start();
+    });
+  });
+}
 
 interface Tutorial {
   id: string;
@@ -33,6 +70,7 @@ export default function TeacherTutorials() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [playingVideo, setPlayingVideo] = useState<Tutorial | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -107,10 +145,9 @@ export default function TeacherTutorials() {
       if (videoType === 'upload' && videoFile) {
         fileName = videoFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
         filePath = `${selectedClassId}/${Date.now()}_${fileName}`;
-        const { error: uploadErr } = await supabase.storage
-          .from('tutorials')
-          .upload(filePath, videoFile);
-        if (uploadErr) throw uploadErr;
+        setUploadProgress(0);
+        // Use resumable TUS upload — required for files > ~50MB
+        await resumableUpload(videoFile, 'tutorials', filePath, setUploadProgress);
       }
 
       const { error } = await supabase.from('tutorials').insert({
@@ -133,6 +170,7 @@ export default function TeacherTutorials() {
       toast.error(err.message || 'Erreur lors de l\'ajout');
     } finally {
       setSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -220,8 +258,11 @@ export default function TeacherTutorials() {
                 </div>
               )}
               <Button onClick={handleSubmit} disabled={submitting} className="w-full">
-                {submitting ? 'Envoi en cours...' : 'Ajouter le tutoriel'}
+                {submitting ? (uploadProgress > 0 ? `Upload ${uploadProgress}%...` : 'Envoi en cours...') : 'Ajouter le tutoriel'}
               </Button>
+              {submitting && uploadProgress > 0 && (
+                <Progress value={uploadProgress} className="mt-2" />
+              )}
             </div>
           </DialogContent>
         </Dialog>
