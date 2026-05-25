@@ -382,7 +382,13 @@ export default function TeacherTutorials() {
               />
             )}
             {playingVideo?.video_type === 'upload' && playingVideo.video_url && (
-              <video src={playingVideo.video_url} controls autoPlay className="w-full h-full" />
+              <video
+                src={playingVideo.video_url}
+                controls
+                playsInline
+                preload="metadata"
+                className="w-full h-full"
+              />
             )}
           </div>
         </DialogContent>
