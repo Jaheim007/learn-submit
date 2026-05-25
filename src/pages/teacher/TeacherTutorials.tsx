@@ -145,10 +145,9 @@ export default function TeacherTutorials() {
       if (videoType === 'upload' && videoFile) {
         fileName = videoFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
         filePath = `${selectedClassId}/${Date.now()}_${fileName}`;
-        const { error: uploadErr } = await supabase.storage
-          .from('tutorials')
-          .upload(filePath, videoFile);
-        if (uploadErr) throw uploadErr;
+        setUploadProgress(0);
+        // Use resumable TUS upload — required for files > ~50MB
+        await resumableUpload(videoFile, 'tutorials', filePath, setUploadProgress);
       }
 
       const { error } = await supabase.from('tutorials').insert({
