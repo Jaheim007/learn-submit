@@ -57,7 +57,8 @@ Deno.serve(async (req) => {
       serviceClient
         .from('students')
         .select('id, user_id, full_name, email, is_active, status, created_at, phone, whatsapp, telegram, github_profile, avatar_url')
-        .order('created_at', { ascending: false }),
+        .order('created_at', { ascending: false })
+        .range(0, 9999),
       serviceClient
         .from('classes')
         .select('id, code, title')
@@ -80,11 +81,11 @@ Deno.serve(async (req) => {
       serviceClient
         .from('enrollments')
         .select('student_id, class_id')
-        .in('student_id', studentIds),
+        .range(0, 49999),
       serviceClient
         .from('submissions')
         .select('student_id')
-        .in('student_id', studentIds),
+        .range(0, 49999),
     ]);
 
     if (enrollmentsError || submissionsError) {
