@@ -79,10 +79,12 @@ Deno.serve(async (req) => {
     const [{ data: enrollments, error: enrollmentsError }, { data: submissions, error: submissionsError }] = await Promise.all([
       serviceClient
         .from('enrollments')
-        .select('student_id, class_id'),
+        .select('student_id, class_id')
+        .range(0, 49999),
       serviceClient
         .from('submissions')
-        .select('student_id'),
+        .select('student_id')
+        .range(0, 49999),
     ]);
 
     if (enrollmentsError || submissionsError) {
