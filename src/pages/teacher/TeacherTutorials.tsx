@@ -170,6 +170,7 @@ export default function TeacherTutorials() {
       toast.error(err.message || 'Erreur lors de l\'ajout');
     } finally {
       setSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
