@@ -49,16 +49,21 @@ export default function StudentGuard({ children }: StudentGuardProps) {
         // Check student record
         const { data: student } = await supabase
           .from('students')
-          .select('id, status')
+          .select('id, status, is_active')
           .eq('user_id', user.id)
           .maybeSingle();
 
         checkedForUserRef.current = user.id;
 
-        if (!student || student.status === 'pending') {
+        if (!student) {
           setStudentCheck('not_found');
         } else if (student.status === 'rejected') {
           setStudentCheck('rejected');
+        } else if (student.is_active === false) {
+          // Deactivated account → treat as pending until reactivated
+          setStudentCheck('not_found');
+        } else if (student.status === 'pending') {
+          setStudentCheck('not_found');
         } else {
           setStudentCheck('found');
         }

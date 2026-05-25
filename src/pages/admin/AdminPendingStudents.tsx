@@ -230,10 +230,10 @@ export default function AdminPendingStudents() {
     if (!user.student_id) return;
     setProcessing(true);
     try {
-      // Directly reactivate by setting is_active back to true
+      // Reactivate: set is_active=true AND ensure status is 'active' (not 'pending'/'rejected')
       const { error } = await supabase
         .from('students')
-        .update({ is_active: true })
+        .update({ is_active: true, status: 'active' })
         .eq('id', user.student_id);
 
       if (error) throw error;
