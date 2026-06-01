@@ -272,13 +272,10 @@ export default function SubmitProject() {
       // Filter out empty links
       const validLinks = links.filter(link => link.trim() !== '');
 
-      // Mark any previous submission for this project as not latest
-      await supabase
-        .from('submissions')
-        .update({ is_latest: false })
-        .eq('student_id', studentId)
-        .eq('project_id', parseInt(projectId!))
-        .eq('is_latest', true);
+      // Previous submissions are auto-flipped to is_latest=false by a DB trigger,
+      // and version is auto-incremented. No client-side update needed (and would
+      // be blocked by RLS anyway since students can't UPDATE submissions).
+
 
       // Create submission with all data
       const submissionData: any = {
