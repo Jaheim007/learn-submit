@@ -203,6 +203,101 @@ export type Database = {
           },
         ]
       }
+      afrodash_payment_packs: {
+        Row: {
+          amount_xof: number
+          character_id: string | null
+          cowries_amount: number | null
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          amount_xof: number
+          character_id?: string | null
+          cowries_amount?: number | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          amount_xof?: number
+          character_id?: string | null
+          cowries_amount?: number | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      afrodash_payments: {
+        Row: {
+          amount_xof: number
+          created_at: string
+          currency: string
+          id: string
+          pack_id: string
+          paystack_response: Json | null
+          paystack_transaction_id: string | null
+          reference: string
+          status: string
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          amount_xof: number
+          created_at?: string
+          currency?: string
+          id?: string
+          pack_id: string
+          paystack_response?: Json | null
+          paystack_transaction_id?: string | null
+          reference: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          amount_xof?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          pack_id?: string
+          paystack_response?: Json | null
+          paystack_transaction_id?: string | null
+          reference?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "afrodash_payments_pack_id_fkey"
+            columns: ["pack_id"]
+            isOneToOne: false
+            referencedRelation: "afrodash_payment_packs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       afrodash_players: {
         Row: {
           active_character: string
@@ -215,6 +310,7 @@ export type Database = {
           high_score: number
           id: string
           language: string
+          last_payment_at: string | null
           last_played_at: string | null
           total_cowries: number
           total_distance: number
@@ -232,6 +328,7 @@ export type Database = {
           high_score?: number
           id: string
           language?: string
+          last_payment_at?: string | null
           last_played_at?: string | null
           total_cowries?: number
           total_distance?: number
@@ -249,6 +346,7 @@ export type Database = {
           high_score?: number
           id?: string
           language?: string
+          last_payment_at?: string | null
           last_played_at?: string | null
           total_cowries?: number
           total_distance?: number
