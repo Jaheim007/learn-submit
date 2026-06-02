@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import ImageCropper from '@/components/ImageCropper';
-import { Plus, FolderOpen, Calendar, Users, FileText, Pencil, Trash2, Image as ImageIcon } from 'lucide-react';
+import { Plus, FolderOpen, Calendar, Users, FileText, Pencil, Trash2, Image as ImageIcon, Eye, EyeOff } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -159,6 +159,17 @@ export default function TeacherProjects() {
     setForm(prev => ({ ...prev, class_ids: prev.class_ids.includes(classId) ? prev.class_ids.filter(id => id !== classId) : [...prev.class_ids, classId] }));
   };
 
+  const handleToggleActive = async (p: ProjectInfo) => {
+    try {
+      const { error } = await supabase.from('projects').update({ is_active: !p.is_active }).eq('id', p.id);
+      if (error) throw error;
+      toast.success(!p.is_active ? 'Projet activé' : 'Projet désactivé');
+      loadData();
+    } catch (error: any) {
+      toast.error(error.message || 'Erreur');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -237,8 +248,11 @@ export default function TeacherProjects() {
                     {project.allow_resubmit && <span className="text-primary">Resoumission ✓</span>}
                   </div>
                   <div className="flex items-center gap-1">
-                    <button onClick={() => openEdit(project)} className="p-1.5 rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors touch-manipulation active:scale-90">
+                    <button onClick={() => openEdit(project)} title="Modifier" className="p-1.5 rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors touch-manipulation active:scale-90">
                       <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button onClick={() => handleToggleActive(project)} title={project.is_active ? 'Désactiver' : 'Activer'} className={`p-1.5 rounded-lg hover:bg-muted/60 transition-colors touch-manipulation active:scale-90 ${project.is_active ? 'text-muted-foreground hover:text-foreground' : 'text-[hsl(var(--success))]'}`}>
+                      {project.is_active ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     </button>
                     <button onClick={() => setDeleteProject(project)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors touch-manipulation active:scale-90">
                       <Trash2 className="h-3.5 w-3.5" />

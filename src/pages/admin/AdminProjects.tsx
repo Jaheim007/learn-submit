@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit, Trash2, Eye, Calendar, Upload, X, FileText } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Calendar, Upload, X, FileText } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { RichTextEditor, RichTextRenderer } from '@/components/ui/rich-text-editor';
 import { formatDistanceToNow } from 'date-fns';
@@ -67,6 +68,7 @@ export default function AdminProjects() {
   });
   const [projectImage, setProjectImage] = useState<File | null>(null);
   const [lastRefreshTime, setLastRefreshTime] = useState(new Date());
+  const [deletingProject, setDeletingProject] = useState<Project | null>(null);
 
   const loadData = async () => {
     try {
@@ -332,6 +334,21 @@ export default function AdminProjects() {
     }
   };
 
+  const handleDeleteProject = async () => {
+    if (!deletingProject) return;
+    try {
+      await supabase.from('class_projects').delete().eq('project_id', deletingProject.id);
+      const { error } = await supabase.from('projects').delete().eq('id', deletingProject.id);
+      if (error) throw error;
+      setProjects(prev => prev.filter(p => p.id !== deletingProject.id));
+      toast.success('Projet supprimé définitivement');
+      setDeletingProject(null);
+    } catch (error: any) {
+      console.error('Error deleting project:', error);
+      toast.error(error.message || 'Erreur lors de la suppression');
+    }
+  };
+
   const handleClassToggle = (classId: number) => {
     setFormData(prev => ({
       ...prev,
@@ -536,19 +553,30 @@ export default function AdminProjects() {
                       )}
                     </div>
                     <div className="flex items-center gap-0.5 shrink-0">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(project)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" title="Modifier" onClick={() => openEditDialog(project)}>
                         <Edit className="h-3.5 w-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className={`h-8 w-8 ${project.is_active ? "text-destructive hover:text-destructive" : "text-[hsl(var(--success))] hover:text-[hsl(var(--success))]"}`}
+                        className={`h-8 w-8 ${project.is_active ? "text-muted-foreground hover:text-foreground" : "text-[hsl(var(--success))] hover:text-[hsl(var(--success))]"}`}
+                        title={project.is_active ? 'Désactiver' : 'Activer'}
                         onClick={() => toggleProjectStatus(project.id, project.is_active)}
                       >
-                        {project.is_active ? <Trash2 className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        {project.is_active ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        title="Supprimer définitivement"
+                        onClick={() => setDeletingProject(project)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
+
 
                   {/* Meta */}
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
@@ -613,6 +641,24 @@ export default function AdminProjects() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deletingProject} onOpenChange={(open) => !open && setDeletingProject(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer définitivement ce projet ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Le projet "{deletingProject?.title}" sera supprimé de la base de données. Cette action est irréversible et entraînera la suppression des associations de classes liées.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteProject} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
