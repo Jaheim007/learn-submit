@@ -159,6 +159,17 @@ export default function TeacherProjects() {
     setForm(prev => ({ ...prev, class_ids: prev.class_ids.includes(classId) ? prev.class_ids.filter(id => id !== classId) : [...prev.class_ids, classId] }));
   };
 
+  const handleToggleActive = async (p: ProjectInfo) => {
+    try {
+      const { error } = await supabase.from('projects').update({ is_active: !p.is_active }).eq('id', p.id);
+      if (error) throw error;
+      toast.success(!p.is_active ? 'Projet activé' : 'Projet désactivé');
+      loadData();
+    } catch (error: any) {
+      toast.error(error.message || 'Erreur');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
