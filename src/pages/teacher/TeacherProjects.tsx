@@ -248,8 +248,11 @@ export default function TeacherProjects() {
                     {project.allow_resubmit && <span className="text-primary">Resoumission ✓</span>}
                   </div>
                   <div className="flex items-center gap-1">
-                    <button onClick={() => openEdit(project)} className="p-1.5 rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors touch-manipulation active:scale-90">
+                    <button onClick={() => openEdit(project)} title="Modifier" className="p-1.5 rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors touch-manipulation active:scale-90">
                       <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button onClick={() => handleToggleActive(project)} title={project.is_active ? 'Désactiver' : 'Activer'} className={`p-1.5 rounded-lg hover:bg-muted/60 transition-colors touch-manipulation active:scale-90 ${project.is_active ? 'text-muted-foreground hover:text-foreground' : 'text-[hsl(var(--success))]'}`}>
+                      {project.is_active ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     </button>
                     <button onClick={() => setDeleteProject(project)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors touch-manipulation active:scale-90">
                       <Trash2 className="h-3.5 w-3.5" />
