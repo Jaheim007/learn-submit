@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import ImageCropper from '@/components/ImageCropper';
-import { Plus, FolderOpen, Calendar, Users, FileText, Pencil, Trash2, Image as ImageIcon } from 'lucide-react';
+import { Plus, FolderOpen, Calendar, Users, FileText, Pencil, Trash2, Image as ImageIcon, Eye, EyeOff } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
