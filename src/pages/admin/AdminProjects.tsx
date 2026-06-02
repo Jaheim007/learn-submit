@@ -68,6 +68,7 @@ export default function AdminProjects() {
   });
   const [projectImage, setProjectImage] = useState<File | null>(null);
   const [lastRefreshTime, setLastRefreshTime] = useState(new Date());
+  const [deletingProject, setDeletingProject] = useState<Project | null>(null);
 
   const loadData = async () => {
     try {
