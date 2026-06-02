@@ -125,12 +125,12 @@ export default function StudentProjects() {
         .select(`
           project_id,
           projects (
-            id, code, title, description, due_at, deadline_at, image_url
+            id, code, title, description, due_at, deadline_at, image_url, is_active
           )
         `)
         .eq('class_id', selectedClassId);
 
-      const projectsList = data?.map((cp: any) => cp.projects).filter(Boolean) || [];
+      const projectsList = data?.map((cp: any) => cp.projects).filter(Boolean).filter((p: any) => p.is_active !== false) || [];
       
       // Batch fetch all submissions for this student in this class (fixes N+1 query)
       const projectIds = projectsList.map((p: any) => p.id);
