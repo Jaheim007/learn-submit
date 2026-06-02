@@ -553,19 +553,30 @@ export default function AdminProjects() {
                       )}
                     </div>
                     <div className="flex items-center gap-0.5 shrink-0">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(project)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" title="Modifier" onClick={() => openEditDialog(project)}>
                         <Edit className="h-3.5 w-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className={`h-8 w-8 ${project.is_active ? "text-destructive hover:text-destructive" : "text-[hsl(var(--success))] hover:text-[hsl(var(--success))]"}`}
+                        className={`h-8 w-8 ${project.is_active ? "text-muted-foreground hover:text-foreground" : "text-[hsl(var(--success))] hover:text-[hsl(var(--success))]"}`}
+                        title={project.is_active ? 'Désactiver' : 'Activer'}
                         onClick={() => toggleProjectStatus(project.id, project.is_active)}
                       >
-                        {project.is_active ? <Trash2 className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        {project.is_active ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        title="Supprimer définitivement"
+                        onClick={() => setDeletingProject(project)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
+
 
                   {/* Meta */}
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
