@@ -334,6 +334,21 @@ export default function AdminProjects() {
     }
   };
 
+  const handleDeleteProject = async () => {
+    if (!deletingProject) return;
+    try {
+      await supabase.from('class_projects').delete().eq('project_id', deletingProject.id);
+      const { error } = await supabase.from('projects').delete().eq('id', deletingProject.id);
+      if (error) throw error;
+      setProjects(prev => prev.filter(p => p.id !== deletingProject.id));
+      toast.success('Projet supprimé définitivement');
+      setDeletingProject(null);
+    } catch (error: any) {
+      console.error('Error deleting project:', error);
+      toast.error(error.message || 'Erreur lors de la suppression');
+    }
+  };
+
   const handleClassToggle = (classId: number) => {
     setFormData(prev => ({
       ...prev,
