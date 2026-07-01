@@ -28,7 +28,7 @@ interface Project {
 
 export default function SubmitProject() {
   const { projectId } = useParams<{ projectId: string }>();
-  const { user } = useAuth();
+  const { user, authLoading } = useAuth();
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(true);
@@ -48,19 +48,44 @@ export default function SubmitProject() {
   const [uploadingFile, setUploadingFile] = useState<string>('');
 
   useEffect(() => {
-    if (user && projectId) {
+    // Wait for auth to finish before deciding
+    if (authLoading) return;
+
+    // If auth finished but there's no user, session is missing/expired.
+    // Bounce to login instead of spinning forever on "Chargement...".
+    if (!user) {
+      toast.error('Session expirée. Veuillez vous reconnecter.');
+      navigate('/login');
+      return;
+    }
+
+    if (projectId) {
       fetchProjectData();
     }
-  }, [user, projectId]);
+  }, [user, authLoading, projectId]);
+
+  // Safety net: if for any reason loading never resolves within 15s,
+  // stop the spinner so the user isn't stuck on a blank loading screen.
+  useEffect(() => {
+    if (!loading) return;
+    const t = setTimeout(() => {
+      setLoading(false);
+    }, 15000);
+    return () => clearTimeout(t);
+  }, [loading]);
 
   const fetchProjectData = async () => {
     try {
       // Get student data
-      const { data: studentData } = await supabase
+      const { data: studentData, error: studentError } = await supabase
         .from('students')
         .select('id, primary_class_id')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
+
+      if (studentError) {
+        console.error('[SubmitProject] student fetch error', studentError);
+      }
 
       if (!studentData) {
         toast.error('Profil étudiant non trouvé');
@@ -93,11 +118,15 @@ export default function SubmitProject() {
       }
 
       // Get project data
-      const { data: projectData } = await supabase
+      const { data: projectData, error: projectError } = await supabase
         .from('projects')
         .select('*')
         .eq('id', parseInt(projectId!))
-        .single();
+        .maybeSingle();
+
+      if (projectError) {
+        console.error('[SubmitProject] project fetch error', projectError);
+      }
 
       if (!projectData) {
         toast.error('Projet non trouvé');
@@ -107,7 +136,9 @@ export default function SubmitProject() {
 
       setProject(projectData);
     } catch (error) {
+      console.error('[SubmitProject] fetchProjectData error', error);
       toast.error('Erreur lors du chargement');
+      navigate('/etudiant/projets');
     } finally {
       setLoading(false);
     }
