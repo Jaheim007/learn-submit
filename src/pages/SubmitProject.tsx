@@ -118,11 +118,15 @@ export default function SubmitProject() {
       }
 
       // Get project data
-      const { data: projectData } = await supabase
+      const { data: projectData, error: projectError } = await supabase
         .from('projects')
         .select('*')
         .eq('id', parseInt(projectId!))
-        .single();
+        .maybeSingle();
+
+      if (projectError) {
+        console.error('[SubmitProject] project fetch error', projectError);
+      }
 
       if (!projectData) {
         toast.error('Projet non trouvé');
@@ -132,7 +136,9 @@ export default function SubmitProject() {
 
       setProject(projectData);
     } catch (error) {
+      console.error('[SubmitProject] fetchProjectData error', error);
       toast.error('Erreur lors du chargement');
+      navigate('/etudiant/projets');
     } finally {
       setLoading(false);
     }
