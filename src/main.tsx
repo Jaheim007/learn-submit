@@ -13,9 +13,11 @@ if (!localStorage.getItem('theme') || localStorage.getItem('theme') === 'dark') 
 const isInIframe = (() => {
   try { return window.self !== window.top; } catch { return true; }
 })();
+const hostname = window.location.hostname.toLowerCase();
 const isPreviewHost =
-  window.location.hostname.includes('id-preview--') ||
-  window.location.hostname.includes('lovableproject.com');
+  hostname.includes('id-preview--') ||
+  hostname === 'lovableproject.com' ||
+  hostname.endsWith('.lovableproject.com');
 
 if (isPreviewHost || isInIframe) {
   navigator.serviceWorker?.getRegistrations().then((regs) => {
