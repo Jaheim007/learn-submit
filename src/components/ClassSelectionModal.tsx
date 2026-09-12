@@ -72,7 +72,7 @@ export function ClassSelectionModal({ isOpen, onClassSelected }: ClassSelectionM
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjZ2F4Y25mdnJiaHN4eGN3Y2VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDc1OTMsImV4cCI6MjA2NzAyMzU5M30.qPKuBuirq3kJI36BhoA_6IO_usl6iGt6QA2qWV_Sv4o',
+          'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         },
         body: JSON.stringify({
           class_id: parseInt(selectedClassId)
