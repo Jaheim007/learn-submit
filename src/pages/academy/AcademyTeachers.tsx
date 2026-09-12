@@ -41,18 +41,30 @@ export default function AcademyTeachers() {
     const numbers = '0123456789';
     const symbols = '!@#$%^&*';
     const allChars = uppercase + lowercase + numbers + symbols;
-    
-    let password = '';
-    password += uppercase[Math.floor(Math.random() * uppercase.length)];
-    password += lowercase[Math.floor(Math.random() * lowercase.length)];
-    password += numbers[Math.floor(Math.random() * numbers.length)];
-    password += symbols[Math.floor(Math.random() * symbols.length)];
-    
-    for (let i = password.length; i < length; i++) {
-      password += allChars[Math.floor(Math.random() * allChars.length)];
+
+    const cryptoRandom = (max: number) => {
+      const randomValues = new Uint32Array(1);
+      window.crypto.getRandomValues(randomValues);
+      return randomValues[0] % max;
+    };
+
+    let passwordChars: string[] = [];
+    passwordChars.push(uppercase[cryptoRandom(uppercase.length)]);
+    passwordChars.push(lowercase[cryptoRandom(lowercase.length)]);
+    passwordChars.push(numbers[cryptoRandom(numbers.length)]);
+    passwordChars.push(symbols[cryptoRandom(symbols.length)]);
+
+    for (let i = passwordChars.length; i < length; i++) {
+      passwordChars.push(allChars[cryptoRandom(allChars.length)]);
     }
-    
-    password = password.split('').sort(() => Math.random() - 0.5).join('');
+
+    // Fisher-Yates shuffle to make character positions unpredictable
+    for (let i = passwordChars.length - 1; i > 0; i--) {
+      const j = cryptoRandom(i + 1);
+      [passwordChars[i], passwordChars[j]] = [passwordChars[j], passwordChars[i]];
+    }
+
+    const password = passwordChars.join('');
     setPassword(password);
     setShowPassword(true);
   };
